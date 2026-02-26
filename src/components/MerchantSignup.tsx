@@ -50,12 +50,14 @@ const MerchantSignup = () => {
       category: form.category,
       address: form.address,
       email: form.email,
+      plan: "PANDAY",
+      wallet: { balance: 0, credits: 500 },
       joinedDate: new Date().toISOString(),
     };
 
     localStorage.setItem("pila-merchant", JSON.stringify(data));
     console.log("Merchant saved:", data);
-    navigate("/dashboard");
+    setTimeout(() => navigate("/dashboard"), 100);
   };
 
   // Generate bunting triangles
@@ -150,12 +152,12 @@ const MerchantSignup = () => {
           />
 
           {/* Anti-Corruption Notice */}
-          <div className="bg-[#FEF3C7] border-l-4 border-[#EF4444] p-4 rounded">
+          <div className="bg-[#FEF3C7] border-l-4 border-[#EF4444] p-4 rounded shadow-md">
             <div className="flex items-start gap-3">
-              <span className="text-2xl leading-none">⚠️</span>
+              <span className="text-3xl leading-none">⚠️</span>
               <div>
-                <p className="font-bold text-gray-900 text-sm">Bawal ang Fixer at Under-the-Table!</p>
-                <p className="text-gray-700 text-xs mt-1">
+                <p className="font-extrabold text-gray-900 text-base uppercase tracking-wide">Bawal ang Fixer at Under-the-Table!</p>
+                <p className="text-gray-700 text-sm mt-1">
                   Lahat ng bayad ay digital. Walang cash transaction sa pila.
                 </p>
               </div>
@@ -182,7 +184,7 @@ const MerchantSignup = () => {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-[#FFD700] hover:bg-[#F59E0B] text-white font-bold py-4 text-lg rounded-lg transition-colors"
+            className="w-full bg-[#FFD700] hover:bg-[#F59E0B] active:scale-95 text-white font-bold py-4 text-lg rounded-lg transition-all"
           >
             MAGPATULOY
           </button>
