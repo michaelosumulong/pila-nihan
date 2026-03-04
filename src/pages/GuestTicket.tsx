@@ -34,8 +34,9 @@ const GuestTicket = () => {
 
   const [qualifiesForSocial, setQualifiesForSocial] = useState(false);
 
+  const displayTicketNumber = ticketNumber || "R-056";
+
   const [ticketData] = useState({
-    ticketNumber: ticketNumber || "R-056",
     customerName: "Maria Santos",
     category: "regular",
     position: 2,
