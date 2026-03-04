@@ -18,8 +18,7 @@ const getMessage = (position: number) => {
   return "Thank you for waiting! ⏳";
 };
 
-const ordinal = (n: number) =>
-  n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`;
+const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
 
 const GuestTicket = () => {
   const { ticketNumber } = useParams();
@@ -34,9 +33,8 @@ const GuestTicket = () => {
 
   const [qualifiesForSocial, setQualifiesForSocial] = useState(false);
 
-  const displayTicketNumber = ticketNumber || "R-056";
-
   const [ticketData] = useState({
+    ticketNumber: ticketNumber || "R-056",
     customerName: "Maria Santos",
     category: "regular",
     position: 2,
@@ -45,8 +43,7 @@ const GuestTicket = () => {
     nowServing: "R-054",
   });
 
-  const progressValue =
-    ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100;
+  const progressValue = ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100;
 
   const cat = CATEGORY_STYLES[ticketData.category] || CATEGORY_STYLES.regular;
 
@@ -98,7 +95,6 @@ const GuestTicket = () => {
       <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md mx-auto mb-6 text-center">
         <div className="flex items-center justify-center gap-2 mb-4">
           <span className="text-4xl">🎫</span>
-          <span className="text-8xl font-bold text-[#1E3A8A]">{displayTicketNumber}</span>
         </div>
         <p className="text-2xl font-medium text-gray-700 mb-2">{ticketData.customerName}</p>
         <span className={`${cat.bg} ${cat.text} px-4 py-2 rounded-full text-lg font-semibold inline-block`}>
@@ -140,8 +136,7 @@ const GuestTicket = () => {
       <div className="max-w-md mx-auto mb-6">
         <h3 className="text-white font-bold text-lg mb-3 text-center">Upgrade Your Spot</h3>
         <div className="grid grid-cols-2 gap-3">
-          {/* Express - hidden for LINGKOD */}
-          {expressPrice > 0 && (
+          {/* Express */}
           <div className="bg-white rounded-2xl border-2 border-[#10B981] p-4 text-center">
             <span className="text-3xl">⚡</span>
             <p className="font-bold text-lg mt-1">Express Service</p>
@@ -159,9 +154,8 @@ const GuestTicket = () => {
             >
               Pay ₱{totalExpressPrice} to Upgrade
             </button>
-            <p className="text-xs text-gray-500 italic mt-1">Revenue: Merchant ₱{Math.round(totalExpressPrice * 0.4)} (40%) | Platform ₱{Math.round(totalExpressPrice * 0.6)} (60%)</p>
+            <p className="text-xs text-gray-500 italic mt-1">Revenue: Merchant 40% | Platform 60%</p>
           </div>
-          )}
 
           {/* Social Priority */}
           <div className="bg-white rounded-2xl border-2 border-[#10B981] p-4 text-center">
