@@ -118,11 +118,37 @@ const Dashboard = () => {
           <ActionButton icon="⚙️" label="Settings" bg="bg-[#6B7280]" />
         </div>
 
+        {/* Revenue Chart */}
+        <div className="bg-white rounded-2xl shadow-lg p-5 mb-6">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">7-Day Revenue</h3>
+          <div className="flex items-end justify-between gap-2 h-32">
+            {[
+              { day: "Mon", h: 55 },
+              { day: "Tue", h: 72 },
+              { day: "Wed", h: 75 },
+              { day: "Thu", h: 69 },
+              { day: "Fri", h: 87 },
+              { day: "Sat", h: 100 },
+              { day: "Sun", h: 21 },
+            ].map((d) => (
+              <div key={d.day} className="flex flex-col items-center flex-1 h-full justify-end">
+                <div
+                  className="w-full max-w-[28px] rounded-t-md bg-[#FFD700]"
+                  style={{ height: `${d.h}%` }}
+                />
+                <span className="text-[10px] text-gray-500 mt-1">{d.day}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Announcement */}
-        <div className="bg-[#FFF9E6] border-l-4 border-[#FFB703] p-4 rounded-lg mb-6">
-          <p className="text-sm text-gray-800">
-            🔔 Welcome to Pila-nihan! Your queue system is ready.
-          </p>
+        <div className="bg-[#FFF9E6] border-l-4 border-[#FFB703] p-4 rounded-lg mb-6 flex justify-between items-start">
+          <div>
+            <p className="text-sm font-semibold text-gray-800">🔔 Announcement</p>
+            <p className="text-sm text-gray-600 mt-1">Welcome to Pila-nihan! Your queue is ready.</p>
+          </div>
+          <button className="text-[#3B82F6] text-sm font-medium shrink-0">Edit</button>
         </div>
       </div>
 
