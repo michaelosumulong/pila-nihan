@@ -34,8 +34,9 @@ const GuestTicket = () => {
 
   const [qualifiesForSocial, setQualifiesForSocial] = useState(false);
 
+  const displayTicketNumber = ticketNumber || "R-056";
+
   const [ticketData] = useState({
-    ticketNumber: ticketNumber || "R-056",
     customerName: "Maria Santos",
     category: "regular",
     position: 2,
@@ -97,7 +98,7 @@ const GuestTicket = () => {
       <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md mx-auto mb-6 text-center">
         <div className="flex items-center justify-center gap-2 mb-4">
           <span className="text-4xl">🎫</span>
-          <span className="text-8xl font-bold text-[#1E3A8A]">{ticketData.ticketNumber}</span>
+          <span className="text-8xl font-bold text-[#1E3A8A]">{displayTicketNumber}</span>
         </div>
         <p className="text-2xl font-medium text-gray-700 mb-2">{ticketData.customerName}</p>
         <span className={`${cat.bg} ${cat.text} px-4 py-2 rounded-full text-lg font-semibold inline-block`}>
