@@ -25,8 +25,9 @@ const GuestTicket = () => {
   const { ticketNumber } = useParams();
   const buntingCount = 24;
 
-  const merchantCategory = "SULONG";
-  const expressPrice = 100;
+  const merchantData = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
+  const merchantCategory = merchantData.category || "SULONG";
+  const expressPrice = merchantCategory === "AGOS" ? 200 : merchantCategory === "SULONG" ? 100 : 0;
   const vatRate = 0.12;
   const vatAmount = Math.round(expressPrice * vatRate);
   const totalExpressPrice = expressPrice + vatAmount;
