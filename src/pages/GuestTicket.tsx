@@ -139,7 +139,8 @@ const GuestTicket = () => {
       <div className="max-w-md mx-auto mb-6">
         <h3 className="text-white font-bold text-lg mb-3 text-center">Upgrade Your Spot</h3>
         <div className="grid grid-cols-2 gap-3">
-          {/* Express */}
+          {/* Express - hidden for LINGKOD */}
+          {expressPrice > 0 && (
           <div className="bg-white rounded-2xl border-2 border-[#10B981] p-4 text-center">
             <span className="text-3xl">⚡</span>
             <p className="font-bold text-lg mt-1">Express Service</p>
@@ -157,8 +158,9 @@ const GuestTicket = () => {
             >
               Pay ₱{totalExpressPrice} to Upgrade
             </button>
-            <p className="text-xs text-gray-500 italic mt-1">Revenue: Merchant 40% | Platform 60%</p>
+            <p className="text-xs text-gray-500 italic mt-1">Revenue: Merchant ₱{Math.round(totalExpressPrice * 0.4)} (40%) | Platform ₱{Math.round(totalExpressPrice * 0.6)} (60%)</p>
           </div>
+          )}
 
           {/* Social Priority */}
           <div className="bg-white rounded-2xl border-2 border-[#10B981] p-4 text-center">
