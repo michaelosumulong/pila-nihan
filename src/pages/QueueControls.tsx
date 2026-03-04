@@ -1,0 +1,220 @@
+import { useState } from "react";
+import { toast } from "sonner";
+
+const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
+  express: { bg: "bg-green-100", text: "text-green-800", label: "Express" },
+  priority: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Priority" },
+};
+
+const QueueControls = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const buntingCount = 24;
+
+  const [currentServing, setCurrentServing] = useState({
+    ticketNumber: "R-055",
+    customerName: "Juan Dela Cruz",
+    category: "regular",
+    waitTime: 8,
+  });
+
+  const [queueList, setQueueList] = useState([
+    { id: 1, ticketNumber: "R-056", name: "Maria Santos", category: "regular", waitTime: 12 },
+    { id: 2, ticketNumber: "E-012", name: "Pedro Reyes", category: "express", waitTime: 15 },
+    { id: 3, ticketNumber: "R-057", name: "Ana Garcia", category: "regular", waitTime: 18 },
+    { id: 4, ticketNumber: "P-003", name: "Lola Rosa (Senior)", category: "priority", waitTime: 20 },
+    { id: 5, ticketNumber: "R-058", name: "Jose Martinez", category: "regular", waitTime: 22 },
+  ]);
+
+  const [servedCount, setServedCount] = useState({ regular: 0, express: 0 });
+  const [servedToday, setServedToday] = useState(158);
+
+  const callNext = () => {
+    let nextTicket;
+    const priorityTicket = queueList.find((t) => t.category === "priority");
+    if (priorityTicket) {
+      nextTicket = priorityTicket;
+    } else if (servedCount.regular >= 2) {
+      const expressTicket = queueList.find((t) => t.category === "express");
+      nextTicket = expressTicket || queueList.find((t) => t.category === "regular");
+    } else {
+      nextTicket = queueList.find((t) => t.category === "regular") || queueList[0];
+    }
+
+    if (nextTicket) {
+      setCurrentServing({
+        ticketNumber: nextTicket.ticketNumber,
+        customerName: nextTicket.name,
+        category: nextTicket.category,
+        waitTime: nextTicket.waitTime,
+      });
+      setQueueList((prev) => prev.filter((t) => t.id !== nextTicket!.id));
+      if (nextTicket.category === "regular") {
+        setServedCount((prev) => ({ ...prev, regular: prev.regular + 1 }));
+      } else if (nextTicket.category === "express") {
+        setServedCount({ regular: 0, express: servedCount.express + 1 });
+      }
+      setServedToday((prev) => prev + 1);
+      toast.success(`Now serving ${nextTicket.ticketNumber} - ${nextTicket.name}`);
+    } else {
+      toast.info("Queue is empty!");
+    }
+  };
+
+  const markServed = () => {
+    toast.success(`${currentServing.ticketNumber} marked as served!`);
+    callNext();
+  };
+
+  const undo = () => {
+    toast.info("Previous customer returned to queue");
+  };
+
+  const cat = CATEGORY_STYLES[currentServing.category] || CATEGORY_STYLES.regular;
+  const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
+
+  return (
+    <div className="min-h-screen bg-gray-100 pb-24">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#1E3A8A] to-[#2563EB] relative">
+        <div className="bunting pt-2 pb-1">
+          {Array.from({ length: buntingCount }).map((_, i) => (
+            <div key={i} className="bunting-triangle" />
+          ))}
+        </div>
+        <div className="flex items-center justify-between px-5 pt-3 pb-6">
+          <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 bg-[#3B82F6] rounded-xl flex items-center justify-center logo-glow mb-1">
+              <span className="text-3xl">🎫</span>
+            </div>
+            <h1 className="text-xl font-bold text-white">Queue Controls</h1>
+          </div>
+          <button className="relative text-white text-2xl">
+            🔔
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#2563EB]" />
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="px-6 -mt-4">
+        {/* Now Serving */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 text-center">
+          <p className="text-gray-600 text-sm uppercase tracking-wider mb-2">Now Serving</p>
+          <p className="text-6xl font-bold text-[#1E3A8A] mb-2">{currentServing.ticketNumber}</p>
+          <p className="text-xl text-gray-700 mb-2">{currentServing.customerName}</p>
+          <span className={`${cat.bg} ${cat.text} rounded-full px-3 py-1 text-sm font-semibold inline-block mb-2`}>
+            {cat.label}
+          </span>
+          <p className="text-sm text-gray-600">⏱️ Waited: {currentServing.waitTime} minutes</p>
+        </div>
+
+        {/* Control Buttons */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            onClick={callNext}
+            className="col-span-2 bg-[#10B981] text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
+          >
+            📢 Call Next
+          </button>
+          <button
+            onClick={markServed}
+            className="bg-[#3B82F6] text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
+          >
+            ✅ Mark Served
+          </button>
+          <button
+            onClick={undo}
+            className="bg-[#6B7280] text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
+          >
+            ↩️ Undo
+          </button>
+        </div>
+
+        {/* Waiting List */}
+        <div className="bg-white rounded-2xl shadow-lg p-5 mb-6">
+          <h3 className="font-bold text-lg mb-4 text-gray-800">Waiting List</h3>
+          {queueList.length === 0 ? (
+            <p className="text-gray-400 text-center py-4">Queue is empty 🎉</p>
+          ) : (
+            <div className="space-y-3">
+              {queueList.map((ticket, idx) => {
+                const tc = CATEGORY_STYLES[ticket.category] || CATEGORY_STYLES.regular;
+                return (
+                  <div key={ticket.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-bold text-gray-400 w-6">{ordinal(idx + 1)}</span>
+                      <div>
+                        <p className="font-semibold text-gray-800">{ticket.ticketNumber}</p>
+                        <p className="text-sm text-gray-500">{ticket.name}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`${tc.bg} ${tc.text} text-xs font-semibold px-2.5 py-0.5 rounded-full`}>
+                        {tc.label}
+                      </span>
+                      <span className="text-xs text-gray-400">{ticket.waitTime} min</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Stats Summary */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-white rounded-xl shadow p-4 text-center">
+            <p className="text-2xl font-bold text-[#1E3A8A]">{queueList.length}</p>
+            <p className="text-xs text-gray-500">In Queue</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-4 text-center">
+            <p className="text-2xl font-bold text-[#10B981]">{servedToday}</p>
+            <p className="text-xs text-gray-500">Served Today</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-4 text-center">
+            <p className="text-2xl font-bold text-[#FFB703]">8 min</p>
+            <p className="text-xs text-gray-500">Avg Wait</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Slide-out Menu */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setMenuOpen(false)} />
+          <div className="relative w-64 bg-white h-full shadow-xl p-6 z-10 animate-in slide-in-from-left">
+            <h2 className="text-lg font-bold mb-6">Menu</h2>
+            <nav className="space-y-3 text-sm">
+              <p className="cursor-pointer hover:text-blue-600" onClick={() => (window.location.href = "/dashboard")}>🏠 Dashboard</p>
+              <p className="cursor-pointer hover:text-blue-600 text-blue-600 font-semibold">📋 Queue</p>
+              <p className="cursor-pointer hover:text-blue-600">💰 Wallet</p>
+              <p className="cursor-pointer hover:text-blue-600">⚙️ Settings</p>
+            </nav>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Nav */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-40">
+        <NavTab icon="🏠" label="Dashboard" href="/dashboard" />
+        <NavTab icon="📋" label="Queue" active />
+        <NavTab icon="💰" label="Wallet" />
+        <NavTab icon="⚙️" label="Settings" />
+      </div>
+    </div>
+  );
+};
+
+const NavTab = ({ icon, label, active, href }: { icon: string; label: string; active?: boolean; href?: string }) => (
+  <div
+    className={`flex flex-col items-center text-xs cursor-pointer ${active ? "text-[#FFB703]" : "text-gray-400"}`}
+    onClick={() => href && (window.location.href = href)}
+  >
+    <span className="text-xl">{icon}</span>
+    <span className="mt-0.5">{label}</span>
+  </div>
+);
+
+export default QueueControls;
