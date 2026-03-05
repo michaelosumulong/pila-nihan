@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import QueueControls from "./pages/QueueControls";
 import GuestTicket from "./pages/GuestTicket";
+import GuestEntry from "./pages/GuestEntry";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
