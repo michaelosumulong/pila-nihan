@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import QueueControls from "./pages/QueueControls";
+import Analytics from "./pages/Analytics";
 import GuestTicket from "./pages/GuestTicket";
 import GuestEntry from "./pages/GuestEntry";
 import Login from "./pages/Login";
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/queue" element={<QueueControls />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/ticket/:ticketNumber" element={<GuestTicket />} />
           <Route path="/join/:merchantId" element={<GuestEntry />} />
           <Route path="/login" element={<Login />} />
