@@ -99,7 +99,7 @@ const Index = () => {
               onChange={handleCodeChange}
               placeholder="XXX-XXX"
               maxLength={7}
-              className="w-full text-3xl text-center font-mono font-bold uppercase py-4 px-6 rounded-xl border-[3px] border-gray-300 focus:border-primary focus:ring-4 focus:ring-yellow-200 outline-none tracking-widest transition-colors"
+              className="w-full text-3xl text-center font-mono font-bold uppercase py-4 px-6 rounded-xl border-[3px] border-gray-300 focus:border-primary focus:ring-4 focus:ring-yellow-200 outline-none tracking-widest transition-colors text-gray-900"
             />
           </div>
 
@@ -113,9 +113,13 @@ const Index = () => {
 
           <div className="text-center mt-4">
             <p className="text-sm text-gray-500 mb-1">Walang code?</p>
-            <p className="text-secondary font-medium text-sm" title="Use your phone camera to scan the QR code at the store entrance">
+            <button
+              onClick={() => toast.info("Open your phone camera and point it at the QR code at the store entrance.")}
+              className="text-secondary font-medium text-sm hover:underline"
+              title="Use your phone camera to scan the QR code at the store entrance"
+            >
               📱 I-scan ang QR sa harap ng tindahan
-            </p>
+            </button>
           </div>
 
           <div className="grid grid-cols-3 gap-2 mt-6 text-center text-xs text-gray-600">
