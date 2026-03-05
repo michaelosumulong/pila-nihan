@@ -8,6 +8,34 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string 
   priority: { bg: "bg-yellow-100", text: "text-yellow-800", label: "Priority" },
 };
 
+const updateAnalytics = (type: "completed" | "no_show") => {
+  const today = new Date().toISOString().split("T")[0];
+  const analyticsData = JSON.parse(localStorage.getItem("pila-analytics") || "{}");
+
+  if (!analyticsData[today]) {
+    analyticsData[today] = { total_tickets: 0, completed: 0, no_shows: 0, no_show_rate: 0 };
+  }
+
+  if (type === "completed") {
+    analyticsData[today].completed += 1;
+  } else {
+    analyticsData[today].no_shows += 1;
+  }
+
+  analyticsData[today].total_tickets = analyticsData[today].completed + analyticsData[today].no_shows;
+  analyticsData[today].no_show_rate = parseFloat(
+    ((analyticsData[today].no_shows / analyticsData[today].total_tickets) * 100).toFixed(1)
+  );
+
+  localStorage.setItem("pila-analytics", JSON.stringify(analyticsData));
+};
+
+const logQueueAction = (action: Record<string, string>) => {
+  const actions = JSON.parse(localStorage.getItem("pila-queue-actions") || "[]");
+  actions.push(action);
+  localStorage.setItem("pila-queue-actions", JSON.stringify(actions));
+};
+
 const QueueControls = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,6 +58,7 @@ const QueueControls = () => {
 
   const [servedCount, setServedCount] = useState({ regular: 0, express: 0 });
   const [servedToday, setServedToday] = useState(158);
+  const [noShowCount, setNoShowCount] = useState(0);
 
   const callNext = () => {
     let nextTicket;
@@ -64,7 +93,47 @@ const QueueControls = () => {
   };
 
   const markServed = () => {
+    if (!currentServing.ticketNumber) {
+      toast.error("No customer currently being served");
+      return;
+    }
+
+    updateAnalytics("completed");
+    logQueueAction({
+      action_type: "completed",
+      ticket_number: currentServing.ticketNumber,
+      customer_name: currentServing.customerName,
+      timestamp: new Date().toISOString(),
+    });
+
     toast.success(`${currentServing.ticketNumber} marked as served!`);
+    callNext();
+  };
+
+  const markNoShow = () => {
+    if (!currentServing.ticketNumber) {
+      toast.error("No customer currently being served");
+      return;
+    }
+
+    if (!confirm(`Mark ${currentServing.ticketNumber} - ${currentServing.customerName} as No-Show?`)) {
+      return;
+    }
+
+    updateAnalytics("no_show");
+    logQueueAction({
+      action_type: "no_show",
+      ticket_number: currentServing.ticketNumber,
+      customer_name: currentServing.customerName,
+      timestamp: new Date().toISOString(),
+    });
+
+    setNoShowCount((prev) => prev + 1);
+
+    toast.warning(`${currentServing.ticketNumber} marked as No-Show`, {
+      description: "Customer did not respond after being called",
+    });
+
     callNext();
   };
 
@@ -122,13 +191,19 @@ const QueueControls = () => {
           </button>
           <button
             onClick={markServed}
-            className="bg-[#3B82F6] text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
+            className="bg-[#3B82F6] text-white font-bold py-3 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
           >
             ✅ Mark Served
           </button>
           <button
+            onClick={markNoShow}
+            className="bg-[#EF4444] text-white font-bold py-3 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
+          >
+            ❌ No-Show
+          </button>
+          <button
             onClick={undo}
-            className="bg-[#6B7280] text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
+            className="col-span-2 bg-[#6B7280] text-white font-bold py-3 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
           >
             ↩️ Undo
           </button>
@@ -166,14 +241,18 @@ const QueueControls = () => {
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-4 gap-3 mb-6">
           <div className="bg-white rounded-xl shadow p-4 text-center">
             <p className="text-2xl font-bold text-[#1E3A8A]">{queueList.length}</p>
             <p className="text-xs text-gray-500">In Queue</p>
           </div>
           <div className="bg-white rounded-xl shadow p-4 text-center">
             <p className="text-2xl font-bold text-[#10B981]">{servedToday}</p>
-            <p className="text-xs text-gray-500">Served Today</p>
+            <p className="text-xs text-gray-500">Served</p>
+          </div>
+          <div className="bg-white rounded-xl shadow p-4 text-center">
+            <p className="text-2xl font-bold text-[#EF4444]">{noShowCount}</p>
+            <p className="text-xs text-gray-500">No-Shows</p>
           </div>
           <div className="bg-white rounded-xl shadow p-4 text-center">
             <p className="text-2xl font-bold text-[#FFB703]">8 min</p>

@@ -32,6 +32,7 @@ const Analytics = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [noShowStats, setNoShowStats] = useState({ count: 0, rate: 0, totalServed: 158 });
   const buntingCount = 24;
 
   useEffect(() => {
@@ -40,8 +41,29 @@ const Analytics = () => {
       navigate("/");
       return;
     }
+
+    // Load analytics from localStorage
+    const today = new Date().toISOString().split("T")[0];
+    const analyticsData = JSON.parse(localStorage.getItem("pila-analytics") || "{}");
+    const todayData = analyticsData[today];
+
+    if (todayData) {
+      const total = todayData.completed + todayData.no_shows;
+      setNoShowStats({
+        count: todayData.no_shows,
+        rate: total > 0 ? parseFloat(((todayData.no_shows / total) * 100).toFixed(1)) : 0,
+        totalServed: 158 + todayData.completed,
+      });
+    }
+
     setTimeout(() => setLoaded(true), 100);
   }, [navigate]);
+
+  const noShowBadge = noShowStats.rate < 5
+    ? { label: "EXCELLENT", cls: "bg-green-100 text-green-800" }
+    : noShowStats.rate < 10
+    ? { label: "STABLE", cls: "bg-yellow-100 text-yellow-800" }
+    : { label: "NEEDS ATTENTION", cls: "bg-red-100 text-red-800" };
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24">
@@ -80,7 +102,7 @@ const Analytics = () => {
         {/* Key Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <MetricCard
-            icon="👥" value="158" label="Clients Served Today"
+            icon="👥" value={String(noShowStats.totalServed)} label="Clients Served Today"
             valueColor="text-[#1E3A8A]"
             extra={<p className="text-xs text-green-600 font-semibold mt-1">↗️ +12% vs yesterday</p>}
             delay={0} loaded={loaded}
@@ -97,12 +119,12 @@ const Analytics = () => {
             delay={1} loaded={loaded}
           />
           <MetricCard
-            icon="⚠️" value="4%" label="No-Show Rate"
+            icon="⚠️" value={`${noShowStats.rate}%`} label="No-Show Rate"
             valueColor="text-[#FFB703]"
             extra={
               <div className="mt-1 space-y-1">
-                <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-xs font-bold">STABLE</span>
-                <p className="text-xs text-gray-500">Industry avg: 8%</p>
+                <span className={`${noShowBadge.cls} px-2 py-0.5 rounded text-xs font-bold`}>{noShowBadge.label}</span>
+                <p className="text-xs text-gray-500">Industry avg: 8% • Total: {noShowStats.count}</p>
               </div>
             }
             delay={2} loaded={loaded}
@@ -205,6 +227,32 @@ const Analytics = () => {
             <p className="text-sm text-gray-700 mb-2">96% of customers served within 15 minutes (industry average: 78%). Your Sigma Level: <strong>4.2σ</strong> (World-class performance).</p>
             <p className="text-sm text-[#FFB703] font-semibold"><strong>Achievement:</strong> You qualify for 'Suri Certified' badge - display this to attract quality-conscious customers.</p>
           </div>
+
+          {/* Dynamic No-Show Insight */}
+          {noShowStats.rate > 5 && (
+            <>
+              <div className="border-t border-gray-300 my-4" />
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">⚠️</span>
+                  <h4 className="font-bold text-[#EF4444]">High No-Show Rate Detected</h4>
+                </div>
+                <p className="text-sm text-gray-700 mb-2">
+                  Your no-show rate is {noShowStats.rate}% (industry average: 8%).
+                  This represents {noShowStats.count} customers who didn't show up today.
+                </p>
+                <p className="text-sm text-gray-700 mb-2">
+                  <strong>Root Cause:</strong> Web Push notifications may not be enabled, or notification timing needs optimization.
+                </p>
+                <p className="text-sm text-gray-700 mb-2">
+                  <strong>Action:</strong> Enable Web Push notifications to send alerts when customers are 3rd in line. Send reminder if no movement after 5 minutes.
+                </p>
+                <p className="text-sm font-semibold text-green-700">
+                  <strong>Value:</strong> Reducing no-shows to 4% would recover ₱{Math.round((noShowStats.count - (noShowStats.totalServed * 0.04)) * 150).toLocaleString()} in lost revenue per day.
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Performance Scorecard */}
