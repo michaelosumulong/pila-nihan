@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,18 @@ const validateMobile = (value: string) => {
   return /^(\+639|09)\d{9}$/.test(cleaned);
 };
 
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
 const GuestEntry = () => {
   const { merchantId } = useParams();
   const navigate = useNavigate();
@@ -17,25 +29,56 @@ const GuestEntry = () => {
 
   const merchantData = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
   const merchantName = merchantData.businessName || "Pila-nihan Queue System";
+  const merchantLocation = merchantData.location || { lat: 14.5995, lng: 120.9842 };
 
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<"regular" | "priority">("regular");
   const [priorityConfirmed, setPriorityConfirmed] = useState(false);
+  const [enablePushNotifications, setEnablePushNotifications] = useState(true);
+
+  const [customerLocation, setCustomerLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [isWithinRange, setIsWithinRange] = useState(false);
+  const [locationStatus, setLocationStatus] = useState<"checking" | "within_range" | "too_far" | "error" | "not_supported">("checking");
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationStatus("not_supported");
+      toast.error("Your device does not support geolocation");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const custLoc = { lat: position.coords.latitude, lng: position.coords.longitude };
+        setCustomerLocation(custLoc);
+        const dist = calculateDistance(custLoc.lat, custLoc.lng, merchantLocation.lat, merchantLocation.lng);
+        setDistance(dist);
+        setIsWithinRange(dist <= 5);
+        setLocationStatus(dist <= 5 ? "within_range" : "too_far");
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        setLocationStatus("error");
+        toast.error("Please enable location services to join the queue");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }, [merchantLocation.lat, merchantLocation.lng]);
 
   const isValid =
     name.trim() !== "" &&
     validateMobile(mobile) &&
-    (selectedCategory === "regular" || priorityConfirmed);
+    (selectedCategory === "regular" || priorityConfirmed) &&
+    isWithinRange &&
+    locationStatus === "within_range";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!isValid) {
       toast.error("Please fill in all required fields correctly.");
       return;
     }
-
     try {
       const existingTickets = JSON.parse(localStorage.getItem("tickets") || "[]");
       const prefix = selectedCategory === "priority" ? "P" : "R";
@@ -65,6 +108,9 @@ const GuestEntry = () => {
         totalInQueue: waitingTickets.length + 1,
         estimatedWaitMinutes: (waitingTickets.length + 1) * 8,
         nowServing: existingTickets.find((t: any) => t.status === "serving")?.ticketNumber || "N/A",
+        customer_location: customerLocation,
+        distance_from_merchant: distance,
+        push_notifications_enabled: enablePushNotifications,
       };
 
       existingTickets.push(newTicket);
@@ -73,7 +119,6 @@ const GuestEntry = () => {
       toast.success(`Ticket ${ticketNumber} created!`, {
         description: `Welcome, ${name.trim()}!`,
       });
-
       navigate(`/ticket/${ticketNumber}`);
     } catch {
       toast.error("Something went wrong. Please try again.");
@@ -146,39 +191,27 @@ const GuestEntry = () => {
         <div className="mb-4">
           <Label className="text-gray-700 font-semibold mb-2 block">Category</Label>
           <div className="grid grid-cols-2 gap-4">
-            {/* Regular */}
             <button
               type="button"
-              onClick={() => {
-                setSelectedCategory("regular");
-                setPriorityConfirmed(false);
-              }}
+              onClick={() => { setSelectedCategory("regular"); setPriorityConfirmed(false); }}
               className={`rounded-2xl border-2 p-4 text-center transition-all ${
-                selectedCategory === "regular"
-                  ? "border-[#3B82F6] bg-blue-50"
-                  : "border-gray-300 bg-white"
+                selectedCategory === "regular" ? "border-[#3B82F6] bg-blue-50" : "border-gray-300 bg-white"
               }`}
             >
               <span className="text-3xl block">👥</span>
               <p className="font-bold mt-1">Regular</p>
               <p className="text-sm text-gray-600">Standard queue</p>
             </button>
-
-            {/* Priority */}
             <button
               type="button"
               onClick={() => setSelectedCategory("priority")}
               className={`rounded-2xl border-2 p-4 text-center transition-all ${
-                selectedCategory === "priority"
-                  ? "border-[#10B981] bg-green-50"
-                  : "border-gray-300 bg-white"
+                selectedCategory === "priority" ? "border-[#10B981] bg-green-50" : "border-gray-300 bg-white"
               }`}
             >
               <span className="text-3xl block">🤝</span>
               <p className="font-bold mt-1">Priority</p>
-              <span className="inline-block bg-[#10B981] text-white text-xs px-2 py-0.5 rounded mb-1">
-                LIBRE
-              </span>
+              <span className="inline-block bg-[#10B981] text-white text-xs px-2 py-0.5 rounded mb-1">LIBRE</span>
               <p className="text-sm text-gray-600">Senior / PWD / Buntis</p>
             </button>
           </div>
@@ -203,13 +236,89 @@ const GuestEntry = () => {
           </div>
         )}
 
+        {/* Distance Indicator */}
+        {locationStatus === "checking" && (
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-blue-600 animate-pulse">📍</span>
+              <p className="text-sm text-blue-700">Checking your location...</p>
+            </div>
+          </div>
+        )}
+        {locationStatus === "within_range" && distance !== null && (
+          <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-green-600">✓</span>
+              <div>
+                <p className="text-sm font-semibold text-green-800">You're within range!</p>
+                <p className="text-xs text-green-700">📍 Kasalukuyang layo: {distance.toFixed(2)} km mula sa tindahan</p>
+              </div>
+            </div>
+          </div>
+        )}
+        {locationStatus === "too_far" && distance !== null && (
+          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-yellow-600">⚠️</span>
+              <div>
+                <p className="text-sm font-semibold text-yellow-800">Malayo pa po kayo</p>
+                <p className="text-xs text-yellow-700">📍 Current distance: {distance.toFixed(2)} km (Max: 5.0 km)</p>
+                <p className="text-xs text-yellow-700 mt-1">Please be within 5 km to secure a spot in the queue.</p>
+              </div>
+            </div>
+          </div>
+        )}
+        {(locationStatus === "error" || locationStatus === "not_supported") && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-red-600">❌</span>
+              <div>
+                <p className="text-sm font-semibold text-red-800">Location access required</p>
+                <p className="text-xs text-red-700">Please enable location services in your browser to join the queue.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Push Notification Opt-in */}
+        {isWithinRange && (
+          <div className="bg-[#FFF9E6] border border-[#FFB703] rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">🔔</span>
+              <div className="flex-1">
+                <h4 className="font-bold text-gray-900 mb-1">Get notified when it's your turn</h4>
+                <p className="text-xs text-gray-700 mb-3">
+                  We'll send you alerts when you're 3rd in line so you can walk over from nearby shops.
+                </p>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={enablePushNotifications}
+                    onChange={(e) => setEnablePushNotifications(e.target.checked)}
+                    className="w-4 h-4 rounded accent-[#FFB703]"
+                  />
+                  <span className="text-sm font-medium text-gray-800">Enable push notifications (Recommended)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Submit */}
         <button
           type="submit"
           disabled={!isValid}
-          className="w-full py-4 rounded-xl font-bold uppercase text-white text-lg shadow-lg transition-colors bg-[#FFD700] hover:bg-[#F59E0B] disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full py-4 rounded-xl font-bold uppercase text-lg shadow-lg transition-colors ${
+            isValid
+              ? "bg-[#FFD700] text-white hover:bg-[#F59E0B]"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
         >
-          Kumuha ng Ticket
+          {locationStatus === "checking"
+            ? "Checking location..."
+            : !isWithinRange
+            ? "Too far from shop (5km max)"
+            : "Kumuha ng Ticket"}
         </button>
 
         {/* Anti-fraud note */}

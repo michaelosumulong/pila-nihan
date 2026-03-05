@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const CATEGORIES = [
@@ -20,6 +20,25 @@ const MerchantSignup = () => {
   });
   const [agreed, setAgreed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationError, setLocationError] = useState("");
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          setLocationError("Unable to get location. Please enable location services.");
+          console.error("Geolocation error:", error);
+        }
+      );
+    }
+  }, []);
 
   const update = (field: string, value: string) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -50,6 +69,7 @@ const MerchantSignup = () => {
       category: form.category,
       address: form.address,
       email: form.email,
+      location: location || { lat: 14.5995, lng: 120.9842 },
       plan: "PANDAY",
       wallet: { balance: 0, credits: 500 },
       joinedDate: new Date().toISOString(),
@@ -141,6 +161,17 @@ const MerchantSignup = () => {
               className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#FFD700] resize-none"
             />
             {errors.address && <p className="text-red-400 text-xs mt-1">{errors.address}</p>}
+            <div className="text-sm mt-2">
+              {location ? (
+                <span className="text-green-400">
+                  ✓ Location captured: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                </span>
+              ) : (
+                <span className="text-yellow-400">
+                  ⚠️ {locationError || "Getting location..."}
+                </span>
+              )}
+            </div>
           </div>
 
           <Field
