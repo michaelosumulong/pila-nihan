@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import WalkInModal from "@/components/WalkInModal";
+import OfflineBanner from "@/components/OfflineBanner";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -38,7 +41,9 @@ const logQueueAction = (action: Record<string, string>) => {
 
 const QueueControls = () => {
   const navigate = useNavigate();
+  const isOnline = useOnlineStatus();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showWalkIn, setShowWalkIn] = useState(false);
   const buntingCount = 24;
 
   const [currentServing, setCurrentServing] = useState({
@@ -97,7 +102,6 @@ const QueueControls = () => {
       toast.error("No customer currently being served");
       return;
     }
-
     updateAnalytics("completed");
     logQueueAction({
       action_type: "completed",
@@ -105,7 +109,6 @@ const QueueControls = () => {
       customer_name: currentServing.customerName,
       timestamp: new Date().toISOString(),
     });
-
     toast.success(`${currentServing.ticketNumber} marked as served!`);
     callNext();
   };
@@ -115,10 +118,7 @@ const QueueControls = () => {
       toast.error("No customer currently being served");
       return;
     }
-
-    if (!confirm(`Mark ${currentServing.ticketNumber} - ${currentServing.customerName} as No-Show?`)) {
-      return;
-    }
+    if (!confirm(`Mark ${currentServing.ticketNumber} - ${currentServing.customerName} as No-Show?`)) return;
 
     updateAnalytics("no_show");
     logQueueAction({
@@ -127,13 +127,10 @@ const QueueControls = () => {
       customer_name: currentServing.customerName,
       timestamp: new Date().toISOString(),
     });
-
     setNoShowCount((prev) => prev + 1);
-
     toast.warning(`${currentServing.ticketNumber} marked as No-Show`, {
       description: "Customer did not respond after being called",
     });
-
     callNext();
   };
 
@@ -141,11 +138,26 @@ const QueueControls = () => {
     toast.info("Previous customer returned to queue");
   };
 
+  const handleWalkInCreated = (ticket: any) => {
+    setQueueList((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        ticketNumber: ticket.ticketNumber,
+        name: ticket.customerName,
+        category: ticket.category,
+        waitTime: ticket.estimatedWaitMinutes,
+      },
+    ]);
+  };
+
   const cat = CATEGORY_STYLES[currentServing.category] || CATEGORY_STYLES.regular;
   const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-24">
+    <div className={`min-h-screen bg-gray-100 pb-24 ${!isOnline ? "pt-10" : ""}`}>
+      <OfflineBanner isOnline={isOnline} />
+
       {/* Header */}
       <div className="bg-gradient-to-r from-[#1E3A8A] to-[#2563EB] relative">
         <div className="bunting pt-2 pb-1">
@@ -182,12 +194,18 @@ const QueueControls = () => {
         </div>
 
         {/* Control Buttons */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-4">
           <button
             onClick={callNext}
             className="col-span-2 bg-[#10B981] text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
           >
             📢 Call Next
+          </button>
+          <button
+            onClick={() => setShowWalkIn(true)}
+            className="col-span-2 bg-[#3B82F6] text-white font-bold py-3 rounded-xl text-lg shadow-lg active:scale-95 transition-transform hover:bg-[#2563EB]"
+          >
+            ➕ Add Walk-in (No Phone)
           </button>
           <button
             onClick={markServed}
@@ -241,7 +259,7 @@ const QueueControls = () => {
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-5 gap-3 mb-6">
           <div className="bg-white rounded-xl shadow p-4 text-center">
             <p className="text-2xl font-bold text-[#1E3A8A]">{queueList.length}</p>
             <p className="text-xs text-gray-500">In Queue</p>
@@ -258,8 +276,17 @@ const QueueControls = () => {
             <p className="text-2xl font-bold text-[#FFB703]">8 min</p>
             <p className="text-xs text-gray-500">Avg Wait</p>
           </div>
+          <div className="bg-white rounded-xl shadow p-4 text-center">
+            <p className={`text-lg font-bold ${isOnline ? "text-[#10B981]" : "text-[#FFB703]"}`}>
+              {isOnline ? "✓" : "⚠️"}
+            </p>
+            <p className="text-xs text-gray-500">{isOnline ? "Online" : "Offline"}</p>
+          </div>
         </div>
       </div>
+
+      {/* Walk-in Modal */}
+      <WalkInModal open={showWalkIn} onClose={() => setShowWalkIn(false)} onTicketCreated={handleWalkInCreated} />
 
       {/* Slide-out Menu */}
       {menuOpen && (
