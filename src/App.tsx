@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import QueueControls from "./pages/QueueControls";
 import GuestTicket from "./pages/GuestTicket";
+import GuestEntry from "./pages/GuestEntry";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/queue" element={<QueueControls />} />
           <Route path="/ticket/:ticketNumber" element={<GuestTicket />} />
+          <Route path="/join/:merchantId" element={<GuestEntry />} />
           <Route path="/login" element={<Login />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
