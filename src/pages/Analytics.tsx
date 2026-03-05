@@ -253,6 +253,41 @@ const Analytics = () => {
               </div>
             </>
           )}
+
+          {/* Distance-to-No-Show Correlation Insight */}
+          {(() => {
+            const tickets = JSON.parse(localStorage.getItem("tickets") || "[]");
+            const distantTickets = tickets.filter((t: any) => t.distance_from_merchant && t.distance_from_merchant > 3);
+            const distantNoShows = distantTickets.filter((t: any) => t.status === "no_show").length;
+            const distantNoShowRate = distantTickets.length > 0
+              ? parseFloat(((distantNoShows / distantTickets.length) * 100).toFixed(1))
+              : 0;
+            if (distantTickets.length === 0) return null;
+            return (
+              <>
+                <div className="border-t border-gray-300 my-4" />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">📍</span>
+                    <h4 className="font-bold text-[#3B82F6]">Distance-to-No-Show Correlation</h4>
+                  </div>
+                  <p className="text-sm text-gray-700 mb-2">
+                    Customers joining from &gt;3 km away have a {distantNoShowRate}% no-show rate
+                    (vs {noShowStats.rate}% overall). {distantTickets.length} distant ticket(s) tracked.
+                  </p>
+                  <p className="text-sm text-gray-700 mb-2">
+                    <strong>Recommendation:</strong> Consider reducing geofence radius to 3 km
+                    during peak hours to minimize ghost customers.
+                  </p>
+                  <p className="text-sm font-semibold text-green-700">
+                    <strong>Value:</strong> Tighter geofencing could reduce no-shows by
+                    {" "}{Math.round(Math.max(0, distantNoShowRate - noShowStats.rate) * 0.5)}%, recovering
+                    ₱{Math.round(Math.max(0, distantNoShows) * 150 * 0.5).toLocaleString()}/day.
+                  </p>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* Performance Scorecard */}
