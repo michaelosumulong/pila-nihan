@@ -354,13 +354,8 @@ const Analytics = () => {
           );
         })()}
 
-        {/* Pending Audits */}
-        <PendingAudits
-          onAnalyze={(desc) => {
-            setFiveWhysIssue(desc);
-            setShowFiveWhys(true);
-          }}
-        />
+
+
 
         {/* Performance Scorecard */}
         <div className="grid grid-cols-3 gap-4 mb-6">
