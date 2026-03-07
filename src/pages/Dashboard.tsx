@@ -6,6 +6,8 @@ import { useLowBattery } from "@/hooks/use-low-battery";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import LowBatteryToggle from "@/components/LowBatteryToggle";
 import BusinessProfileCard from "@/components/BusinessProfileCard";
+import PendingAudits from "@/components/PendingAudits";
+import FiveWhysModal from "@/components/FiveWhysModal";
 import VersionFooter from "@/components/VersionFooter";
 
 interface MerchantData {
@@ -36,6 +38,9 @@ const Dashboard = () => {
   const [shopCode, setShopCode] = useState("");
   const [isEditingCode, setIsEditingCode] = useState(false);
   const [editableCode, setEditableCode] = useState("");
+  const [showFiveWhys, setShowFiveWhys] = useState(false);
+  const [fiveWhysIssue, setFiveWhysIssue] = useState("");
+  const [backlogItems, setBacklogItems] = useState<any[]>([]);
 
   useEffect(() => {
     const raw = localStorage.getItem("pila-merchant");
@@ -61,6 +66,51 @@ const Dashboard = () => {
       setMerchant(parsed);
       setShopCode(parsed.shopCode);
       setEditableCode(parsed.shopCode);
+
+      // Generate Suri Backlog
+      const tickets = JSON.parse(localStorage.getItem("tickets") || "[]");
+      const targetTime = parsed.targetHandlingTime || 8;
+      const today = new Date().toISOString().split("T")[0];
+      const backlog: any[] = [];
+
+      tickets
+        .filter((t: any) => t.status === "served" && t.served_at?.startsWith(today))
+        .forEach((ticket: any) => {
+          if (ticket.served_at && ticket.called_at) {
+            const handlingTime = (new Date(ticket.served_at).getTime() - new Date(ticket.called_at).getTime()) / 1000 / 60;
+            if (handlingTime > targetTime * 1.5) {
+              backlog.push({
+                id: `backlog-${ticket.id}`,
+                type: "excessive_handling",
+                ticket: ticket.ticketNumber,
+                customer: ticket.customerName,
+                actual: Math.round(handlingTime),
+                target: targetTime,
+                variance: Math.round(handlingTime - targetTime),
+                timestamp: ticket.served_at,
+              });
+            }
+          }
+        });
+
+      const served = tickets
+        .filter((t: any) => t.status === "served" && t.served_at?.startsWith(today))
+        .sort((a: any, b: any) => new Date(a.served_at).getTime() - new Date(b.served_at).getTime());
+
+      for (let i = 1; i < served.length; i++) {
+        const gap = (new Date(served[i].called_at).getTime() - new Date(served[i - 1].served_at).getTime()) / 1000 / 60;
+        if (gap >= 15) {
+          backlog.push({
+            id: `backlog-gap-${i}`,
+            type: "idle_time",
+            gap: Math.round(gap),
+            before: served[i - 1].ticketNumber,
+            after: served[i].ticketNumber,
+            timestamp: served[i].called_at,
+          });
+        }
+      }
+      setBacklogItems(backlog);
     } catch {
       navigate("/");
     }
