@@ -31,6 +31,7 @@ const App = () => (
           <Route path="/join/:merchantId" element={<GuestEntry />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<MerchantSignup />} />
+          <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
