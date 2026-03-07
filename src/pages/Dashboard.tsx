@@ -517,6 +517,8 @@ const Dashboard = () => {
         <VersionFooter />
       </div>
 
+      <FiveWhysModal open={showFiveWhys} onClose={() => { setShowFiveWhys(false); setFiveWhysIssue(""); }} initialIssue={fiveWhysIssue} />
+
       {/* Slide-out Menu */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex">
