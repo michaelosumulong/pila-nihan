@@ -133,6 +133,14 @@ const GuestEntry = () => {
       existingTickets.push(newTicket);
       localStorage.setItem("tickets", JSON.stringify(existingTickets));
 
+      // Save active ticket for recovery
+      localStorage.setItem("pila-active-ticket", JSON.stringify({
+        ticketNumber,
+        customerName: name.trim(),
+        status: "waiting",
+        savedAt: new Date().toISOString(),
+      }));
+
       toast.success(`Ticket ${ticketNumber} created!`, {
         description: `Welcome, ${name.trim()}!`,
       });

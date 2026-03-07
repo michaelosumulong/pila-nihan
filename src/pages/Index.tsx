@@ -9,6 +9,7 @@ const Index = () => {
   const [shopCode, setShopCode] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [ready, setReady] = useState(false);
+  const [existingTicket, setExistingTicket] = useState<any>(null);
 
   useEffect(() => {
     const merchantData = localStorage.getItem("pila-merchant");
@@ -20,6 +21,24 @@ const Index = () => {
         return;
       } catch { /* show landing */ }
     }
+
+    // Check for active ticket recovery
+    const activeTicket = localStorage.getItem("pila-active-ticket");
+    if (activeTicket) {
+      try {
+        const ticketData = JSON.parse(activeTicket);
+        const tickets = JSON.parse(localStorage.getItem("tickets") || "[]");
+        const current = tickets.find((t: any) => t.ticketNumber === ticketData.ticketNumber);
+        if (current && (current.status === "waiting" || current.status === "called")) {
+          setExistingTicket(ticketData);
+        } else {
+          localStorage.removeItem("pila-active-ticket");
+        }
+      } catch {
+        localStorage.removeItem("pila-active-ticket");
+      }
+    }
+
     setReady(true);
   }, [navigate]);
 
@@ -74,6 +93,31 @@ const Index = () => {
           Ginhawa sa Bawat Pila
         </p>
       </div>
+
+      {/* Ticket Recovery Banner */}
+      {existingTicket && (
+        <div className="max-w-5xl w-full mx-auto mb-6">
+          <div className="bg-primary border-4 border-[hsl(220,100%,13%)] rounded-2xl p-6 shadow-2xl animate-pulse">
+            <div className="flex items-start gap-4">
+              <span className="text-5xl">🎫</span>
+              <div className="flex-1">
+                <p className="font-bold text-[hsl(220,100%,13%)] text-xl mb-2">
+                  Welcome back, {existingTicket.customerName}!
+                </p>
+                <p className="text-foreground/80 mb-4">
+                  You have an active ticket in the queue
+                </p>
+                <button
+                  onClick={() => navigate(`/ticket/${existingTicket.ticketNumber}?recovered=true`)}
+                  className="w-full bg-[hsl(220,100%,13%)] hover:bg-secondary text-white py-4 rounded-xl font-bold text-lg shadow-lg transition-all"
+                >
+                  🎫 View Ticket #{existingTicket.ticketNumber}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Two-Section Layout */}
       <div className="flex-1 max-w-5xl w-full mx-auto grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-6 mb-8">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,7 +26,48 @@ const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3
 
 const GuestTicket = () => {
   const { ticketNumber } = useParams();
+  const [searchParams] = useSearchParams();
+  const isRecovered = searchParams.get("recovered") === "true";
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  // PWA install prompt
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallPrompt(true);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        toast.success("Pila-nihan installed!", { description: "Access tickets from your home screen" });
+      }
+      setDeferredPrompt(null);
+      setShowInstallPrompt(false);
+    }
+  };
+
+  const shareTicket = async () => {
+    const shareData = {
+      title: `Pila-nihan Ticket ${ticketNumber}`,
+      text: `I'm #${ticketData.position} in line. Estimated wait: ${ticketData.estimatedWaitMinutes} min.`,
+      url: window.location.href,
+    };
+    if (navigator.share) {
+      try { await navigator.share(shareData); toast.success("Ticket shared!"); } catch {}
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Ticket link copied to clipboard!");
+    }
+  };
 
   const merchantData = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
   const merchantCategory = merchantData.category || "SULONG";
@@ -182,12 +223,65 @@ const GuestTicket = () => {
         </p>
       </div>
 
+      {/* Recovery confirmation */}
+      {isRecovered && (
+        <div className="max-w-md mx-auto mb-4">
+          <div className="bg-green-50 border-l-4 border-green-500 p-3 rounded">
+            <p className="text-sm text-green-800 flex items-center gap-2">
+              <span>✓</span>
+              <span>Ticket recovered successfully! You're still in line.</span>
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Now Serving */}
       <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5 text-center">
         <p className="text-sm text-gray-600 uppercase mb-1">Now Serving:</p>
         <p className="text-2xl font-bold text-[#1E3A8A]">{ticketData.nowServing}</p>
         <p className="text-lg mt-2">{getMessage(ticketData.position)}</p>
       </div>
+
+      {/* Pro Tips & Share */}
+      <div className="max-w-md mx-auto mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4">
+        <p className="text-sm text-yellow-800 font-semibold mb-2">💡 Pro Tips to keep your ticket safe:</p>
+        <ul className="text-xs text-yellow-700 space-y-1">
+          <li>📸 Take a screenshot of this page</li>
+          <li>🔖 Bookmark this page in your browser</li>
+          <li>📱 Add Pila-nihan to your home screen (works like an app!)</li>
+        </ul>
+      </div>
+
+      {/* Share Button */}
+      <div className="max-w-md mx-auto mb-6">
+        <button
+          onClick={shareTicket}
+          className="w-full bg-white/20 text-white py-3 rounded-xl font-bold border-2 border-white/30 hover:bg-white/30 transition-all"
+        >
+          📤 Share Ticket Link
+        </button>
+      </div>
+
+      {/* PWA Install Banner */}
+      {showInstallPrompt && (
+        <div className="max-w-md mx-auto mb-6 bg-blue-50 border-2 border-blue-500 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <span className="text-3xl">📱</span>
+            <div className="flex-1">
+              <p className="font-bold text-blue-900 mb-1">Install Pila-nihan</p>
+              <p className="text-sm text-blue-800 mb-3">Add to your home screen for quick access!</p>
+              <div className="flex gap-2">
+                <button onClick={handleInstallClick} className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold text-sm">
+                  Install Now
+                </button>
+                <button onClick={() => setShowInstallPrompt(false)} className="px-4 bg-white text-gray-700 py-2 rounded-lg font-bold text-sm border border-gray-300">
+                  Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Upgrade Options */}
       <div className="max-w-md mx-auto mb-6">
