@@ -61,12 +61,14 @@ const MerchantSignup = () => {
     e.preventDefault();
     if (!validate()) return;
 
-    // Generate shop code from business name
-    const shopCode = form.businessName
+    // Generate CLEAN shop code from business name
+    let shopCode = form.businessName
       .toUpperCase()
-      .replace(/[^A-Z]/g, "")
-      .substring(0, 6)
-      .padEnd(6, "X");
+      .replace(/[^A-Z0-9]/g, "")
+      .substring(0, 10);
+    if (shopCode.length < 3) {
+      shopCode = (shopCode + form.category).substring(0, 6);
+    }
 
     const data = {
       id: `MERCH-${Date.now()}`,
@@ -78,6 +80,7 @@ const MerchantSignup = () => {
       email: form.email,
       location: location || { lat: 14.5995, lng: 120.9842 },
       shopCode,
+      targetHandlingTime: 8,
       plan: "PANDAY",
       wallet: { balance: 0, credits: 500 },
       joinedDate: new Date().toISOString(),

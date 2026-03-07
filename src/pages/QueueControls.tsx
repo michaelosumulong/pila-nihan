@@ -7,6 +7,7 @@ import WalkInModal from "@/components/WalkInModal";
 import OfflineBanner from "@/components/OfflineBanner";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import LowBatteryToggle from "@/components/LowBatteryToggle";
+import VersionFooter from "@/components/VersionFooter";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -332,6 +333,8 @@ const QueueControls = () => {
             <p className="text-xs text-gray-500">{isOnline ? "Online" : "Offline"}</p>
           </div>
         </div>
+
+        <VersionFooter />
       </div>
 
       {/* Walk-in Modal */}

@@ -43,15 +43,18 @@ const Index = () => {
   }, [navigate]);
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    if (value.length > 6) value = value.substring(0, 6);
-    setShopCode(value);
-    setIsValid(value.length === 6);
+    // SANITIZE: Remove all non-alphanumeric, convert to uppercase
+    const cleaned = e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    const limited = cleaned.substring(0, 10);
+    setShopCode(limited);
+    setIsValid(limited.length >= 3);
   };
 
   const handleEnterQueue = () => {
     if (!isValid) {
-      toast.error("Please enter a valid 6-digit shop code");
+      toast.error("Invalid shop code", {
+        description: "Shop code must be at least 3 characters",
+      });
       return;
     }
     toast.success("Redirecting to queue...");
@@ -68,6 +71,7 @@ const Index = () => {
 
   if (!ready) return null;
 
+  // Format for DISPLAY only (with dash after 3rd char)
   const displayCode = shopCode.length > 3
     ? `${shopCode.slice(0, 3)}-${shopCode.slice(3)}`
     : shopCode;
@@ -141,8 +145,8 @@ const Index = () => {
               type="text"
               value={displayCode}
               onChange={handleCodeChange}
-              placeholder="XXX-XXX"
-              maxLength={7}
+              placeholder="Enter shop code"
+              maxLength={12}
               className="w-full text-3xl text-center font-mono font-bold uppercase py-4 px-6 rounded-xl border-[3px] border-gray-300 focus:border-primary focus:ring-4 focus:ring-yellow-200 outline-none tracking-widest transition-colors text-gray-900"
             />
           </div>
@@ -154,6 +158,10 @@ const Index = () => {
           >
             PUMILA NA!
           </button>
+
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            No dashes or spaces needed — we'll format it for you!
+          </p>
 
           <div className="text-center mt-4">
             <p className="text-sm text-gray-500 mb-1">Walang code?</p>
