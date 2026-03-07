@@ -8,6 +8,8 @@ import { useLowBattery } from "@/hooks/use-low-battery";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import LowBatteryToggle from "@/components/LowBatteryToggle";
 import FiveWhysModal from "@/components/FiveWhysModal";
+import PendingAudits from "@/components/PendingAudits";
+import VersionFooter from "@/components/VersionFooter";
 const hourlyData = [
   { hour: "8 AM", customers: 12 },
   { hour: "9 AM", customers: 28 },
@@ -37,6 +39,7 @@ const Analytics = () => {
   const [loaded, setLoaded] = useState(false);
   const [noShowStats, setNoShowStats] = useState({ count: 0, rate: 0, totalServed: 158 });
   const [showFiveWhys, setShowFiveWhys] = useState(false);
+  const [fiveWhysIssue, setFiveWhysIssue] = useState("");
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
   const buntingCount = 24;
 
@@ -314,12 +317,48 @@ const Analytics = () => {
           })()}
         </div>
 
+        {/* Customer Satisfaction */}
+        {(() => {
+          const feedback = JSON.parse(localStorage.getItem("customer_feedback") || "[]");
+          const today = new Date().toISOString().split("T")[0];
+          const todayFeedback = feedback.filter((f: any) => f.date === today);
+          const positiveCount = todayFeedback.filter((f: any) => f.rating === "positive").length;
+          const satisfactionRate = todayFeedback.length > 0
+            ? ((positiveCount / todayFeedback.length) * 100).toFixed(0)
+            : "—";
+          return (
+            <div className="grid grid-cols-1 gap-4 mb-6">
+              <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-[#10B981]">
+                <div className="text-3xl font-bold text-[#10B981]">
+                  {satisfactionRate}{typeof satisfactionRate === "string" && satisfactionRate !== "—" ? "%" : satisfactionRate === "—" ? "" : "%"}
+                </div>
+                <div className="text-sm text-gray-600 mt-1">Customer Satisfaction</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {todayFeedback.length > 0
+                    ? `${positiveCount}/${todayFeedback.length} positive today`
+                    : "No feedback yet today"}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Pending Audits */}
+        <PendingAudits
+          onAnalyze={(desc) => {
+            setFiveWhysIssue(desc);
+            setShowFiveWhys(true);
+          }}
+        />
+
         {/* Performance Scorecard */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <ScoreCard icon="🎯" metric="96%" label="Within 15-min Target" status="EXCELLENT" statusColor="bg-green-100 text-green-800" loaded={loaded} delay={700} />
           <ScoreCard icon="⚡" metric="18%" label="Express Upgrade Rate" status="ABOVE AVERAGE" statusColor="bg-blue-100 text-blue-800" loaded={loaded} delay={800} />
           <ScoreCard icon="📊" metric="4.2σ" label="Six Sigma Rating" status="WORLD CLASS" statusColor="bg-[#FFF9E6] text-[#B8860B]" loaded={loaded} delay={900} />
         </div>
+
+        <VersionFooter />
       </div>
 
       {/* Slide-out Menu */}
@@ -346,7 +385,7 @@ const Analytics = () => {
         </div>
       )}
 
-      <FiveWhysModal open={showFiveWhys} onClose={() => setShowFiveWhys(false)} />
+      <FiveWhysModal open={showFiveWhys} onClose={() => { setShowFiveWhys(false); setFiveWhysIssue(""); }} initialIssue={fiveWhysIssue} />
 
       {/* Bottom Nav */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-40">
