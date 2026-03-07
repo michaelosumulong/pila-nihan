@@ -346,6 +346,8 @@ const Analytics = () => {
         </div>
       )}
 
+      <FiveWhysModal open={showFiveWhys} onClose={() => setShowFiveWhys(false)} />
+
       {/* Bottom Nav */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-40">
         <NavTab icon="🏠" label="Dashboard" onClick={() => navigate("/dashboard")} />
