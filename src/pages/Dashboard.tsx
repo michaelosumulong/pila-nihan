@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { generateDailyBypassCode } from "@/lib/bypass-code";
 
 interface MerchantData {
   id: string;
@@ -141,6 +142,32 @@ const Dashboard = () => {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Merchant Demo Kit — Daily Bypass Code */}
+        <div className="bg-white rounded-2xl shadow-lg p-5 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-2xl">🔑</span>
+            <h3 className="text-sm font-semibold text-gray-700">Merchant Demo Kit</h3>
+          </div>
+          <p className="text-xs text-gray-500 mb-2">Today's GPS Bypass Code</p>
+          <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between">
+            <span className="text-2xl font-mono font-bold tracking-[0.3em] text-[#1E3A8A]">
+              {generateDailyBypassCode(merchant.id || "pila-nihan")}
+            </span>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(generateDailyBypassCode(merchant.id || "pila-nihan"));
+                toast.success("Bypass code copied!");
+              }}
+              className="text-xs bg-[#3B82F6] text-white px-3 py-1.5 rounded-lg font-medium"
+            >
+              📋 Copy
+            </button>
+          </div>
+          <p className="text-[10px] text-gray-400 mt-2">
+            Share with customers who have GPS trouble. Code resets daily at midnight.
+          </p>
         </div>
 
         {/* Announcement */}

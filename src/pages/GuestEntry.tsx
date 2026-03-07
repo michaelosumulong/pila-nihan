@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { validateBypassCode } from "@/lib/bypass-code";
 
 const validateMobile = (value: string) => {
   const cleaned = value.replace(/\s+/g, "");
@@ -41,6 +42,22 @@ const GuestEntry = () => {
   const [distance, setDistance] = useState<number | null>(null);
   const [isWithinRange, setIsWithinRange] = useState(false);
   const [locationStatus, setLocationStatus] = useState<"checking" | "within_range" | "too_far" | "error" | "not_supported">("checking");
+
+  const [showBypass, setShowBypass] = useState(false);
+  const [bypassCode, setBypassCode] = useState("");
+  const [bypassVerified, setBypassVerified] = useState(false);
+
+  const handleBypassSubmit = () => {
+    const seed = merchantData.id || "pila-nihan";
+    if (validateBypassCode(bypassCode, seed)) {
+      setBypassVerified(true);
+      setIsWithinRange(true);
+      setLocationStatus("within_range");
+      toast.success("Bypass code accepted! You can now join the queue.");
+    } else {
+      toast.error("Invalid bypass code. Ask the merchant for today's code.");
+    }
+  };
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -280,7 +297,55 @@ const GuestEntry = () => {
           </div>
         )}
 
-        {/* Push Notification Opt-in */}
+        {/* GPS Bypass Code */}
+        {!bypassVerified && (locationStatus === "too_far" || locationStatus === "error" || locationStatus === "not_supported") && (
+          <div className="text-center mb-4">
+            <button
+              type="button"
+              onClick={() => setShowBypass(!showBypass)}
+              className="text-sm text-[#3B82F6] font-medium hover:underline"
+            >
+              📍 Having GPS trouble? Enter bypass code
+            </button>
+            {showBypass && (
+              <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <p className="text-xs text-gray-600 mb-2">
+                  Ask the merchant for today's 6-character bypass code
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    maxLength={6}
+                    value={bypassCode}
+                    onChange={(e) => setBypassCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                    placeholder="e.g. 47X2B9"
+                    className="text-center font-mono font-bold text-lg tracking-widest uppercase"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleBypassSubmit}
+                    disabled={bypassCode.length !== 6}
+                    className="bg-[#3B82F6] text-white px-4 py-2 rounded-lg font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    Verify
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {bypassVerified && (
+          <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-green-600">✓</span>
+              <div>
+                <p className="text-sm font-semibold text-green-800">Bypass code verified!</p>
+                <p className="text-xs text-green-700">You can now join the queue.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {isWithinRange && (
           <div className="bg-[#FFF9E6] border border-[#FFB703] rounded-lg p-4 mb-4">
             <div className="flex items-start gap-3">
