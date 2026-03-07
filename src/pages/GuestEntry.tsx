@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { validateBypassCode } from "@/lib/bypass-code";
 
 const validateMobile = (value: string) => {
   const cleaned = value.replace(/\s+/g, "");
@@ -41,6 +42,22 @@ const GuestEntry = () => {
   const [distance, setDistance] = useState<number | null>(null);
   const [isWithinRange, setIsWithinRange] = useState(false);
   const [locationStatus, setLocationStatus] = useState<"checking" | "within_range" | "too_far" | "error" | "not_supported">("checking");
+
+  const [showBypass, setShowBypass] = useState(false);
+  const [bypassCode, setBypassCode] = useState("");
+  const [bypassVerified, setBypassVerified] = useState(false);
+
+  const handleBypassSubmit = () => {
+    const seed = merchantData.id || "pila-nihan";
+    if (validateBypassCode(bypassCode, seed)) {
+      setBypassVerified(true);
+      setIsWithinRange(true);
+      setLocationStatus("within_range");
+      toast.success("Bypass code accepted! You can now join the queue.");
+    } else {
+      toast.error("Invalid bypass code. Ask the merchant for today's code.");
+    }
+  };
 
   useEffect(() => {
     if (!navigator.geolocation) {
