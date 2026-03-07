@@ -4,7 +4,10 @@ import { toast } from "sonner";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-
+import { useLowBattery } from "@/hooks/use-low-battery";
+import LowBatteryBanner from "@/components/LowBatteryBanner";
+import LowBatteryToggle from "@/components/LowBatteryToggle";
+import FiveWhysModal from "@/components/FiveWhysModal";
 const hourlyData = [
   { hour: "8 AM", customers: 12 },
   { hour: "9 AM", customers: 28 },
@@ -33,7 +36,18 @@ const Analytics = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [noShowStats, setNoShowStats] = useState({ count: 0, rate: 0, totalServed: 158 });
+  const [showFiveWhys, setShowFiveWhys] = useState(false);
+  const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
   const buntingCount = 24;
+
+  const handleToggleBattery = () => {
+    const newMode = toggleLowBattery();
+    if (newMode) {
+      toast.success("Battery optimization active");
+    } else {
+      toast.info("Standard mode restored");
+    }
+  };
 
   useEffect(() => {
     const raw = localStorage.getItem("pila-merchant");
@@ -68,12 +82,14 @@ const Analytics = () => {
   return (
     <div className="min-h-screen bg-gray-100 pb-24">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1E3A8A] to-[#2563EB] relative">
+      <div className={lowBatteryMode ? "bg-[#1E3A8A]" : "bg-gradient-to-r from-[#1E3A8A] to-[#2563EB]"}>
+        {!lowBatteryMode && (
         <div className="bunting pt-2 pb-1">
           {Array.from({ length: buntingCount }).map((_, i) => (
             <div key={i} className="bunting-triangle" />
           ))}
         </div>
+        )}
         <div className="flex items-center justify-between px-5 pt-3 pb-6">
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
           <div className="flex flex-col items-center">
@@ -87,13 +103,21 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="px-4 -mt-4">
-        {/* Export button */}
-        <div className="flex justify-end mb-4">
+        {lowBatteryMode && (
+          <LowBatteryBanner lastRefresh={lastRefresh} onRefresh={() => { manualRefresh(); toast.success("Analytics refreshed!"); }} />
+        )}
+        {/* Action buttons */}
+        <div className="flex justify-end gap-2 mb-4">
+          <button
+            onClick={() => setShowFiveWhys(true)}
+            className="bg-white text-gray-700 text-sm font-medium px-4 py-2 rounded-lg shadow hover:shadow-md flex items-center gap-2"
+          >
+            🧐 5 Whys Analysis
+          </button>
           <button
             onClick={() => toast.info("PDF report generation coming soon!")}
-            className="bg-white text-gray-700 text-sm font-medium px-4 py-2 rounded-lg shadow hover:shadow-md transition-all flex items-center gap-2"
+            className="bg-white text-gray-700 text-sm font-medium px-4 py-2 rounded-lg shadow hover:shadow-md flex items-center gap-2"
           >
             📥 Download PDF Report
           </button>
@@ -311,7 +335,8 @@ const Analytics = () => {
               <p className="flex items-center gap-3 px-4 py-3 bg-[#1E3A8A] text-white rounded-lg">📊 Analytics</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Wallet feature coming soon!")}>💰 Wallet</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Settings feature coming soon!")}>⚙️ Settings</p>
-              <div className="border-t border-gray-200 mt-4 pt-2">
+              <LowBatteryToggle active={lowBatteryMode} onToggle={handleToggleBattery} />
+              <div className="border-t border-gray-200 mt-2 pt-2">
                 <p className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors cursor-pointer rounded-lg" onClick={() => { localStorage.removeItem("pila-merchant"); navigate("/"); }}>
                   🚪 Logout
                 </p>
@@ -320,6 +345,8 @@ const Analytics = () => {
           </div>
         </div>
       )}
+
+      <FiveWhysModal open={showFiveWhys} onClose={() => setShowFiveWhys(false)} />
 
       {/* Bottom Nav */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-40">
