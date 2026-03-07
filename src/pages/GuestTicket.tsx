@@ -5,6 +5,8 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLowBattery } from "@/hooks/use-low-battery";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
+import CustomerFeedbackModal from "@/components/CustomerFeedbackModal";
+import VersionFooter from "@/components/VersionFooter";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -34,6 +36,8 @@ const GuestTicket = () => {
   const totalExpressPrice = expressPrice + vatAmount;
 
   const [qualifiesForSocial, setQualifiesForSocial] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   const [ticketData] = useState({
     ticketNumber: ticketNumber || "R-056",
@@ -67,10 +71,15 @@ const GuestTicket = () => {
   // Smart auto-refresh based on battery mode
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log("Checking queue position...");
+      // Check if ticket has been served for feedback trigger
+      const tickets = JSON.parse(localStorage.getItem("tickets") || "[]");
+      const current = tickets.find((t: any) => t.ticketNumber === ticketNumber);
+      if (current && current.status === "served" && !feedbackSubmitted) {
+        setShowFeedback(true);
+      }
     }, lowBatteryMode ? 60000 : 10000);
     return () => clearInterval(interval);
-  }, [lowBatteryMode]);
+  }, [lowBatteryMode, ticketNumber, feedbackSubmitted]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#002366] via-[#1E5AA8] to-[#3B82F6] px-6 py-4 pb-12">
@@ -258,12 +267,27 @@ const GuestTicket = () => {
       </div>
 
       {/* Auto-refresh indicator */}
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center justify-center gap-2 mb-6">
         <span className={`w-2 h-2 rounded-full ${lowBatteryMode ? "bg-yellow-400" : "bg-green-400"}`} />
         <span className="text-xs text-gray-300">
           {lowBatteryMode ? "Updates every 60s • Tap 🔋 for live" : "Updates automatically every 10s"}
         </span>
       </div>
+
+      <VersionFooter />
+
+      {/* Customer Feedback Modal */}
+      {showFeedback && !feedbackSubmitted && (
+        <CustomerFeedbackModal
+          ticketNumber={ticketData.ticketNumber}
+          customerName={ticketData.customerName}
+          onClose={() => setShowFeedback(false)}
+          onSubmitted={() => {
+            setFeedbackSubmitted(true);
+            setShowFeedback(false);
+          }}
+        />
+      )}
     </div>
   );
 };
