@@ -268,6 +268,99 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Suri Quality Alerts */}
+        {backlogItems.length > 0 ? (
+          <div className="bg-white rounded-2xl shadow-2xl p-6 mb-6 border-l-8 border-red-500">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🔍</span>
+                <div>
+                  <h3 className="text-2xl font-bold text-red-600">Suri Quality Alerts</h3>
+                  <p className="text-sm text-gray-600">Issues detected today requiring analysis</p>
+                </div>
+              </div>
+              <div className="bg-red-500 text-white px-4 py-2 rounded-full font-bold text-xl">
+                {backlogItems.length}
+              </div>
+            </div>
+            <div className="space-y-3">
+              {backlogItems.slice(0, 3).map((item: any) => (
+                <div key={item.id} className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg hover:shadow-lg transition-shadow">
+                  {item.type === "excessive_handling" ? (
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">⚠️</span>
+                          <p className="font-bold text-gray-900 text-lg">Excessive Handling Time</p>
+                        </div>
+                        <p className="text-sm text-gray-700 mb-1">
+                          <strong className="text-red-600">{item.ticket}</strong> ({item.customer}) took{" "}
+                          <strong className="text-red-600">{item.actual} minutes</strong>
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          Target: {item.target} min • Actual: {item.actual} min •{" "}
+                          <span className="text-red-600 font-bold">+{item.variance} min over</span>
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setFiveWhysIssue(`Ticket ${item.ticket} took ${item.actual} minutes (${item.variance} min over ${item.target} min target)`);
+                          setShowFiveWhys(true);
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold whitespace-nowrap shadow-lg transition-all transform hover:scale-105"
+                      >
+                        🧐 Analyze Now
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">⏸️</span>
+                          <p className="font-bold text-gray-900 text-lg">Idle Time Detected</p>
+                        </div>
+                        <p className="text-sm text-gray-700 mb-1">
+                          <strong className="text-yellow-600">{item.gap} minute gap</strong> between {item.before} and {item.after}
+                        </p>
+                        <p className="text-xs text-gray-600">No customers served during this period - potential Muda (waste)</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setFiveWhysIssue(`${item.gap} minute idle time between ${item.before} and ${item.after}`);
+                          setShowFiveWhys(true);
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold whitespace-nowrap shadow-lg transition-all transform hover:scale-105"
+                      >
+                        🧐 Analyze Now
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {backlogItems.length > 3 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => navigate("/analytics")}
+                  className="text-blue-600 hover:text-blue-700 font-bold"
+                >
+                  View all {backlogItems.length} issues in Analytics →
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="bg-green-50 border-l-8 border-green-500 rounded-2xl p-6 mb-6">
+            <div className="flex items-center gap-3">
+              <span className="text-4xl">✅</span>
+              <div>
+                <h3 className="text-xl font-bold text-green-700">No Quality Issues Today</h3>
+                <p className="text-sm text-green-600">All tickets handled within target time • No idle gaps detected</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ENHANCED MERCHANT DEMO KIT */}
         <div className="bg-gradient-to-br from-[#1E3A8A] to-[#3B82F6] rounded-2xl shadow-2xl p-6 mb-6 text-white">
           <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">🎫 Merchant Demo Kit</h3>
