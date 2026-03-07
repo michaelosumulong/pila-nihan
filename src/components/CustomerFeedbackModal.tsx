@@ -26,6 +26,9 @@ const CustomerFeedbackModal = ({
     existing.push(feedback);
     localStorage.setItem("customer_feedback", JSON.stringify(existing));
 
+    // Clear active ticket since customer has been served
+    localStorage.removeItem("pila-active-ticket");
+
     onSubmitted();
     toast.success("Thank you for your feedback!", {
       description: "Your input helps us improve!",

@@ -122,6 +122,18 @@ const QueueControls = () => {
       customer_name: currentServing.customerName,
       timestamp: new Date().toISOString(),
     });
+
+    // Clear active ticket if it matches
+    try {
+      const activeTicket = localStorage.getItem("pila-active-ticket");
+      if (activeTicket) {
+        const td = JSON.parse(activeTicket);
+        if (td.ticketNumber === currentServing.ticketNumber) {
+          localStorage.removeItem("pila-active-ticket");
+        }
+      }
+    } catch {}
+
     toast.success(`${currentServing.ticketNumber} marked as served!`);
     callNext();
   };
@@ -140,6 +152,18 @@ const QueueControls = () => {
       customer_name: currentServing.customerName,
       timestamp: new Date().toISOString(),
     });
+
+    // Clear active ticket if it matches
+    try {
+      const activeTicket = localStorage.getItem("pila-active-ticket");
+      if (activeTicket) {
+        const td = JSON.parse(activeTicket);
+        if (td.ticketNumber === currentServing.ticketNumber) {
+          localStorage.removeItem("pila-active-ticket");
+        }
+      }
+    } catch {}
+
     setNoShowCount((prev) => prev + 1);
     toast.warning(`${currentServing.ticketNumber} marked as No-Show`, {
       description: "Customer did not respond after being called",
