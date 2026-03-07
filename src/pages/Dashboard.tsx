@@ -12,6 +12,7 @@ interface MerchantData {
   address: string;
   email: string;
   plan: string;
+  shopCode?: string;
   wallet: { balance: number; credits: number };
   joinedDate: string;
 }
@@ -26,6 +27,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [merchant, setMerchant] = useState<MerchantData | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [shopCode, setShopCode] = useState("");
+  const [isEditingCode, setIsEditingCode] = useState(false);
+  const [editableCode, setEditableCode] = useState("");
 
   useEffect(() => {
     const raw = localStorage.getItem("pila-merchant");
@@ -34,7 +38,23 @@ const Dashboard = () => {
       return;
     }
     try {
-      setMerchant(JSON.parse(raw));
+      const parsed = JSON.parse(raw);
+
+      // Ensure shop code exists
+      if (!parsed.shopCode) {
+        const businessName = parsed.businessName || "DEMO";
+        const generated = businessName
+          .toUpperCase()
+          .replace(/[^A-Z]/g, "")
+          .substring(0, 6)
+          .padEnd(6, "X");
+        parsed.shopCode = generated || "PILANI";
+        localStorage.setItem("pila-merchant", JSON.stringify(parsed));
+      }
+
+      setMerchant(parsed);
+      setShopCode(parsed.shopCode);
+      setEditableCode(parsed.shopCode);
     } catch {
       navigate("/");
     }
@@ -46,17 +66,58 @@ const Dashboard = () => {
   const isSuriVerified = ["PANDAY"].includes(merchant.plan);
   const buntingCount = 24;
 
+  const qrUrl = `${window.location.origin}/join/${shopCode.toLowerCase()}`;
+
+  const generateShopCode = () => {
+    const businessName = merchant.businessName || "SHOP";
+    const generated = businessName
+      .toUpperCase()
+      .replace(/[^A-Z]/g, "")
+      .substring(0, 6)
+      .padEnd(6, "X");
+    setEditableCode(generated);
+    toast.info(`Suggested code: ${generated}`, {
+      description: "You can edit it before saving",
+    });
+  };
+
+  const saveShopCode = () => {
+    const cleaned = editableCode.toUpperCase().replace(/[^A-Z0-9]/g, "").substring(0, 10);
+    if (cleaned.length < 3) {
+      toast.error("Shop code must be at least 3 characters");
+      return;
+    }
+    const updated = { ...merchant, shopCode: cleaned };
+    localStorage.setItem("pila-merchant", JSON.stringify(updated));
+    setShopCode(cleaned);
+    setMerchant(updated);
+    setIsEditingCode(false);
+    toast.success("Shop Code updated!", {
+      description: `Your new link: ${window.location.origin}/join/${cleaned.toLowerCase()}`,
+      duration: 8000,
+    });
+  };
+
+  const downloadQR = () => {
+    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(qrUrl)}`;
+    const link = document.createElement("a");
+    link.href = qrApiUrl;
+    link.download = `pila-nihan-${shopCode}.png`;
+    link.click();
+    toast.success("QR Code downloading!", {
+      description: "Print and display at your entrance",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 pb-24">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#1E3A8A] to-[#2563EB] relative">
-        {/* Bunting */}
         <div className="bunting pt-2 pb-1">
           {Array.from({ length: buntingCount }).map((_, i) => (
             <div key={i} className="bunting-triangle" />
           ))}
         </div>
-
         <div className="flex items-center justify-between px-5 pt-3 pb-6">
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
           <div className="flex flex-col items-center">
@@ -76,7 +137,6 @@ const Dashboard = () => {
           <p className="text-white text-xl">
             Maligayang araw, <span className="font-bold">{merchant.businessName}</span>!
           </p>
-          {/* Category + Integrity Badge */}
           <div className="flex items-center gap-2 mt-2">
             <span className="text-white/70 text-sm">Category:</span>
             <span className={`${cat.bg} ${cat.text} text-xs font-semibold px-2.5 py-0.5 rounded-full`}>
@@ -91,26 +151,14 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main Content - pulls up into header */}
+      {/* Main Content */}
       <div className="px-6 -mt-4">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <StatCard icon="👥" value="24" label="Sa Pila Ngayon" valueColor="text-[#1E3A8A]" />
           <StatCard icon="✅" value="158" label="Naserve Today" valueColor="text-[#10B981]" />
-          <StatCard
-            icon="💰"
-            value={`₱${merchant.wallet.balance.toLocaleString()}`}
-            label="Wallet Balance"
-            valueColor="text-[#FFB703]"
-            smaller
-          />
-          <StatCard
-            icon="🎟️"
-            value={`₱${merchant.wallet.credits.toLocaleString()}`}
-            label="Prepaid Credits"
-            valueColor="text-[#3B82F6]"
-            smaller
-          />
+          <StatCard icon="💰" value={`₱${merchant.wallet.balance.toLocaleString()}`} label="Wallet Balance" valueColor="text-[#FFB703]" smaller />
+          <StatCard icon="🎟️" value={`₱${merchant.wallet.credits.toLocaleString()}`} label="Prepaid Credits" valueColor="text-[#3B82F6]" smaller />
         </div>
 
         {/* Quick Actions */}
@@ -134,40 +182,152 @@ const Dashboard = () => {
               { day: "Sun", h: 21 },
             ].map((d) => (
               <div key={d.day} className="flex flex-col items-center flex-1 h-full justify-end">
-                <div
-                  className="w-full max-w-[28px] rounded-t-md bg-[#FFD700]"
-                  style={{ height: `${d.h}%` }}
-                />
+                <div className="w-full max-w-[28px] rounded-t-md bg-[#FFD700]" style={{ height: `${d.h}%` }} />
                 <span className="text-[10px] text-gray-500 mt-1">{d.day}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Merchant Demo Kit — Daily Bypass Code */}
-        <div className="bg-white rounded-2xl shadow-lg p-5 mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-2xl">🔑</span>
-            <h3 className="text-sm font-semibold text-gray-700">Merchant Demo Kit</h3>
+        {/* ENHANCED MERCHANT DEMO KIT */}
+        <div className="bg-gradient-to-br from-[#1E3A8A] to-[#3B82F6] rounded-2xl shadow-2xl p-6 mb-6 text-white">
+          <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">🎫 Merchant Demo Kit</h3>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* SHOP CODE */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border-2 border-white/30">
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-sm text-white/80 font-semibold">Your Shop Code</div>
+                {!isEditingCode ? (
+                  <button onClick={() => setIsEditingCode(true)} className="text-white/80 hover:text-white text-sm flex items-center gap-1">
+                    ✏️ Edit
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setIsEditingCode(false); setEditableCode(shopCode); }}
+                    className="text-white/80 hover:text-white text-sm"
+                  >
+                    ✕ Cancel
+                  </button>
+                )}
+              </div>
+
+              {!isEditingCode ? (
+                <>
+                  <div className="bg-white/20 rounded-lg p-4 mb-3">
+                    <div className="text-5xl sm:text-6xl font-bold font-mono tracking-widest text-center text-white drop-shadow-lg">
+                      {shopCode}
+                    </div>
+                  </div>
+                  <div className="text-xs text-white/70 mb-4 text-center">
+                    Customers enter this at: {window.location.origin}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(qrUrl);
+                        toast.success("Link copied to clipboard!");
+                      }}
+                      className="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1"
+                    >
+                      📋 Copy Link
+                    </button>
+                    <button
+                      onClick={downloadQR}
+                      className="bg-[#FFD700]/80 hover:bg-[#FFD700] text-[#1E3A8A] px-3 py-2 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1"
+                    >
+                      📥 QR Code
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    value={editableCode}
+                    onChange={(e) => setEditableCode(e.target.value.toUpperCase())}
+                    placeholder="MYSHOP"
+                    maxLength={10}
+                    className="w-full px-4 py-3 rounded-lg border-2 border-white/30 bg-white/20 text-white text-2xl font-mono font-bold text-center uppercase tracking-widest placeholder-white/40 focus:outline-none focus:border-[#FFD700]"
+                  />
+                  <div className="text-xs text-white/70 mt-2 mb-3 text-center">
+                    3-10 characters • Letters and numbers only
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={generateShopCode} className="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-xs font-semibold transition-all">
+                      ✨ Auto-Generate
+                    </button>
+                    <button onClick={saveShopCode} className="bg-[#10B981] hover:bg-[#059669] px-3 py-2 rounded-lg text-xs font-bold transition-all">
+                      💾 Save Code
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* DAILY BYPASS CODE */}
+            <div className="bg-[#FFD700]/20 backdrop-blur-sm rounded-xl p-6 border-2 border-[#FFD700]">
+              <div className="text-sm text-white/80 mb-2 flex items-center gap-2 font-semibold">
+                🔑 Today's Bypass Code
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded">Changes daily</span>
+              </div>
+              <div className="text-5xl font-bold font-mono tracking-widest mb-3 text-[#FFD700] text-center">
+                {generateDailyBypassCode(merchant.id || "pila-nihan")}
+              </div>
+              <div className="text-xs text-white/90 mb-3">
+                For customers with GPS issues or weak signal
+              </div>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(generateDailyBypassCode(merchant.id || "pila-nihan"));
+                  toast.success("Bypass code copied!");
+                }}
+                className="w-full bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1 mb-3"
+              >
+                📋 Copy Code
+              </button>
+              <div className="bg-yellow-500/20 border-l-4 border-yellow-400 p-3 rounded">
+                <p className="text-xs text-white">
+                  💡 <strong>How to use:</strong> If customer can't join due to location error, give them this code. They'll enter it on the "Having GPS trouble?" field.
+                </p>
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-gray-500 mb-2">Today's GPS Bypass Code</p>
-          <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between">
-            <span className="text-2xl font-mono font-bold tracking-[0.3em] text-[#1E3A8A]">
-              {generateDailyBypassCode(merchant.id || "pila-nihan")}
-            </span>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(generateDailyBypassCode(merchant.id || "pila-nihan"));
-                toast.success("Bypass code copied!");
-              }}
-              className="text-xs bg-[#3B82F6] text-white px-3 py-1.5 rounded-lg font-medium"
-            >
-              📋 Copy
-            </button>
+
+          {/* QR CODE INSTRUCTIONS */}
+          <div className="mt-6 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-24 h-24 bg-white rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl mb-1">📱</div>
+                    <div className="text-xs text-gray-600">QR Code</div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-white mb-2">How Customers Join:</h4>
+                <div className="grid grid-cols-2 gap-3 text-xs text-white/90">
+                  <div className="bg-white/5 rounded-lg p-2">
+                    <div className="font-bold mb-1">Option 1: QR Code</div>
+                    <div className="text-white/70">
+                      1. Click "📥 QR Code" above<br />
+                      2. Print and display<br />
+                      3. Customers scan to join
+                    </div>
+                  </div>
+                  <div className="bg-white/5 rounded-lg p-2">
+                    <div className="font-bold mb-1">Option 2: Shop Code</div>
+                    <div className="text-white/70">
+                      1. Customer goes to site<br />
+                      2. Enters: <strong>{shopCode}</strong><br />
+                      3. Joins queue instantly
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="text-[10px] text-gray-400 mt-2">
-            Share with customers who have GPS trouble. Code resets daily at midnight.
-          </p>
         </div>
 
         {/* Announcement */}

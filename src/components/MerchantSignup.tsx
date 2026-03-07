@@ -61,6 +61,13 @@ const MerchantSignup = () => {
     e.preventDefault();
     if (!validate()) return;
 
+    // Generate shop code from business name
+    const shopCode = form.businessName
+      .toUpperCase()
+      .replace(/[^A-Z]/g, "")
+      .substring(0, 6)
+      .padEnd(6, "X");
+
     const data = {
       id: `MERCH-${Date.now()}`,
       businessName: form.businessName,
@@ -70,6 +77,7 @@ const MerchantSignup = () => {
       address: form.address,
       email: form.email,
       location: location || { lat: 14.5995, lng: 120.9842 },
+      shopCode,
       plan: "PANDAY",
       wallet: { balance: 0, credits: 500 },
       joinedDate: new Date().toISOString(),
