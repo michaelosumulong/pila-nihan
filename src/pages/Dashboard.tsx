@@ -5,6 +5,8 @@ import { generateDailyBypassCode } from "@/lib/bypass-code";
 import { useLowBattery } from "@/hooks/use-low-battery";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import LowBatteryToggle from "@/components/LowBatteryToggle";
+import BusinessProfileCard from "@/components/BusinessProfileCard";
+import VersionFooter from "@/components/VersionFooter";
 
 interface MerchantData {
   id: string;
@@ -357,6 +359,9 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Business Profile */}
+        <BusinessProfileCard />
+
         {/* Announcement */}
         <div className="bg-[#FFF9E6] border-l-4 border-[#FFB703] p-4 rounded-lg mb-6 flex justify-between items-start">
           <div>
@@ -365,6 +370,8 @@ const Dashboard = () => {
           </div>
           <button className="text-[#3B82F6] text-sm font-medium shrink-0">Edit</button>
         </div>
+
+        <VersionFooter />
       </div>
 
       {/* Slide-out Menu */}

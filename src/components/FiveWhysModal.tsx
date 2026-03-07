@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -19,10 +19,15 @@ const PLACEHOLDERS = [
 interface FiveWhysModalProps {
   open: boolean;
   onClose: () => void;
+  initialIssue?: string;
 }
 
-const FiveWhysModal = ({ open, onClose }: FiveWhysModalProps) => {
-  const [issue, setIssue] = useState("");
+const FiveWhysModal = ({ open, onClose, initialIssue = "" }: FiveWhysModalProps) => {
+  const [issue, setIssue] = useState(initialIssue);
+
+  useEffect(() => {
+    if (initialIssue) setIssue(initialIssue);
+  }, [initialIssue]);
   const [whys, setWhys] = useState(["", "", "", "", ""]);
 
   const filledCount = whys.filter((w) => w.trim().length > 0).length;
