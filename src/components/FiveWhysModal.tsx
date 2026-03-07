@@ -19,10 +19,16 @@ const PLACEHOLDERS = [
 interface FiveWhysModalProps {
   open: boolean;
   onClose: () => void;
+  initialIssue?: string;
 }
 
-const FiveWhysModal = ({ open, onClose }: FiveWhysModalProps) => {
-  const [issue, setIssue] = useState("");
+const FiveWhysModal = ({ open, onClose, initialIssue = "" }: FiveWhysModalProps) => {
+  const [issue, setIssue] = useState(initialIssue);
+
+  // Sync initialIssue when it changes
+  useState(() => {
+    if (initialIssue) setIssue(initialIssue);
+  });
   const [whys, setWhys] = useState(["", "", "", "", ""]);
 
   const filledCount = whys.filter((w) => w.trim().length > 0).length;
