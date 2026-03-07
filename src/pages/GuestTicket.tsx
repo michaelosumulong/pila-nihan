@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useLowBattery } from "@/hooks/use-low-battery";
+import LowBatteryBanner from "@/components/LowBatteryBanner";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -22,7 +24,7 @@ const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3
 
 const GuestTicket = () => {
   const { ticketNumber } = useParams();
-  const buntingCount = 24;
+  const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
 
   const merchantData = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
   const merchantCategory = merchantData.category || "SULONG";
@@ -44,7 +46,6 @@ const GuestTicket = () => {
   });
 
   const progressValue = ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100;
-
   const cat = CATEGORY_STYLES[ticketData.category] || CATEGORY_STYLES.regular;
 
   const handleUpgrade = (type: "express" | "social_priority") => {
@@ -63,27 +64,74 @@ const GuestTicket = () => {
     }
   };
 
+  // Smart auto-refresh based on battery mode
   useEffect(() => {
     const interval = setInterval(() => {
       console.log("Checking queue position...");
-    }, 30000);
+    }, lowBatteryMode ? 60000 : 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [lowBatteryMode]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#002366] via-[#1E5AA8] to-[#3B82F6] px-6 py-4 pb-12">
-      {/* Bunting */}
-      <div className="bunting pt-2 pb-1">
-        {Array.from({ length: buntingCount }).map((_, i) => (
-          <div key={i} className="bunting-triangle" />
-        ))}
+      {/* Battery Toggle Header */}
+      <div className="max-w-md mx-auto flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">🎫</span>
+          <div>
+            <p className="text-white font-bold text-sm">Your Ticket</p>
+            <p className="text-xs text-white/70">
+              {lowBatteryMode ? "Battery Saver ON" : "Live Updates"}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => {
+            const newMode = toggleLowBattery();
+            if (newMode) {
+              toast.success("Battery Saver activated", {
+                description: "Auto-update paused. Tap 'Refresh Now' to check manually.",
+                duration: 4000,
+              });
+            } else {
+              toast.info("Standard mode restored", {
+                description: "Auto-update every 10 seconds enabled",
+                duration: 2000,
+              });
+            }
+          }}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+            lowBatteryMode
+              ? "bg-green-500 text-white"
+              : "bg-white/20 text-white hover:bg-white/30"
+          }`}
+        >
+          🔋
+          <span>{lowBatteryMode ? "Saving" : "Save Battery"}</span>
+        </button>
       </div>
+
+      {/* Low Battery Banner */}
+      {lowBatteryMode && (
+        <div className="max-w-md mx-auto">
+          <LowBatteryBanner lastRefresh={lastRefresh} onRefresh={manualRefresh} />
+        </div>
+      )}
+
+      {/* Bunting - hidden in low battery mode */}
+      {!lowBatteryMode && (
+        <div className="bunting pt-2 pb-1">
+          {Array.from({ length: 24 }).map((_, i) => (
+            <div key={i} className="bunting-triangle" />
+          ))}
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-col items-center mt-4 mb-6">
         <div
           className="w-32 h-32 bg-[#3B82F6] rounded-2xl flex items-center justify-center mb-2"
-          style={{ filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }}
+          style={lowBatteryMode ? undefined : { filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }}
         >
           <span className="text-7xl">🎫</span>
         </div>
@@ -211,8 +259,10 @@ const GuestTicket = () => {
 
       {/* Auto-refresh indicator */}
       <div className="flex items-center justify-center gap-2">
-        <span className="w-2 h-2 bg-green-400 rounded-full" />
-        <span className="text-xs text-gray-300">Updates automatically</span>
+        <span className={`w-2 h-2 rounded-full ${lowBatteryMode ? "bg-yellow-400" : "bg-green-400"}`} />
+        <span className="text-xs text-gray-300">
+          {lowBatteryMode ? "Updates every 60s • Tap 🔋 for live" : "Updates automatically every 10s"}
+        </span>
       </div>
     </div>
   );
