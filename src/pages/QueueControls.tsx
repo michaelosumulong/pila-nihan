@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { useLowBattery } from "@/hooks/use-low-battery";
 import WalkInModal from "@/components/WalkInModal";
 import OfflineBanner from "@/components/OfflineBanner";
+import LowBatteryBanner from "@/components/LowBatteryBanner";
+import LowBatteryToggle from "@/components/LowBatteryToggle";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -44,7 +47,17 @@ const QueueControls = () => {
   const isOnline = useOnlineStatus();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showWalkIn, setShowWalkIn] = useState(false);
+  const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
   const buntingCount = 24;
+
+  const handleToggleBattery = () => {
+    const newMode = toggleLowBattery();
+    if (newMode) {
+      toast.success("Battery optimization active", { description: "Auto-refresh paused." });
+    } else {
+      toast.info("Standard mode restored");
+    }
+  };
 
   const [currentServing, setCurrentServing] = useState({
     ticketNumber: "R-055",
@@ -159,19 +172,28 @@ const QueueControls = () => {
       <OfflineBanner isOnline={isOnline} />
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1E3A8A] to-[#2563EB] relative">
+      <div className={lowBatteryMode ? "bg-[#1E3A8A]" : "bg-gradient-to-r from-[#1E3A8A] to-[#2563EB]"}>
+        {!lowBatteryMode && (
         <div className="bunting pt-2 pb-1">
           {Array.from({ length: buntingCount }).map((_, i) => (
             <div key={i} className="bunting-triangle" />
           ))}
         </div>
+        )}
         <div className="flex items-center justify-between px-5 pt-3 pb-6">
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 bg-[#3B82F6] rounded-xl flex items-center justify-center logo-glow mb-1">
               <span className="text-3xl">🎫</span>
             </div>
-            <h1 className="text-xl font-bold text-white">Queue Controls</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold text-white">Queue Controls</h1>
+              {lowBatteryMode && (
+                <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
+                  🔋
+                </span>
+              )}
+            </div>
           </div>
           <button className="relative text-white text-2xl">
             🔔
@@ -182,6 +204,9 @@ const QueueControls = () => {
 
       {/* Main Content */}
       <div className="px-6 -mt-4">
+        {lowBatteryMode && (
+          <LowBatteryBanner lastRefresh={lastRefresh} onRefresh={() => { manualRefresh(); toast.success("Queue refreshed!"); }} />
+        )}
         {/* Now Serving */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 text-center">
           <p className="text-gray-600 text-sm uppercase tracking-wider mb-2">Now Serving</p>
@@ -301,7 +326,8 @@ const QueueControls = () => {
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/analytics"); }}>📊 Analytics</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Wallet feature coming soon!")}>💰 Wallet</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Settings feature coming soon!")}>⚙️ Settings</p>
-              <div className="border-t border-gray-200 mt-4 pt-2">
+              <LowBatteryToggle active={lowBatteryMode} onToggle={handleToggleBattery} />
+              <div className="border-t border-gray-200 mt-2 pt-2">
                 <p className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors cursor-pointer rounded-lg" onClick={() => { localStorage.removeItem("pila-merchant"); navigate("/"); }}>
                   🚪 Logout
                 </p>
