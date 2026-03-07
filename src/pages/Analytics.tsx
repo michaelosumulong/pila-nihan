@@ -110,6 +110,17 @@ const Analytics = () => {
         {lowBatteryMode && (
           <LowBatteryBanner lastRefresh={lastRefresh} onRefresh={() => { manualRefresh(); toast.success("Analytics refreshed!"); }} />
         )}
+
+        {/* PENDING AUDITS - TOP PRIORITY SECTION */}
+        <div className="mb-6">
+          <PendingAudits
+            onAnalyze={(desc) => {
+              setFiveWhysIssue(desc);
+              setShowFiveWhys(true);
+            }}
+          />
+        </div>
+
         {/* Action buttons */}
         <div className="flex justify-end gap-2 mb-4">
           <button
@@ -343,13 +354,8 @@ const Analytics = () => {
           );
         })()}
 
-        {/* Pending Audits */}
-        <PendingAudits
-          onAnalyze={(desc) => {
-            setFiveWhysIssue(desc);
-            setShowFiveWhys(true);
-          }}
-        />
+
+
 
         {/* Performance Scorecard */}
         <div className="grid grid-cols-3 gap-4 mb-6">
