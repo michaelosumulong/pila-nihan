@@ -69,10 +69,10 @@ const CustomerGuide = () => (
 
       {/* Step 3 */}
       <div className="mb-8 pb-8 border-b border-border">
-        <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">3️⃣</span> Watch Your Position
         </h3>
-        <p className="text-muted-foreground mb-4">Your ticket screen shows your position in real-time. No need to refresh - it updates automatically!</p>
+        <p className="text-gray-700 mb-4">Your ticket screen shows your position in real-time. No need to refresh - it updates automatically!</p>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="bg-blue-50 rounded-lg p-4">
             <p className="font-bold text-blue-900 mb-2">📊 What You'll See</p>
