@@ -139,7 +139,7 @@ const CustomerGuide = () => (
             <span className="text-4xl">🤖</span>
             <h3 className="text-xl font-bold text-gray-900">Android</h3>
           </div>
-          <ol className="space-y-3 text-sm text-muted-foreground">
+          <ol className="space-y-3 text-sm text-gray-700">
             {["Open Pila-nihan in **Chrome** browser", "Tap the **three dots (⋮)** menu in top right", 'Tap **"Add to Home screen"** or **"Install app"**', 'Tap **"Add"** or **"Install"**', "Find the Pila-nihan icon on your home screen!"].map((s, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="font-bold text-green-600">{i + 1}.</span>
