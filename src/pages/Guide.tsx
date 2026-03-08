@@ -231,7 +231,7 @@ const MerchantGuide = () => (
       <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border-2 border-yellow-300 mb-4">
         <p className="text-center mb-2 text-sm text-gray-600">Today's Bypass Code</p>
         <p className="text-center text-5xl font-mono font-bold text-[hsl(220,100%,13%)] tracking-widest">3FJFWU</p>
-        <p className="text-center mt-2 text-xs text-muted-foreground">(Example - yours will be different)</p>
+        <p className="text-center mt-2 text-xs text-gray-600">(Example - yours will be different)</p>
       </div>
       <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
         <p className="text-sm text-blue-800 mb-2"><strong>When to use:</strong></p>
