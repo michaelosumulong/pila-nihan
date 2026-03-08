@@ -164,9 +164,13 @@ const Index = () => {
               type="text"
               value={displayCode}
               onChange={handleCodeChange}
-              placeholder="Enter shop code"
+              placeholder="e.g., PILANI"
               maxLength={12}
-              className="w-full text-3xl text-center font-mono font-bold uppercase py-4 px-6 rounded-xl border-[3px] border-gray-300 focus:border-primary focus:ring-4 focus:ring-yellow-200 outline-none tracking-widest transition-colors text-gray-900"
+              disabled={isProcessing}
+              inputMode="text"
+              autoCapitalize="characters"
+              autoComplete="off"
+              className="w-full text-3xl text-center font-mono font-bold uppercase py-4 px-6 rounded-xl border-[3px] border-gray-300 focus:border-primary focus:ring-4 focus:ring-yellow-200 outline-none tracking-widest transition-colors text-gray-900 disabled:opacity-50"
             />
           </div>
 
