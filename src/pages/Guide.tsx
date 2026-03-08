@@ -210,8 +210,8 @@ const MerchantGuide = () => (
           { color: "yellow", icon: "➕", title: "Add Walk-in Customer", desc: 'For customers without smartphones, use "➕ Add Walk-in". Enter their name, choose Regular or Priority, and print a ticket.', tip: "This ensures everyone can use your queue, not just tech-savvy customers." },
         ].map((item) => (
           <div key={item.title} className={`border-l-4 border-${item.color}-500 pl-6`}>
-            <h3 className="text-lg font-bold text-foreground mb-2">{item.icon} {item.title}</h3>
-            <p className="text-muted-foreground mb-3">{item.desc}</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{item.icon} {item.title}</h3>
+            <p className="text-gray-700 mb-3">{item.desc}</p>
             {item.tip && (
               <div className={`bg-${item.color}-50 p-3 rounded`}>
                 <p className={`text-sm text-${item.color}-800`}>💡 <strong>Pro Tip:</strong> {item.tip}</p>
