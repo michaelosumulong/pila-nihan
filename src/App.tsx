@@ -12,6 +12,7 @@ import GuestEntry from "./pages/GuestEntry";
 import Login from "./pages/Login";
 import MerchantSignup from "./components/MerchantSignup";
 import About from "./pages/About";
+import Guide from "./pages/Guide";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
