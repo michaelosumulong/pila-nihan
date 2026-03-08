@@ -244,7 +244,7 @@ const MerchantGuide = () => (
     </div>
 
     {/* Analytics */}
-    <div className="bg-card rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">📊 Business Analytics</h2>
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-5">
