@@ -31,10 +31,10 @@ const CustomerGuide = () => (
 
       {/* Step 1 */}
       <div className="mb-8 pb-8 border-b border-border">
-        <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">1️⃣</span> Join the Queue
         </h3>
-        <p className="text-muted-foreground mb-4">
+        <p className="text-gray-700 mb-4">
           Enter the shop code you see posted at the business. Example: <code className="bg-muted px-2 py-1 rounded font-mono font-bold">PILANIHAN</code>
         </p>
         <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
