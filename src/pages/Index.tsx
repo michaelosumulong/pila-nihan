@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
+import PilaLogo from "@/components/PilaLogo";
 const BUNTING_COUNT = 24;
 
 const Index = () => {
