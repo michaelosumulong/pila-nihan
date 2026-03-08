@@ -11,6 +11,7 @@ const PilaLogo = ({ className = "w-10 h-10", variant = "icon", style }: PilaLogo
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 100 100"
     className={className}
+    style={style}
     aria-label="Pila-nihan logo"
   >
     {/* Ticket shape */}
