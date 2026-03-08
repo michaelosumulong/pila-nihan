@@ -421,13 +421,16 @@ const GuestEntry = () => {
                   Ask the merchant for today's 6-character bypass code
                 </p>
                 <div className="flex gap-2">
-                  <Input
+                   <Input
                     type="text"
                     maxLength={6}
                     value={bypassCode}
-                    onChange={(e) => setBypassCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                    onChange={(e) => setBypassCode(e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().substring(0, 6))}
                     placeholder="e.g. 47X2B9"
                     className="text-center font-mono font-bold text-lg tracking-widest uppercase"
+                    inputMode="text"
+                    autoCapitalize="characters"
+                    autoComplete="off"
                   />
                   <button
                     type="button"
