@@ -8,6 +8,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [shopCode, setShopCode] = useState("");
   const [isValid, setIsValid] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [ready, setReady] = useState(false);
   const [existingTicket, setExistingTicket] = useState<any>(null);
 
