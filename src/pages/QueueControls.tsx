@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useLowBattery } from "@/hooks/use-low-battery";
 import WalkInModal from "@/components/WalkInModal";
+import NotificationCenter from "@/components/NotificationCenter";
+import { addNotification } from "@/lib/notifications";
 import OfflineBanner from "@/components/OfflineBanner";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import LowBatteryToggle from "@/components/LowBatteryToggle";
