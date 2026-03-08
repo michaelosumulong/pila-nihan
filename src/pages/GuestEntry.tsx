@@ -388,8 +388,8 @@ const GuestEntry = () => {
               <span className="text-yellow-600">⚠️</span>
               <div>
                 <p className="text-sm font-semibold text-yellow-800">Malayo pa po kayo</p>
-                <p className="text-xs text-yellow-700">📍 Current distance: {distance.toFixed(2)} km (Max: 5.0 km)</p>
-                <p className="text-xs text-yellow-700 mt-1">Please be within 5 km to secure a spot in the queue.</p>
+                <p className="text-xs text-yellow-700">📍 Current distance: {distance.toFixed(2)} km (Max: 20 km)</p>
+                <p className="text-xs text-yellow-700 mt-1">Please be within 20 km to secure a spot in the queue.</p>
               </div>
             </div>
           </div>
