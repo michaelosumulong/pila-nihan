@@ -159,7 +159,7 @@ const Index = () => {
             </label>
             <input
               type="text"
-              value={displayCode}
+              value={shopCode}
               onChange={handleCodeChange}
               placeholder="e.g., PILANI"
               maxLength={12}
