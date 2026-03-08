@@ -161,8 +161,8 @@ const Index = () => {
               type="text"
               value={shopCode}
               onChange={handleCodeChange}
-              placeholder="e.g., PILANI"
-              maxLength={12}
+              placeholder="Enter shop code (e.g., PILANIHAN)"
+              maxLength={10}
               disabled={isProcessing}
               inputMode="text"
               autoCapitalize="characters"
