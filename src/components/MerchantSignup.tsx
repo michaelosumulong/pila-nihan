@@ -110,7 +110,7 @@ const MerchantSignup = () => {
           <div className="w-32 h-32 bg-[#3B82F6] rounded-2xl flex items-center justify-center logo-glow mb-4">
             <PilaLogo className="w-20 h-20" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-wide">PILA-NIHAN™</h1>
+          <h1 className="text-3xl font-bold text-primary tracking-wide">PILA-NIHAN™</h1>
           <p className="text-[#FFD700] italic text-lg mt-1">Ginhawa sa Bawat Pila</p>
         </div>
 

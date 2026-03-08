@@ -190,7 +190,7 @@ const GuestTicket = () => {
         >
           <PilaLogo className="w-20 h-20" />
         </div>
-        <h1 className="text-2xl font-bold text-white">PILA-NIHAN™</h1>
+        <h1 className="text-2xl font-bold text-primary">PILA-NIHAN™</h1>
         <p className="text-[#FFD700] italic text-lg">Ginhawa sa Bawat Pila</p>
       </div>
 
