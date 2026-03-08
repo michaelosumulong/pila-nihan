@@ -129,7 +129,7 @@ const GuestTicket = () => {
       {/* Battery Toggle Header */}
       <div className="max-w-md mx-auto flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">🎫</span>
+          <PilaLogo className="w-8 h-8" />
           <div>
             <p className="text-white font-bold text-sm">Your Ticket</p>
             <p className="text-xs text-white/70">
