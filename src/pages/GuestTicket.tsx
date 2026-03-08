@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useLowBattery } from "@/hooks/use-low-battery";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import CustomerFeedbackModal from "@/components/CustomerFeedbackModal";
+import NotificationCenter from "@/components/NotificationCenter";
 import VersionFooter from "@/components/VersionFooter";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
