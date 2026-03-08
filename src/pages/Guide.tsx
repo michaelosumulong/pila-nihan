@@ -201,7 +201,7 @@ const MerchantGuide = () => (
 
     {/* Dashboard Guide */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">🏪 Using Your Dashboard</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">🏪 Using Your Dashboard</h2>
       <div className="space-y-6">
         {[
           { color: "green", icon: "📢", title: "Call Next Customer", desc: 'Click the green "📢 Call Next" button to notify the next customer in line. They\'ll get an alert on their phone and the ticket will turn green.', tip: "Call the customer when you're 90% done with the current one to minimize gaps between customers." },
