@@ -191,8 +191,8 @@ const MerchantGuide = () => (
           <li key={item.step} className="flex items-start gap-3">
             <span className="bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">{item.step}</span>
             <div>
-              <p className="font-bold text-foreground">{item.title}</p>
-              <p className="text-sm text-muted-foreground">{item.desc}</p>
+              <p className="font-bold text-gray-900">{item.title}</p>
+              <p className="text-sm text-gray-700">{item.desc}</p>
             </div>
           </li>
         ))}
