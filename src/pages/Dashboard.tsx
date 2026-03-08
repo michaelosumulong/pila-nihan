@@ -10,6 +10,7 @@ import BusinessProfileCard from "@/components/BusinessProfileCard";
 import PendingAudits from "@/components/PendingAudits";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import VersionFooter from "@/components/VersionFooter";
+import PilaLogo from "@/components/PilaLogo";
 
 interface MerchantData {
   id: string;
@@ -192,7 +193,7 @@ const Dashboard = () => {
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 bg-[#3B82F6] rounded-xl flex items-center justify-center logo-glow mb-1">
-              <span className="text-3xl">🎫</span>
+              <PilaLogo className="w-10 h-10" />
             </div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-white">Dashboard</h1>

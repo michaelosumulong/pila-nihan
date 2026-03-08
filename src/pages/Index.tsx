@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
+import PilaLogo from "@/components/PilaLogo";
 const BUNTING_COUNT = 24;
 
 const Index = () => {
@@ -103,9 +103,7 @@ const Index = () => {
 
       {/* Header */}
       <div className="text-center mb-8 sm:mb-16">
-        <div className="text-8xl mb-6" style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.6))" }}>
-          🎫
-        </div>
+        <PilaLogo className="w-28 h-28 mx-auto mb-6" style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.6))" }} />
         <h1 className="text-4xl sm:text-6xl font-bold text-white mb-3 tracking-tight">
           PILA-NIHAN™
         </h1>
@@ -144,7 +142,7 @@ const Index = () => {
         {/* SECTION 1 - Customer Entry */}
         <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 hover:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.35)] transition-all duration-300">
           <div className="text-center">
-            <div className="text-7xl mb-4">🎫</div>
+            <PilaLogo className="w-20 h-20 mx-auto mb-4" />
             <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(220,100%,13%)] mb-3">
               Kumuha ng Ticket
             </h2>

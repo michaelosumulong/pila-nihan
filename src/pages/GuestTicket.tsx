@@ -8,6 +8,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import CustomerFeedbackModal from "@/components/CustomerFeedbackModal";
 import NotificationCenter from "@/components/NotificationCenter";
 import VersionFooter from "@/components/VersionFooter";
+import PilaLogo from "@/components/PilaLogo";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -128,7 +129,7 @@ const GuestTicket = () => {
       {/* Battery Toggle Header */}
       <div className="max-w-md mx-auto flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">🎫</span>
+          <PilaLogo className="w-8 h-8" />
           <div>
             <p className="text-white font-bold text-sm">Your Ticket</p>
             <p className="text-xs text-white/70">
@@ -187,7 +188,7 @@ const GuestTicket = () => {
           className="w-32 h-32 bg-[#3B82F6] rounded-2xl flex items-center justify-center mb-2"
           style={lowBatteryMode ? undefined : { filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }}
         >
-          <span className="text-7xl">🎫</span>
+          <PilaLogo className="w-20 h-20" />
         </div>
         <h1 className="text-2xl font-bold text-white">PILA-NIHAN™</h1>
         <p className="text-[#FFD700] italic text-lg">Ginhawa sa Bawat Pila</p>

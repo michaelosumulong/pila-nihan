@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import PilaLogo from "@/components/PilaLogo";
 
 const features = [
   {
@@ -68,7 +69,7 @@ const About = () => {
       {/* Hero */}
       <section className="bg-gradient-to-br from-[hsl(220,100%,13%)] to-secondary py-20">
         <div className="container mx-auto px-6 text-center">
-          <div className="text-7xl mb-6" style={{ filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }}>🎫</div>
+          <PilaLogo className="w-24 h-24 mx-auto mb-6" style={{ filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }} />
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">Pila-nihan™</h1>
           <p className="text-3xl text-primary italic font-light mb-6">Ginhawa sa Bawat Pila</p>
           <p className="text-xl text-white/90 max-w-3xl mx-auto">
