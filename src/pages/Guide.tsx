@@ -245,7 +245,7 @@ const MerchantGuide = () => (
 
     {/* Analytics */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">📊 Business Analytics</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">📊 Business Analytics</h2>
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-5">
           <h3 className="font-bold text-foreground mb-2">⏱️ Takt Time (Target Handling Time)</h3>
