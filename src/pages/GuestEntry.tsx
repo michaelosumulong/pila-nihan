@@ -23,14 +23,32 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 };
 
+const DEMO_MERCHANTS: Record<string, any> = {
+  pilani: {
+    id: "demo-pilani", businessName: "Pilanihan Demo", shopCode: "PILANI", category: "AGOS",
+    location: { lat: 14.5995, lng: 120.9842 }, address: "123 Demo Street, Manila",
+    ownerName: "Demo Owner", mobile: "09171234567", targetHandlingTime: 8,
+  },
+  pilanihan: {
+    id: "demo-pilanihan", businessName: "Pilanihan", shopCode: "PILANIHAN", category: "AGOS",
+    location: { lat: 14.5995, lng: 120.9842 }, address: "123 Demo Street, Manila",
+    ownerName: "Demo Owner", mobile: "09171234567", targetHandlingTime: 8,
+  },
+  demo: {
+    id: "demo-test", businessName: "Demo Shop", shopCode: "DEMO", category: "SULONG",
+    location: { lat: 14.5995, lng: 120.9842 }, address: "Demo Address",
+    ownerName: "Test User", mobile: "09171234567", targetHandlingTime: 10,
+  },
+};
+
 const GuestEntry = () => {
   const { merchantId } = useParams();
   const navigate = useNavigate();
   const buntingCount = 24;
 
-  const merchantData = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
-  const merchantName = merchantData.businessName || "Pila-nihan Queue System";
-  const merchantLocation = merchantData.location || { lat: 14.5995, lng: 120.9842 };
+  const [merchantData, setMerchantData] = useState<any>(null);
+  const [merchantLoading, setMerchantLoading] = useState(true);
+  const [merchantError, setMerchantError] = useState(false);
 
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
