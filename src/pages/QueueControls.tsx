@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useLowBattery } from "@/hooks/use-low-battery";
 import WalkInModal from "@/components/WalkInModal";
+import NotificationCenter from "@/components/NotificationCenter";
+import { addNotification } from "@/lib/notifications";
 import OfflineBanner from "@/components/OfflineBanner";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import LowBatteryToggle from "@/components/LowBatteryToggle";
@@ -106,6 +108,12 @@ const QueueControls = () => {
       }
       setServedToday((prev) => prev + 1);
       toast.success(`Now serving ${nextTicket.ticketNumber} - ${nextTicket.name}`);
+      addNotification({
+        title: "YOUR TURN!",
+        message: `Ticket ${nextTicket.ticketNumber} — please proceed to the counter now.`,
+        type: "alert",
+        ticketNumber: nextTicket.ticketNumber,
+      });
     } else {
       toast.info("Queue is empty!");
     }
@@ -220,10 +228,7 @@ const QueueControls = () => {
               )}
             </div>
           </div>
-          <button className="relative text-white text-2xl">
-            🔔
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#2563EB]" />
-          </button>
+          <NotificationCenter variant="dark" />
         </div>
       </div>
 
