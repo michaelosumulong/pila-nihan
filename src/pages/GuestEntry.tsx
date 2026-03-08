@@ -102,14 +102,29 @@ const GuestEntry = () => {
     }
   };
 
+  const [locationError, setLocationError] = useState("");
+
   useEffect(() => {
+    if (!merchantData) return;
+
     if (!navigator.geolocation) {
       setLocationStatus("not_supported");
-      toast.error("Your device does not support geolocation");
+      setLocationError("Your device does not support location services.");
       return;
     }
+
+    const locationTimeout = setTimeout(() => {
+      setLocationStatus("error");
+      setLocationError("Location request timed out. Use bypass code to continue.");
+      toast.warning("Location not available", {
+        description: "Use the bypass code from the merchant to continue",
+        duration: 8000,
+      });
+    }, 10000);
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        clearTimeout(locationTimeout);
         const custLoc = { lat: position.coords.latitude, lng: position.coords.longitude };
         setCustomerLocation(custLoc);
         const dist = calculateDistance(custLoc.lat, custLoc.lng, merchantLocation.lat, merchantLocation.lng);
@@ -118,13 +133,24 @@ const GuestEntry = () => {
         setLocationStatus(dist <= 5 ? "within_range" : "too_far");
       },
       (error) => {
+        clearTimeout(locationTimeout);
         console.error("Geolocation error:", error);
+        let errorMsg = "Location access denied.";
+        if (error.code === 1) errorMsg = "Location permission denied. Please enable location in your browser settings.";
+        else if (error.code === 2) errorMsg = "Location unavailable. Check your GPS/WiFi connection.";
+        else if (error.code === 3) errorMsg = "Location request timed out.";
         setLocationStatus("error");
-        toast.error("Please enable location services to join the queue");
+        setLocationError(errorMsg);
+        toast.warning("Location not available", {
+          description: "Use the bypass code from the merchant to continue",
+          duration: 8000,
+        });
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
     );
-  }, [merchantLocation.lat, merchantLocation.lng]);
+
+    return () => clearTimeout(locationTimeout);
+  }, [merchantData, merchantLocation.lat, merchantLocation.lng]);
 
   const isValid =
     name.trim() !== "" &&
