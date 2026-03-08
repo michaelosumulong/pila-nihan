@@ -219,6 +219,37 @@ const GuestEntry = () => {
     }
   };
 
+  if (merchantLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#002366] via-[#1E5AA8] to-[#3B82F6] flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="text-6xl mb-4 animate-pulse">🎫</div>
+          <p className="text-lg font-bold">Loading shop...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (merchantError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+          <div className="text-6xl mb-4">😕</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Shop Not Found</h2>
+          <p className="text-gray-700 mb-6">
+            We couldn't find a shop with code: <strong>{merchantId}</strong>
+          </p>
+          <p className="text-sm text-gray-500 mb-6">
+            Make sure there are no dashes or spaces. Just letters and numbers.
+          </p>
+          <button onClick={() => navigate("/")} className="w-full bg-[#1E3A8A] text-white py-3 rounded-xl font-bold">
+            ← Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#002366] via-[#1E5AA8] to-[#3B82F6] px-6 py-4 pb-12">
       {/* Bunting */}

@@ -437,18 +437,25 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* DAILY BYPASS CODE */}
+            {/* DAILY BYPASS CODE - PROMINENT & COPY-FRIENDLY */}
             <div className="bg-[#FFD700]/20 backdrop-blur-sm rounded-xl p-6 border-2 border-[#FFD700]">
               <div className="text-sm text-white/80 mb-2 flex items-center gap-2 font-semibold">
                 🔑 Today's Bypass Code
                 <span className="text-xs bg-white/20 px-2 py-0.5 rounded">Changes daily</span>
               </div>
-              <div className="text-5xl font-bold font-mono tracking-widest mb-3 text-[#FFD700] text-center">
+              <div
+                onClick={() => {
+                  navigator.clipboard.writeText(generateDailyBypassCode(merchant.id || "pila-nihan"));
+                  toast.success("Bypass code copied!");
+                }}
+                className="text-5xl font-bold font-mono tracking-widest mb-3 text-[#FFD700] text-center cursor-pointer hover:scale-105 transition-transform"
+                title="Click to copy"
+              >
                 {generateDailyBypassCode(merchant.id || "pila-nihan")}
               </div>
-              <div className="text-xs text-white/90 mb-3">
-                For customers with GPS issues or weak signal
-              </div>
+              <p className="text-xs text-white/90 mb-3 text-center">
+                Tap code to copy • Valid for today only
+              </p>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(generateDailyBypassCode(merchant.id || "pila-nihan"));
@@ -460,7 +467,9 @@ const Dashboard = () => {
               </button>
               <div className="bg-yellow-500/20 border-l-4 border-yellow-400 p-3 rounded">
                 <p className="text-xs text-white">
-                  💡 <strong>How to use:</strong> If customer can't join due to location error, give them this code. They'll enter it on the "Having GPS trouble?" field.
+                  💡 <strong>When to use:</strong> Give this code to customers who can't join
+                  due to weak GPS signal or location errors. They enter it in the "Having GPS trouble?"
+                  field on their phone.
                 </p>
               </div>
             </div>

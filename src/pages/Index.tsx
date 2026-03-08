@@ -176,10 +176,10 @@ const Index = () => {
 
           <button
             onClick={handleEnterQueue}
-            disabled={!isValid}
+            disabled={!isValid || isProcessing}
             className="w-full bg-primary text-primary-foreground py-5 text-xl sm:text-2xl font-bold rounded-xl shadow-lg hover:brightness-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            PUMILA NA!
+            {isProcessing ? "Finding shop..." : "PUMILA NA!"}
           </button>
 
           <p className="text-xs text-gray-500 mt-2 text-center">
