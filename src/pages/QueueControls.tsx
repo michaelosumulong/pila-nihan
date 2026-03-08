@@ -10,6 +10,7 @@ import OfflineBanner from "@/components/OfflineBanner";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import LowBatteryToggle from "@/components/LowBatteryToggle";
 import VersionFooter from "@/components/VersionFooter";
+import PilaLogo from "@/components/PilaLogo";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
