@@ -229,7 +229,7 @@ const MerchantGuide = () => (
         Your dashboard displays a <strong>6-digit Bypass Code</strong> that changes daily. This code allows customers to join the queue even if GPS location fails.
       </p>
       <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border-2 border-yellow-300 mb-4">
-        <p className="text-center mb-2 text-sm text-muted-foreground">Today's Bypass Code</p>
+        <p className="text-center mb-2 text-sm text-gray-600">Today's Bypass Code</p>
         <p className="text-center text-5xl font-mono font-bold text-[hsl(220,100%,13%)] tracking-widest">3FJFWU</p>
         <p className="text-center mt-2 text-xs text-muted-foreground">(Example - yours will be different)</p>
       </div>
