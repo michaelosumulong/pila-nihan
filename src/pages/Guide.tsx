@@ -248,8 +248,8 @@ const MerchantGuide = () => (
       <h2 className="text-2xl font-bold text-gray-900 mb-6">📊 Business Analytics</h2>
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-5">
-          <h3 className="font-bold text-foreground mb-2">⏱️ Takt Time (Target Handling Time)</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-bold text-gray-900 mb-2">⏱️ Takt Time (Target Handling Time)</h3>
+          <p className="text-sm text-gray-700">
             This is your benchmark - the average time you <em>aim</em> to spend with each customer. Set it slightly higher than your actual speed to give realistic wait time estimates.
           </p>
           <div className="bg-blue-200 rounded p-3 mt-3">
