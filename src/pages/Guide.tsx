@@ -26,11 +26,11 @@ const CustomerGuide = () => (
     </div>
 
     {/* Detailed Steps */}
-    <div className="bg-card rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">📱 Step-by-Step Guide</h2>
 
       {/* Step 1 */}
-      <div className="mb-8 pb-8 border-b border-border">
+      <div className="mb-8 pb-8 border-b border-gray-200">
         <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">1️⃣</span> Join the Queue
         </h3>
@@ -45,7 +45,7 @@ const CustomerGuide = () => (
       </div>
 
       {/* Step 2 */}
-      <div className="mb-8 pb-8 border-b border-border">
+      <div className="mb-8 pb-8 border-b border-gray-200">
         <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">2️⃣</span> Location Check
         </h3>
@@ -68,7 +68,7 @@ const CustomerGuide = () => (
       </div>
 
       {/* Step 3 */}
-      <div className="mb-8 pb-8 border-b border-border">
+      <div className="mb-8 pb-8 border-b border-gray-200">
         <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">3️⃣</span> Watch Your Position
         </h3>
@@ -114,7 +114,7 @@ const CustomerGuide = () => (
     </div>
 
     {/* Install Guide */}
-    <div className="bg-card rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">📱 How to Install (Add to Home Screen)</h2>
       <p className="text-gray-700 mb-6">
         For the best experience, "install" Pila-nihan to your phone. It works like a native app - faster, offline-capable, and you'll never lose the link!
@@ -157,7 +157,7 @@ const CustomerGuide = () => (
     </div>
 
     {/* Troubleshooting */}
-    <div className="bg-card rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">🔧 Troubleshooting</h2>
       <div className="space-y-4">
         {[
@@ -200,7 +200,7 @@ const MerchantGuide = () => (
     </div>
 
     {/* Dashboard Guide */}
-    <div className="bg-card rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">🏪 Using Your Dashboard</h2>
       <div className="space-y-6">
         {[
@@ -223,7 +223,7 @@ const MerchantGuide = () => (
     </div>
 
     {/* Bypass Codes */}
-    <div className="bg-card rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">🔑 Daily Bypass Codes</h2>
       <p className="text-gray-700 mb-4">
         Your dashboard displays a <strong>6-digit Bypass Code</strong> that changes daily. This code allows customers to join the queue even if GPS location fails.
@@ -244,7 +244,7 @@ const MerchantGuide = () => (
     </div>
 
     {/* Analytics */}
-    <div className="bg-card rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">📊 Business Analytics</h2>
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-5">
@@ -280,7 +280,7 @@ const MerchantGuide = () => (
     </div>
 
     {/* Best Practices */}
-    <div className="bg-card rounded-xl shadow-lg p-8">
+    <div className="bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">⭐ Best Practices</h2>
       <div className="grid md:grid-cols-2 gap-4">
         <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
@@ -334,13 +334,13 @@ const Guide = () => {
 
       {/* Tab Switcher */}
       <div className="container mx-auto px-6 max-w-4xl -mt-8 relative z-10">
-        <div className="bg-card rounded-2xl shadow-xl p-2 flex gap-2">
+        <div className="bg-white rounded-2xl shadow-xl p-2 flex gap-2">
           <button
             onClick={() => setActiveTab("customer")}
             className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
               activeTab === "customer"
                 ? "bg-gradient-to-r from-[hsl(220,100%,13%)] to-[hsl(217,91%,60%)] text-white shadow-lg"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             👤 For Customers
@@ -350,7 +350,7 @@ const Guide = () => {
             className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
               activeTab === "merchant"
                 ? "bg-gradient-to-r from-[hsl(220,100%,13%)] to-[hsl(217,91%,60%)] text-white shadow-lg"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             🏪 For Merchants
