@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import PilaLogo from "@/components/PilaLogo";
 
 const CATEGORIES = [
   { value: "", label: "Pumili ng kategorya..." },
