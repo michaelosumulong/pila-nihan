@@ -90,10 +90,7 @@ const Index = () => {
 
   if (!ready) return null;
 
-  // Format for DISPLAY only (with dash after 3rd char)
-  const displayCode = shopCode.length > 3
-    ? `${shopCode.slice(0, 3)}-${shopCode.slice(3)}`
-    : shopCode;
+  // No dash formatting — plain text only
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[hsl(220,100%,13%)] via-[hsl(213,70%,38%)] to-[hsl(217,91%,60%)] px-4 sm:px-6 py-6 sm:py-12 flex flex-col">
