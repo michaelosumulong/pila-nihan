@@ -259,8 +259,8 @@ const MerchantGuide = () => (
           </div>
         </div>
         <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-5">
-          <h3 className="font-bold text-foreground mb-2">🔍 Automated Quality Audits</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-bold text-gray-900 mb-2">🔍 Automated Quality Audits</h3>
+          <p className="text-sm text-gray-700">
             The system automatically flags when a customer takes 50% longer than your target, or when there's a 15+ minute gap between customers (idle time).
           </p>
           <p className="text-xs text-green-800 mt-2">These flags appear in your "Suri Backlog" for root cause analysis.</p>
