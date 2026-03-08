@@ -10,6 +10,7 @@ import BusinessProfileCard from "@/components/BusinessProfileCard";
 import PendingAudits from "@/components/PendingAudits";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import VersionFooter from "@/components/VersionFooter";
+import PilaLogo from "@/components/PilaLogo";
 
 interface MerchantData {
   id: string;
