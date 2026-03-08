@@ -46,10 +46,10 @@ const CustomerGuide = () => (
 
       {/* Step 2 */}
       <div className="mb-8 pb-8 border-b border-border">
-        <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">2️⃣</span> Location Check
         </h3>
-        <p className="text-muted-foreground mb-4">The app will ask for your location to confirm you're near the shop (within 20km).</p>
+        <p className="text-gray-700 mb-4">The app will ask for your location to confirm you're near the shop (within 20km).</p>
         <div className="space-y-3">
           <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
             <p className="text-sm font-bold text-green-800 mb-1">✅ Location Works</p>
