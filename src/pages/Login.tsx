@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import PilaLogo from "@/components/PilaLogo";
 
 const Login = () => {
   const navigate = useNavigate();
