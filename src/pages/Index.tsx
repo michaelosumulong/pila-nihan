@@ -51,6 +51,14 @@ const Index = () => {
     setIsValid(limited.length >= 3);
   };
 
+  const verifyMerchantExists = (code: string): boolean => {
+    const merchant = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
+    const merchantCode = merchant.shopCode?.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (merchantCode === code) return true;
+    const demoMerchants = ["pilani", "demo", "pilanihan"];
+    return demoMerchants.includes(code);
+  };
+
   const handleEnterQueue = () => {
     if (!isValid) {
       toast.error("Invalid shop code", {
@@ -58,8 +66,18 @@ const Index = () => {
       });
       return;
     }
-    toast.success("Redirecting to queue...");
-    navigate(`/join/${shopCode.toLowerCase()}`);
+    setIsProcessing(true);
+    const finalCode = shopCode.toLowerCase();
+    if (verifyMerchantExists(finalCode)) {
+      toast.success("Redirecting to queue...");
+      navigate(`/join/${finalCode}`);
+    } else {
+      toast.error("Shop not found", {
+        description: "Please check the code and try again. No dashes or spaces needed.",
+        duration: 5000,
+      });
+      setIsProcessing(false);
+    }
   };
 
   const handleSwitchToGuest = () => {
