@@ -266,8 +266,8 @@ const MerchantGuide = () => (
           <p className="text-xs text-green-800 mt-2">These flags appear in your "Suri Backlog" for root cause analysis.</p>
         </div>
         <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-5">
-          <h3 className="font-bold text-foreground mb-2">😊 Customer Satisfaction</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-bold text-gray-900 mb-2">😊 Customer Satisfaction</h3>
+          <p className="text-sm text-gray-700">
             After service, customers rate their experience (Fast/Good or Slow/Issue). Track your satisfaction percentage to measure service quality.
           </p>
         </div>
