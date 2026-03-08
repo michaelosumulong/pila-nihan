@@ -136,6 +136,8 @@ const GuestTicket = () => {
             </p>
           </div>
         </div>
+        <div className="flex items-center gap-3">
+          <NotificationCenter variant="dark" />
         <button
           onClick={() => {
             const newMode = toggleLowBattery();

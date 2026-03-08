@@ -212,6 +212,12 @@ const GuestEntry = () => {
         savedAt: new Date().toISOString(),
       }));
 
+      addNotification({
+        title: "Ticket Created!",
+        message: `You are now in the queue. Position #${waitingTickets.length + 1}.`,
+        type: "success",
+        ticketNumber,
+      });
       toast.success(`Ticket ${ticketNumber} created!`, {
         description: `Welcome, ${name.trim()}!`,
       });
