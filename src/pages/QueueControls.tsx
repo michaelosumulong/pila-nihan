@@ -108,6 +108,12 @@ const QueueControls = () => {
       }
       setServedToday((prev) => prev + 1);
       toast.success(`Now serving ${nextTicket.ticketNumber} - ${nextTicket.name}`);
+      addNotification({
+        title: "YOUR TURN!",
+        message: `Ticket ${nextTicket.ticketNumber} — please proceed to the counter now.`,
+        type: "alert",
+        ticketNumber: nextTicket.ticketNumber,
+      });
     } else {
       toast.info("Queue is empty!");
     }
