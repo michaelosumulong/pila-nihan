@@ -167,9 +167,9 @@ const CustomerGuide = () => (
           { q: "❓ My position isn't updating", a: 'Tap the "🔄 Refresh" button on your ticket screen. If offline mode is active, make sure you have an internet connection and tap "Update Position."' },
           { q: "❓ I don't have a smartphone", a: 'No problem! Ask the merchant to add you manually using the "➕ Add Walk-in" button. They\'ll print a physical ticket for you.' },
         ].map((item, i) => (
-          <details key={i} className="bg-muted/50 rounded-lg p-4 cursor-pointer hover:bg-muted">
-            <summary className="font-bold text-foreground">{item.q}</summary>
-            <p className="text-sm text-muted-foreground mt-3" dangerouslySetInnerHTML={{ __html: item.a }} />
+          <details key={i} className="bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100">
+            <summary className="font-bold text-gray-900">{item.q}</summary>
+            <p className="text-sm text-gray-700 mt-3" dangerouslySetInnerHTML={{ __html: item.a }} />
           </details>
         ))}
       </div>
