@@ -68,7 +68,7 @@ const CustomerGuide = () => (
       </div>
 
       {/* Step 3 */}
-      <div className="mb-8 pb-8 border-b border-border">
+      <div className="mb-8 pb-8 border-b border-gray-200">
         <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">3️⃣</span> Watch Your Position
         </h3>
