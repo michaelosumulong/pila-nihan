@@ -86,7 +86,7 @@ const About = () => {
             {valueProps.map((v) => (
               <div key={v.title} className={`bg-gradient-to-br ${v.bg} rounded-xl p-6 shadow-lg`}>
                 <div className="text-5xl mb-4 text-center">{v.icon}</div>
-                <h3 className="text-xl font-bold text-foreground mb-3 text-center">{v.title}</h3>
+                <h3 className="text-xl font-bold text-[hsl(220,100%,13%)] mb-3 text-center">{v.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{v.description}</p>
               </div>
             ))}
