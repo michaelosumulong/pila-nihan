@@ -158,7 +158,7 @@ const CustomerGuide = () => (
 
     {/* Troubleshooting */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">🔧 Troubleshooting</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">🔧 Troubleshooting</h2>
       <div className="space-y-4">
         {[
           { q: "❓ I closed my browser tab and lost my ticket", a: 'Don\'t worry! Go back to the main page. If your ticket is still active, you\'ll see a yellow "Welcome back!" banner with a button to view your ticket.' },
