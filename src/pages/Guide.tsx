@@ -101,10 +101,10 @@ const CustomerGuide = () => (
 
       {/* Step 4 */}
       <div className="mb-8">
-        <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">4️⃣</span> Your Turn!
         </h3>
-        <p className="text-muted-foreground mb-4">
+        <p className="text-gray-700 mb-4">
           When you see your ticket turn <strong className="text-green-600">GREEN</strong> or receive a "YOUR TURN!" notification, head to the counter.
         </p>
         <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
