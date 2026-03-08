@@ -162,7 +162,7 @@ const GuestTicket = () => {
           🔋
           <span>{lowBatteryMode ? "Saving" : "Save Battery"}</span>
         </button>
-      </div>
+        </div>
 
       {/* Low Battery Banner */}
       {lowBatteryMode && (
