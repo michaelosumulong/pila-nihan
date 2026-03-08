@@ -81,7 +81,7 @@ const About = () => {
       {/* Core Value Propositions */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-6 max-w-5xl">
-          <h2 className="text-3xl font-bold text-foreground mb-12 text-center">Core Value Propositions</h2>
+          <h2 className="text-3xl font-bold text-white mb-12 text-center">Core Value Propositions</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {valueProps.map((v) => (
               <div key={v.title} className={`bg-gradient-to-br ${v.bg} rounded-xl p-6 shadow-lg`}>
