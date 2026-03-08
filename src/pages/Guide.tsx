@@ -340,7 +340,7 @@ const Guide = () => {
             className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
               activeTab === "customer"
                 ? "bg-gradient-to-r from-[hsl(220,100%,13%)] to-[hsl(217,91%,60%)] text-white shadow-lg"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             👤 For Customers
