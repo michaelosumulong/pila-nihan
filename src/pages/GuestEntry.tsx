@@ -494,7 +494,7 @@ const GuestEntry = () => {
           {locationStatus === "checking"
             ? "Checking location..."
             : !isWithinRange
-            ? "Too far from shop (5km max)"
+            ? "Too far from shop (20km max)"
             : "Kumuha ng Ticket"}
         </button>
 

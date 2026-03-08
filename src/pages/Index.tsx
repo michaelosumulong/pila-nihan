@@ -180,7 +180,7 @@ const Index = () => {
           </button>
 
           <p className="text-xs text-gray-500 mt-2 text-center">
-            No dashes or spaces needed — we'll format it for you!
+            Enter code as one word (dashes and spaces removed automatically)
           </p>
 
           <div className="text-center mt-4">
