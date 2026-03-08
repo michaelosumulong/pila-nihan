@@ -137,7 +137,7 @@ const CustomerGuide = () => (
         <div className="border-2 border-green-200 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-4xl">🤖</span>
-            <h3 className="text-xl font-bold text-foreground">Android</h3>
+            <h3 className="text-xl font-bold text-gray-900">Android</h3>
           </div>
           <ol className="space-y-3 text-sm text-muted-foreground">
             {["Open Pila-nihan in **Chrome** browser", "Tap the **three dots (⋮)** menu in top right", 'Tap **"Add to Home screen"** or **"Install app"**', 'Tap **"Add"** or **"Install"**', "Find the Pila-nihan icon on your home screen!"].map((s, i) => (
