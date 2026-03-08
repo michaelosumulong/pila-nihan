@@ -103,9 +103,7 @@ const Index = () => {
 
       {/* Header */}
       <div className="text-center mb-8 sm:mb-16">
-        <div className="text-8xl mb-6" style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.6))" }}>
-          🎫
-        </div>
+        <PilaLogo className="w-28 h-28 mx-auto mb-6" style={{ filter: "drop-shadow(0 0 30px rgba(255,255,255,0.6))" }} />
         <h1 className="text-4xl sm:text-6xl font-bold text-white mb-3 tracking-tight">
           PILA-NIHAN™
         </h1>
