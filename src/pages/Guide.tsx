@@ -281,7 +281,7 @@ const MerchantGuide = () => (
 
     {/* Best Practices */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">⭐ Best Practices</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">⭐ Best Practices</h2>
       <div className="grid md:grid-cols-2 gap-4">
         <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
           <p className="font-bold text-green-900 mb-2">✅ DO</p>
