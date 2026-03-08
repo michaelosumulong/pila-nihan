@@ -129,8 +129,9 @@ const GuestEntry = () => {
         setCustomerLocation(custLoc);
         const dist = calculateDistance(custLoc.lat, custLoc.lng, merchantLocation.lat, merchantLocation.lng);
         setDistance(dist);
-        setIsWithinRange(dist <= 5);
-        setLocationStatus(dist <= 5 ? "within_range" : "too_far");
+        const GEOFENCE_RADIUS_KM = 20;
+        setIsWithinRange(dist <= GEOFENCE_RADIUS_KM);
+        setLocationStatus(dist <= GEOFENCE_RADIUS_KM ? "within_range" : "too_far");
       },
       (error) => {
         clearTimeout(locationTimeout);
