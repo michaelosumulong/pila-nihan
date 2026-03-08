@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import PilaLogo from "@/components/PilaLogo";
 
 const features = [
   {
