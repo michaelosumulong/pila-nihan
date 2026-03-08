@@ -192,6 +192,12 @@ const Index = () => {
             >
               📱 I-scan ang QR sa harap ng tindahan
             </button>
+            <button
+              onClick={() => navigate("/guide")}
+              className="block mx-auto mt-2 text-secondary font-semibold text-sm hover:underline"
+            >
+              📖 First time? Read the guide →
+            </button>
           </div>
 
           <div className="grid grid-cols-3 gap-2 mt-6 text-center text-xs text-gray-600">
