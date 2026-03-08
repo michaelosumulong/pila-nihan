@@ -363,12 +363,12 @@ const GuestEntry = () => {
           </div>
         )}
         {(locationStatus === "error" || locationStatus === "not_supported") && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-4">
+          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded mb-4">
             <div className="flex items-center gap-2">
-              <span className="text-red-600">❌</span>
+              <span className="text-yellow-600">❌</span>
               <div>
-                <p className="text-sm font-semibold text-red-800">Location access required</p>
-                <p className="text-xs text-red-700">Please enable location services in your browser to join the queue.</p>
+                <p className="text-sm font-semibold text-yellow-800">Location unavailable</p>
+                <p className="text-xs text-yellow-700">{locationError || "Please enable location services or use bypass code."}</p>
               </div>
             </div>
           </div>
