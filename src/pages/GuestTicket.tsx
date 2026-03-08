@@ -131,7 +131,7 @@ const GuestTicket = () => {
         <div className="flex items-center gap-2">
           <PilaLogo className="w-8 h-8" />
           <div>
-            <p className="text-white font-bold text-sm">Your Ticket</p>
+            <p className="text-primary font-bold text-sm">Your Ticket</p>
             <p className="text-xs text-white/70">
               {lowBatteryMode ? "Battery Saver ON" : "Live Updates"}
             </p>
