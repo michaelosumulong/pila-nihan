@@ -50,6 +50,31 @@ const GuestEntry = () => {
   const [merchantLoading, setMerchantLoading] = useState(true);
   const [merchantError, setMerchantError] = useState(false);
 
+  // Discover merchant on mount
+  useEffect(() => {
+    const cleanId = merchantId?.toLowerCase().replace(/[^a-z0-9]/g, "") || "";
+    const stored = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
+    const storedCode = stored.shopCode?.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    if (storedCode === cleanId) {
+      setMerchantData(stored);
+      setMerchantLoading(false);
+    } else if (DEMO_MERCHANTS[cleanId]) {
+      setMerchantData(DEMO_MERCHANTS[cleanId]);
+      setMerchantLoading(false);
+    } else {
+      setMerchantError(true);
+      setMerchantLoading(false);
+      toast.error("Shop not found", {
+        description: `Could not find shop with code: ${merchantId}`,
+        duration: 8000,
+      });
+    }
+  }, [merchantId]);
+
+  const merchantName = merchantData?.businessName || "Pila-nihan Queue System";
+  const merchantLocation = merchantData?.location || { lat: 14.5995, lng: 120.9842 };
+
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<"regular" | "priority">("regular");
