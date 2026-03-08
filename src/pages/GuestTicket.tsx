@@ -188,7 +188,7 @@ const GuestTicket = () => {
           className="w-32 h-32 bg-[#3B82F6] rounded-2xl flex items-center justify-center mb-2"
           style={lowBatteryMode ? undefined : { filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }}
         >
-          <span className="text-7xl">🎫</span>
+          <PilaLogo className="w-20 h-20" />
         </div>
         <h1 className="text-2xl font-bold text-white">PILA-NIHAN™</h1>
         <p className="text-[#FFD700] italic text-lg">Ginhawa sa Bawat Pila</p>

@@ -142,7 +142,7 @@ const Index = () => {
         {/* SECTION 1 - Customer Entry */}
         <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 hover:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.35)] transition-all duration-300">
           <div className="text-center">
-            <div className="text-7xl mb-4">🎫</div>
+            <PilaLogo className="w-20 h-20 mx-auto mb-4" />
             <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(220,100%,13%)] mb-3">
               Kumuha ng Ticket
             </h2>
