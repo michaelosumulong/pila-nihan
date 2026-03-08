@@ -26,17 +26,17 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
 const DEMO_MERCHANTS: Record<string, any> = {
   pilani: {
     id: "demo-pilani", businessName: "Pilanihan Demo", shopCode: "PILANI", category: "AGOS",
-    location: { lat: 14.5995, lng: 120.9842 }, address: "123 Demo Street, Manila",
+    location: { lat: 14.5826, lng: 121.0527 }, address: "Pasig City, Metro Manila",
     ownerName: "Demo Owner", mobile: "09171234567", targetHandlingTime: 8,
   },
   pilanihan: {
     id: "demo-pilanihan", businessName: "Pilanihan", shopCode: "PILANIHAN", category: "AGOS",
-    location: { lat: 14.5995, lng: 120.9842 }, address: "123 Demo Street, Manila",
+    location: { lat: 14.5826, lng: 121.0527 }, address: "Pasig City, Metro Manila",
     ownerName: "Demo Owner", mobile: "09171234567", targetHandlingTime: 8,
   },
   demo: {
     id: "demo-test", businessName: "Demo Shop", shopCode: "DEMO", category: "SULONG",
-    location: { lat: 14.5995, lng: 120.9842 }, address: "Demo Address",
+    location: { lat: 14.5826, lng: 121.0527 }, address: "Pasig City, Metro Manila",
     ownerName: "Test User", mobile: "09171234567", targetHandlingTime: 10,
   },
 };
@@ -129,8 +129,9 @@ const GuestEntry = () => {
         setCustomerLocation(custLoc);
         const dist = calculateDistance(custLoc.lat, custLoc.lng, merchantLocation.lat, merchantLocation.lng);
         setDistance(dist);
-        setIsWithinRange(dist <= 5);
-        setLocationStatus(dist <= 5 ? "within_range" : "too_far");
+        const GEOFENCE_RADIUS_KM = 20;
+        setIsWithinRange(dist <= GEOFENCE_RADIUS_KM);
+        setLocationStatus(dist <= GEOFENCE_RADIUS_KM ? "within_range" : "too_far");
       },
       (error) => {
         clearTimeout(locationTimeout);
@@ -387,8 +388,8 @@ const GuestEntry = () => {
               <span className="text-yellow-600">⚠️</span>
               <div>
                 <p className="text-sm font-semibold text-yellow-800">Malayo pa po kayo</p>
-                <p className="text-xs text-yellow-700">📍 Current distance: {distance.toFixed(2)} km (Max: 5.0 km)</p>
-                <p className="text-xs text-yellow-700 mt-1">Please be within 5 km to secure a spot in the queue.</p>
+                <p className="text-xs text-yellow-700">📍 Current distance: {distance.toFixed(2)} km (Max: 20 km)</p>
+                <p className="text-xs text-yellow-700 mt-1">Please be within 20 km to secure a spot in the queue.</p>
               </div>
             </div>
           </div>
@@ -493,7 +494,7 @@ const GuestEntry = () => {
           {locationStatus === "checking"
             ? "Checking location..."
             : !isWithinRange
-            ? "Too far from shop (5km max)"
+            ? "Too far from shop (20km max)"
             : "Kumuha ng Ticket"}
         </button>
 
