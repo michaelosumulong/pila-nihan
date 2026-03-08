@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import VersionFooter from "@/components/VersionFooter";
+import PilaLogo from "@/components/PilaLogo";
 
 const CustomerGuide = () => (
   <div className="space-y-8">
