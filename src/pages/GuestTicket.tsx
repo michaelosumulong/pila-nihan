@@ -131,7 +131,7 @@ const GuestTicket = () => {
         <div className="flex items-center gap-2">
           <PilaLogo className="w-8 h-8" />
           <div>
-            <p className="text-white font-bold text-sm">Your Ticket</p>
+            <p className="text-primary font-bold text-sm">Your Ticket</p>
             <p className="text-xs text-white/70">
               {lowBatteryMode ? "Battery Saver ON" : "Live Updates"}
             </p>
@@ -190,7 +190,7 @@ const GuestTicket = () => {
         >
           <PilaLogo className="w-20 h-20" />
         </div>
-        <h1 className="text-2xl font-bold text-white">PILA-NIHAN™</h1>
+        <h1 className="text-2xl font-bold text-primary">PILA-NIHAN™</h1>
         <p className="text-[#FFD700] italic text-lg">Ginhawa sa Bawat Pila</p>
       </div>
 

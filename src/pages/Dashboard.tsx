@@ -196,7 +196,7 @@ const Dashboard = () => {
               <PilaLogo className="w-10 h-10" />
             </div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white">Dashboard</h1>
+              <h1 className="text-xl font-bold text-primary">Dashboard</h1>
               {lowBatteryMode && (
                 <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
                   🔋 Saver

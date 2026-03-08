@@ -10,6 +10,7 @@ import OfflineBanner from "@/components/OfflineBanner";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import LowBatteryToggle from "@/components/LowBatteryToggle";
 import VersionFooter from "@/components/VersionFooter";
+import PilaLogo from "@/components/PilaLogo";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -217,10 +218,10 @@ const QueueControls = () => {
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
           <div className="flex flex-col items-center">
             <div className="w-16 h-16 bg-[#3B82F6] rounded-xl flex items-center justify-center logo-glow mb-1">
-              <span className="text-3xl">🎫</span>
+              <PilaLogo className="w-10 h-10" />
             </div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white">Queue Controls</h1>
+              <h1 className="text-xl font-bold text-primary">Queue Controls</h1>
               {lowBatteryMode && (
                 <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
                   🔋
