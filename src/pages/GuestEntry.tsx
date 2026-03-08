@@ -23,14 +23,57 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 };
 
+const DEMO_MERCHANTS: Record<string, any> = {
+  pilani: {
+    id: "demo-pilani", businessName: "Pilanihan Demo", shopCode: "PILANI", category: "AGOS",
+    location: { lat: 14.5995, lng: 120.9842 }, address: "123 Demo Street, Manila",
+    ownerName: "Demo Owner", mobile: "09171234567", targetHandlingTime: 8,
+  },
+  pilanihan: {
+    id: "demo-pilanihan", businessName: "Pilanihan", shopCode: "PILANIHAN", category: "AGOS",
+    location: { lat: 14.5995, lng: 120.9842 }, address: "123 Demo Street, Manila",
+    ownerName: "Demo Owner", mobile: "09171234567", targetHandlingTime: 8,
+  },
+  demo: {
+    id: "demo-test", businessName: "Demo Shop", shopCode: "DEMO", category: "SULONG",
+    location: { lat: 14.5995, lng: 120.9842 }, address: "Demo Address",
+    ownerName: "Test User", mobile: "09171234567", targetHandlingTime: 10,
+  },
+};
+
 const GuestEntry = () => {
   const { merchantId } = useParams();
   const navigate = useNavigate();
   const buntingCount = 24;
 
-  const merchantData = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
-  const merchantName = merchantData.businessName || "Pila-nihan Queue System";
-  const merchantLocation = merchantData.location || { lat: 14.5995, lng: 120.9842 };
+  const [merchantData, setMerchantData] = useState<any>(null);
+  const [merchantLoading, setMerchantLoading] = useState(true);
+  const [merchantError, setMerchantError] = useState(false);
+
+  // Discover merchant on mount
+  useEffect(() => {
+    const cleanId = merchantId?.toLowerCase().replace(/[^a-z0-9]/g, "") || "";
+    const stored = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
+    const storedCode = stored.shopCode?.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    if (storedCode === cleanId) {
+      setMerchantData(stored);
+      setMerchantLoading(false);
+    } else if (DEMO_MERCHANTS[cleanId]) {
+      setMerchantData(DEMO_MERCHANTS[cleanId]);
+      setMerchantLoading(false);
+    } else {
+      setMerchantError(true);
+      setMerchantLoading(false);
+      toast.error("Shop not found", {
+        description: `Could not find shop with code: ${merchantId}`,
+        duration: 8000,
+      });
+    }
+  }, [merchantId]);
+
+  const merchantName = merchantData?.businessName || "Pila-nihan Queue System";
+  const merchantLocation = merchantData?.location || { lat: 14.5995, lng: 120.9842 };
 
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
@@ -59,14 +102,29 @@ const GuestEntry = () => {
     }
   };
 
+  const [locationError, setLocationError] = useState("");
+
   useEffect(() => {
+    if (!merchantData) return;
+
     if (!navigator.geolocation) {
       setLocationStatus("not_supported");
-      toast.error("Your device does not support geolocation");
+      setLocationError("Your device does not support location services.");
       return;
     }
+
+    const locationTimeout = setTimeout(() => {
+      setLocationStatus("error");
+      setLocationError("Location request timed out. Use bypass code to continue.");
+      toast.warning("Location not available", {
+        description: "Use the bypass code from the merchant to continue",
+        duration: 8000,
+      });
+    }, 10000);
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        clearTimeout(locationTimeout);
         const custLoc = { lat: position.coords.latitude, lng: position.coords.longitude };
         setCustomerLocation(custLoc);
         const dist = calculateDistance(custLoc.lat, custLoc.lng, merchantLocation.lat, merchantLocation.lng);
@@ -75,13 +133,24 @@ const GuestEntry = () => {
         setLocationStatus(dist <= 5 ? "within_range" : "too_far");
       },
       (error) => {
+        clearTimeout(locationTimeout);
         console.error("Geolocation error:", error);
+        let errorMsg = "Location access denied.";
+        if (error.code === 1) errorMsg = "Location permission denied. Please enable location in your browser settings.";
+        else if (error.code === 2) errorMsg = "Location unavailable. Check your GPS/WiFi connection.";
+        else if (error.code === 3) errorMsg = "Location request timed out.";
         setLocationStatus("error");
-        toast.error("Please enable location services to join the queue");
+        setLocationError(errorMsg);
+        toast.warning("Location not available", {
+          description: "Use the bypass code from the merchant to continue",
+          duration: 8000,
+        });
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
     );
-  }, [merchantLocation.lat, merchantLocation.lng]);
+
+    return () => clearTimeout(locationTimeout);
+  }, [merchantData, merchantLocation.lat, merchantLocation.lng]);
 
   const isValid =
     name.trim() !== "" &&
@@ -149,6 +218,37 @@ const GuestEntry = () => {
       toast.error("Something went wrong. Please try again.");
     }
   };
+
+  if (merchantLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#002366] via-[#1E5AA8] to-[#3B82F6] flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="text-6xl mb-4 animate-pulse">🎫</div>
+          <p className="text-lg font-bold">Loading shop...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (merchantError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+          <div className="text-6xl mb-4">😕</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Shop Not Found</h2>
+          <p className="text-gray-700 mb-6">
+            We couldn't find a shop with code: <strong>{merchantId}</strong>
+          </p>
+          <p className="text-sm text-gray-500 mb-6">
+            Make sure there are no dashes or spaces. Just letters and numbers.
+          </p>
+          <button onClick={() => navigate("/")} className="w-full bg-[#1E3A8A] text-white py-3 rounded-xl font-bold">
+            ← Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#002366] via-[#1E5AA8] to-[#3B82F6] px-6 py-4 pb-12">
@@ -294,12 +394,12 @@ const GuestEntry = () => {
           </div>
         )}
         {(locationStatus === "error" || locationStatus === "not_supported") && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-4">
+          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded mb-4">
             <div className="flex items-center gap-2">
-              <span className="text-red-600">❌</span>
+              <span className="text-yellow-600">❌</span>
               <div>
-                <p className="text-sm font-semibold text-red-800">Location access required</p>
-                <p className="text-xs text-red-700">Please enable location services in your browser to join the queue.</p>
+                <p className="text-sm font-semibold text-yellow-800">Location unavailable</p>
+                <p className="text-xs text-yellow-700">{locationError || "Please enable location services or use bypass code."}</p>
               </div>
             </div>
           </div>

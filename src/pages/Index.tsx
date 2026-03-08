@@ -8,6 +8,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [shopCode, setShopCode] = useState("");
   const [isValid, setIsValid] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [ready, setReady] = useState(false);
   const [existingTicket, setExistingTicket] = useState<any>(null);
 
@@ -50,6 +51,14 @@ const Index = () => {
     setIsValid(limited.length >= 3);
   };
 
+  const verifyMerchantExists = (code: string): boolean => {
+    const merchant = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
+    const merchantCode = merchant.shopCode?.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (merchantCode === code) return true;
+    const demoMerchants = ["pilani", "demo", "pilanihan"];
+    return demoMerchants.includes(code);
+  };
+
   const handleEnterQueue = () => {
     if (!isValid) {
       toast.error("Invalid shop code", {
@@ -57,8 +66,18 @@ const Index = () => {
       });
       return;
     }
-    toast.success("Redirecting to queue...");
-    navigate(`/join/${shopCode.toLowerCase()}`);
+    setIsProcessing(true);
+    const finalCode = shopCode.toLowerCase();
+    if (verifyMerchantExists(finalCode)) {
+      toast.success("Redirecting to queue...");
+      navigate(`/join/${finalCode}`);
+    } else {
+      toast.error("Shop not found", {
+        description: "Please check the code and try again. No dashes or spaces needed.",
+        duration: 5000,
+      });
+      setIsProcessing(false);
+    }
   };
 
   const handleSwitchToGuest = () => {
@@ -145,18 +164,22 @@ const Index = () => {
               type="text"
               value={displayCode}
               onChange={handleCodeChange}
-              placeholder="Enter shop code"
+              placeholder="e.g., PILANI"
               maxLength={12}
-              className="w-full text-3xl text-center font-mono font-bold uppercase py-4 px-6 rounded-xl border-[3px] border-gray-300 focus:border-primary focus:ring-4 focus:ring-yellow-200 outline-none tracking-widest transition-colors text-gray-900"
+              disabled={isProcessing}
+              inputMode="text"
+              autoCapitalize="characters"
+              autoComplete="off"
+              className="w-full text-3xl text-center font-mono font-bold uppercase py-4 px-6 rounded-xl border-[3px] border-gray-300 focus:border-primary focus:ring-4 focus:ring-yellow-200 outline-none tracking-widest transition-colors text-gray-900 disabled:opacity-50"
             />
           </div>
 
           <button
             onClick={handleEnterQueue}
-            disabled={!isValid}
+            disabled={!isValid || isProcessing}
             className="w-full bg-primary text-primary-foreground py-5 text-xl sm:text-2xl font-bold rounded-xl shadow-lg hover:brightness-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            PUMILA NA!
+            {isProcessing ? "Finding shop..." : "PUMILA NA!"}
           </button>
 
           <p className="text-xs text-gray-500 mt-2 text-center">
