@@ -327,7 +327,7 @@ const Guide = () => {
           <button onClick={() => navigate(-1)} className="absolute left-4 top-4 text-white/80 hover:text-white text-sm">
             ← Back
           </button>
-          <div className="text-6xl mb-4">📖</div>
+          <PilaLogo className="w-16 h-16 mx-auto mb-4" />
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">How It Works</h1>
           <p className="text-xl text-white/90">Your complete guide to using Pila-nihan</p>
         </div>
