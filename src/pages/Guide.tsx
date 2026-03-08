@@ -17,8 +17,8 @@ const CustomerGuide = () => (
           <li key={item.step} className="flex items-start gap-3">
             <span className="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">{item.step}</span>
             <div>
-              <p className="font-bold text-foreground">{item.title}</p>
-              <p className="text-sm text-muted-foreground">{item.desc}</p>
+              <p className="font-bold text-gray-900">{item.title}</p>
+              <p className="text-sm text-gray-700">{item.desc}</p>
             </div>
           </li>
         ))}
@@ -27,14 +27,14 @@ const CustomerGuide = () => (
 
     {/* Detailed Steps */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">📱 Step-by-Step Guide</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">📱 Step-by-Step Guide</h2>
 
       {/* Step 1 */}
       <div className="mb-8 pb-8 border-b border-border">
-        <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">1️⃣</span> Join the Queue
         </h3>
-        <p className="text-muted-foreground mb-4">
+        <p className="text-gray-700 mb-4">
           Enter the shop code you see posted at the business. Example: <code className="bg-muted px-2 py-1 rounded font-mono font-bold">PILANIHAN</code>
         </p>
         <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
@@ -46,10 +46,10 @@ const CustomerGuide = () => (
 
       {/* Step 2 */}
       <div className="mb-8 pb-8 border-b border-border">
-        <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">2️⃣</span> Location Check
         </h3>
-        <p className="text-muted-foreground mb-4">The app will ask for your location to confirm you're near the shop (within 20km).</p>
+        <p className="text-gray-700 mb-4">The app will ask for your location to confirm you're near the shop (within 20km).</p>
         <div className="space-y-3">
           <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
             <p className="text-sm font-bold text-green-800 mb-1">✅ Location Works</p>
@@ -69,10 +69,10 @@ const CustomerGuide = () => (
 
       {/* Step 3 */}
       <div className="mb-8 pb-8 border-b border-border">
-        <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">3️⃣</span> Watch Your Position
         </h3>
-        <p className="text-muted-foreground mb-4">Your ticket screen shows your position in real-time. No need to refresh - it updates automatically!</p>
+        <p className="text-gray-700 mb-4">Your ticket screen shows your position in real-time. No need to refresh - it updates automatically!</p>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="bg-blue-50 rounded-lg p-4">
             <p className="font-bold text-blue-900 mb-2">📊 What You'll See</p>
@@ -101,10 +101,10 @@ const CustomerGuide = () => (
 
       {/* Step 4 */}
       <div className="mb-8">
-        <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
           <span className="text-2xl">4️⃣</span> Your Turn!
         </h3>
-        <p className="text-muted-foreground mb-4">
+        <p className="text-gray-700 mb-4">
           When you see your ticket turn <strong className="text-green-600">GREEN</strong> or receive a "YOUR TURN!" notification, head to the counter.
         </p>
         <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
@@ -115,17 +115,17 @@ const CustomerGuide = () => (
 
     {/* Install Guide */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">📱 How to Install (Add to Home Screen)</h2>
-      <p className="text-muted-foreground mb-6">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">📱 How to Install (Add to Home Screen)</h2>
+      <p className="text-gray-700 mb-6">
         For the best experience, "install" Pila-nihan to your phone. It works like a native app - faster, offline-capable, and you'll never lose the link!
       </p>
       <div className="grid md:grid-cols-2 gap-6">
         <div className="border-2 border-blue-200 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-4xl"></span>
-            <h3 className="text-xl font-bold text-foreground">iPhone (iOS)</h3>
+            <h3 className="text-xl font-bold text-gray-900">iPhone (iOS)</h3>
           </div>
-          <ol className="space-y-3 text-sm text-muted-foreground">
+          <ol className="space-y-3 text-sm text-gray-700">
             {["Open Pila-nihan in **Safari** browser", "Tap the **Share** button (box with arrow up)", 'Scroll and tap **"Add to Home Screen"**', 'Tap **"Add"** in the top right', "Find the Pila-nihan icon on your home screen!"].map((s, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="font-bold text-blue-600">{i + 1}.</span>
@@ -137,9 +137,9 @@ const CustomerGuide = () => (
         <div className="border-2 border-green-200 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-4xl">🤖</span>
-            <h3 className="text-xl font-bold text-foreground">Android</h3>
+            <h3 className="text-xl font-bold text-gray-900">Android</h3>
           </div>
-          <ol className="space-y-3 text-sm text-muted-foreground">
+          <ol className="space-y-3 text-sm text-gray-700">
             {["Open Pila-nihan in **Chrome** browser", "Tap the **three dots (⋮)** menu in top right", 'Tap **"Add to Home screen"** or **"Install app"**', 'Tap **"Add"** or **"Install"**', "Find the Pila-nihan icon on your home screen!"].map((s, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="font-bold text-green-600">{i + 1}.</span>
@@ -158,7 +158,7 @@ const CustomerGuide = () => (
 
     {/* Troubleshooting */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">🔧 Troubleshooting</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">🔧 Troubleshooting</h2>
       <div className="space-y-4">
         {[
           { q: "❓ I closed my browser tab and lost my ticket", a: 'Don\'t worry! Go back to the main page. If your ticket is still active, you\'ll see a yellow "Welcome back!" banner with a button to view your ticket.' },
@@ -167,9 +167,9 @@ const CustomerGuide = () => (
           { q: "❓ My position isn't updating", a: 'Tap the "🔄 Refresh" button on your ticket screen. If offline mode is active, make sure you have an internet connection and tap "Update Position."' },
           { q: "❓ I don't have a smartphone", a: 'No problem! Ask the merchant to add you manually using the "➕ Add Walk-in" button. They\'ll print a physical ticket for you.' },
         ].map((item, i) => (
-          <details key={i} className="bg-muted/50 rounded-lg p-4 cursor-pointer hover:bg-muted">
-            <summary className="font-bold text-foreground">{item.q}</summary>
-            <p className="text-sm text-muted-foreground mt-3" dangerouslySetInnerHTML={{ __html: item.a }} />
+          <details key={i} className="bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100">
+            <summary className="font-bold text-gray-900">{item.q}</summary>
+            <p className="text-sm text-gray-700 mt-3" dangerouslySetInnerHTML={{ __html: item.a }} />
           </details>
         ))}
       </div>
@@ -191,8 +191,8 @@ const MerchantGuide = () => (
           <li key={item.step} className="flex items-start gap-3">
             <span className="bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">{item.step}</span>
             <div>
-              <p className="font-bold text-foreground">{item.title}</p>
-              <p className="text-sm text-muted-foreground">{item.desc}</p>
+              <p className="font-bold text-gray-900">{item.title}</p>
+              <p className="text-sm text-gray-700">{item.desc}</p>
             </div>
           </li>
         ))}
@@ -201,7 +201,7 @@ const MerchantGuide = () => (
 
     {/* Dashboard Guide */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">🏪 Using Your Dashboard</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">🏪 Using Your Dashboard</h2>
       <div className="space-y-6">
         {[
           { color: "green", icon: "📢", title: "Call Next Customer", desc: 'Click the green "📢 Call Next" button to notify the next customer in line. They\'ll get an alert on their phone and the ticket will turn green.', tip: "Call the customer when you're 90% done with the current one to minimize gaps between customers." },
@@ -210,8 +210,8 @@ const MerchantGuide = () => (
           { color: "yellow", icon: "➕", title: "Add Walk-in Customer", desc: 'For customers without smartphones, use "➕ Add Walk-in". Enter their name, choose Regular or Priority, and print a ticket.', tip: "This ensures everyone can use your queue, not just tech-savvy customers." },
         ].map((item) => (
           <div key={item.title} className={`border-l-4 border-${item.color}-500 pl-6`}>
-            <h3 className="text-lg font-bold text-foreground mb-2">{item.icon} {item.title}</h3>
-            <p className="text-muted-foreground mb-3">{item.desc}</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{item.icon} {item.title}</h3>
+            <p className="text-gray-700 mb-3">{item.desc}</p>
             {item.tip && (
               <div className={`bg-${item.color}-50 p-3 rounded`}>
                 <p className={`text-sm text-${item.color}-800`}>💡 <strong>Pro Tip:</strong> {item.tip}</p>
@@ -224,14 +224,14 @@ const MerchantGuide = () => (
 
     {/* Bypass Codes */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">🔑 Daily Bypass Codes</h2>
-      <p className="text-muted-foreground mb-4">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">🔑 Daily Bypass Codes</h2>
+      <p className="text-gray-700 mb-4">
         Your dashboard displays a <strong>6-digit Bypass Code</strong> that changes daily. This code allows customers to join the queue even if GPS location fails.
       </p>
       <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border-2 border-yellow-300 mb-4">
-        <p className="text-center mb-2 text-sm text-muted-foreground">Today's Bypass Code</p>
+        <p className="text-center mb-2 text-sm text-gray-600">Today's Bypass Code</p>
         <p className="text-center text-5xl font-mono font-bold text-[hsl(220,100%,13%)] tracking-widest">3FJFWU</p>
-        <p className="text-center mt-2 text-xs text-muted-foreground">(Example - yours will be different)</p>
+        <p className="text-center mt-2 text-xs text-gray-600">(Example - yours will be different)</p>
       </div>
       <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
         <p className="text-sm text-blue-800 mb-2"><strong>When to use:</strong></p>
@@ -245,11 +245,11 @@ const MerchantGuide = () => (
 
     {/* Analytics */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">📊 Business Analytics</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">📊 Business Analytics</h2>
       <div className="space-y-4">
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-5">
-          <h3 className="font-bold text-foreground mb-2">⏱️ Takt Time (Target Handling Time)</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-bold text-gray-900 mb-2">⏱️ Takt Time (Target Handling Time)</h3>
+          <p className="text-sm text-gray-700">
             This is your benchmark - the average time you <em>aim</em> to spend with each customer. Set it slightly higher than your actual speed to give realistic wait time estimates.
           </p>
           <div className="bg-blue-200 rounded p-3 mt-3">
@@ -259,15 +259,15 @@ const MerchantGuide = () => (
           </div>
         </div>
         <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-5">
-          <h3 className="font-bold text-foreground mb-2">🔍 Automated Quality Audits</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-bold text-gray-900 mb-2">🔍 Automated Quality Audits</h3>
+          <p className="text-sm text-gray-700">
             The system automatically flags when a customer takes 50% longer than your target, or when there's a 15+ minute gap between customers (idle time).
           </p>
           <p className="text-xs text-green-800 mt-2">These flags appear in your "Suri Backlog" for root cause analysis.</p>
         </div>
         <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-5">
-          <h3 className="font-bold text-foreground mb-2">😊 Customer Satisfaction</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-bold text-gray-900 mb-2">😊 Customer Satisfaction</h3>
+          <p className="text-sm text-gray-700">
             After service, customers rate their experience (Fast/Good or Slow/Issue). Track your satisfaction percentage to measure service quality.
           </p>
         </div>
@@ -281,7 +281,7 @@ const MerchantGuide = () => (
 
     {/* Best Practices */}
     <div className="bg-card rounded-xl shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-[hsl(220,100%,13%)] mb-6">⭐ Best Practices</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">⭐ Best Practices</h2>
       <div className="grid md:grid-cols-2 gap-4">
         <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
           <p className="font-bold text-green-900 mb-2">✅ DO</p>
