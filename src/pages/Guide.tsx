@@ -123,7 +123,7 @@ const CustomerGuide = () => (
         <div className="border-2 border-blue-200 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-4xl"></span>
-            <h3 className="text-xl font-bold text-foreground">iPhone (iOS)</h3>
+            <h3 className="text-xl font-bold text-gray-900">iPhone (iOS)</h3>
           </div>
           <ol className="space-y-3 text-sm text-muted-foreground">
             {["Open Pila-nihan in **Safari** browser", "Tap the **Share** button (box with arrow up)", 'Scroll and tap **"Add to Home Screen"**', 'Tap **"Add"** in the top right', "Find the Pila-nihan icon on your home screen!"].map((s, i) => (
