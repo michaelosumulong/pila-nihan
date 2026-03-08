@@ -334,7 +334,7 @@ const Guide = () => {
 
       {/* Tab Switcher */}
       <div className="container mx-auto px-6 max-w-4xl -mt-8 relative z-10">
-        <div className="bg-card rounded-2xl shadow-xl p-2 flex gap-2">
+        <div className="bg-white rounded-2xl shadow-xl p-2 flex gap-2">
           <button
             onClick={() => setActiveTab("customer")}
             className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${
