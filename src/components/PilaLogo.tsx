@@ -1,9 +1,12 @@
+import React from "react";
+
 interface PilaLogoProps {
   className?: string;
   variant?: "full" | "icon";
+  style?: React.CSSProperties;
 }
 
-const PilaLogo = ({ className = "w-10 h-10", variant = "icon" }: PilaLogoProps) => (
+const PilaLogo = ({ className = "w-10 h-10", variant = "icon", style }: PilaLogoProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 100 100"
