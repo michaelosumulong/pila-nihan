@@ -54,6 +54,17 @@ const GuestEntry = () => {
   // Discover merchant on mount
   useEffect(() => {
     const cleanId = merchantId?.toLowerCase().replace(/[^a-z0-9]/g, "") || "";
+
+    // Guard against literal parameter name in URL
+    if (!cleanId || cleanId === "merchantid") {
+      toast.error("Invalid shop link", {
+        description: "Please enter a valid shop code on the home page.",
+        duration: 5000,
+      });
+      navigate("/");
+      return;
+    }
+
     const stored = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
     const storedCode = stored.shopCode?.toLowerCase().replace(/[^a-z0-9]/g, "");
 
