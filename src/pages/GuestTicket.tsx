@@ -184,12 +184,7 @@ const GuestTicket = () => {
 
       {/* Header */}
       <div className="flex flex-col items-center mt-4 mb-6">
-        <div
-          className="w-32 h-32 bg-[#3B82F6] rounded-2xl flex items-center justify-center mb-2"
-          style={lowBatteryMode ? undefined : { filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }}
-        >
-          <PilaLogo className="w-20 h-20" showGradient />
-        </div>
+        <PilaLogo className="w-24 h-24 mb-2" showGradient />
         <h1 className="text-2xl font-bold text-primary">PILA-NIHAN™</h1>
         <p className="text-[#FFD700] italic text-lg">Ginhawa sa Bawat Pila</p>
       </div>
