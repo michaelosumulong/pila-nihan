@@ -1,43 +1,81 @@
 import React from "react";
-import pilaLogo from "@/assets/pila-logo.png";
 
 interface PilaLogoProps {
+  size?: number;
   className?: string;
-  variant?: "full" | "icon";
-  style?: React.CSSProperties;
-  showGradient?: boolean;
+  showText?: boolean;
 }
 
-const PilaLogo = ({ className = "w-14 h-14", variant = "icon", style, showGradient = false }: PilaLogoProps) => {
-  if (showGradient) {
-    return (
-      <div
-        className={`inline-flex items-center justify-center rounded-2xl ${className}`}
-        style={{
-          background: "linear-gradient(135deg, hsl(220,100%,13%) 0%, hsl(213,70%,38%) 50%, hsl(217,91%,60%) 100%)",
-          padding: "12px",
-          boxShadow: "0 4px 12px rgba(10, 37, 105, 0.3)",
-          ...style,
-        }}
-      >
-        <img
-          src={pilaLogo}
-          alt="Pila-nihan logo"
-          className="w-full h-full object-contain"
-          style={{ filter: "none" }}
-        />
-      </div>
-    );
-  }
-
+export const PilaLogo = ({ size = 60, className = "", showText = true }: PilaLogoProps) => {
   return (
-    <img
-      src={pilaLogo}
-      alt="Pila-nihan logo"
-      className={className}
-      style={{ ...style, filter: "none" }}
-    />
+    <div className={`flex items-center justify-center ${className}`}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 100 100"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="flex-shrink-0"
+      >
+        {/* Transparent Ticket Body - subtle white outline */}
+        <rect
+          x="15"
+          y="25"
+          width="70"
+          height="50"
+          rx="8"
+          stroke="white"
+          strokeWidth="2"
+          strokeDasharray="4 2"
+          fill="white"
+          fillOpacity="0.05"
+        />
+
+        {/* The Philippine Sun - Golden Yellow center */}
+        <circle cx="50" cy="50" r="12" fill="#FFB703" />
+
+        {/* Sun rays - 8 main rays */}
+        <g stroke="#FFB703" strokeWidth="2.5" strokeLinecap="round">
+          {/* Cardinal rays */}
+          <line x1="50" y1="32" x2="50" y2="38" />
+          <line x1="50" y1="62" x2="50" y2="68" />
+          <line x1="32" y1="50" x2="38" y2="50" />
+          <line x1="62" y1="50" x2="68" y2="50" />
+          {/* Diagonal rays */}
+          <line x1="38" y1="38" x2="42" y2="42" />
+          <line x1="58" y1="58" x2="62" y2="62" />
+          <line x1="38" y1="62" x2="42" y2="58" />
+          <line x1="58" y1="42" x2="62" y2="38" />
+        </g>
+
+        {/* 3 Golden Stars (Philippine flag style) */}
+        {/* Top star */}
+        <path d="M50 18 L51.5 22 L56 22 L52.5 25 L54 29 L50 26 L46 29 L47.5 25 L44 22 L48.5 22 Z" fill="#FCD116" />
+
+        {/* Bottom left star */}
+        <path d="M25 65 L26.5 69 L31 69 L27.5 72 L29 76 L25 73 L21 76 L22.5 72 L19 69 L23.5 69 Z" fill="#FCD116" />
+
+        {/* Bottom right star */}
+        <path d="M75 65 L76.5 69 L81 69 L77.5 72 L79 76 L75 73 L71 76 L72.5 72 L69 69 L73.5 69 Z" fill="#FCD116" />
+
+        {/* Stylized person icon (represents queue/pila) */}
+        <circle cx="25" cy="45" r="5" fill="white" opacity="0.9" />
+        <path
+          d="M20 58 C20 52 22 50 25 50 C28 50 30 52 30 58"
+          stroke="white"
+          strokeWidth="2"
+          fill="none"
+          opacity="0.9"
+        />
+      </svg>
+
+      {/* Branded Text (optional) */}
+      {showText && (
+        <div className="ml-3 flex flex-col">
+          <span className="text-xl font-bold tracking-tight text-[#FFB703] leading-none">PILA-NIHAN™</span>
+          <span className="text-[10px] italic text-[#FDFBD4] opacity-90 leading-tight">Ginhawa sa Bawat Pila</span>
+        </div>
+      )}
+    </div>
   );
 };
-
-export default PilaLogo;
