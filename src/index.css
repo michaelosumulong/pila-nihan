@@ -94,9 +94,6 @@
   transition-duration: 0s !important;
 }
 
-.low-battery-mode .logo-glow {
-  box-shadow: none !important;
-}
 
 .low-battery-mode .bunting {
   display: none !important;

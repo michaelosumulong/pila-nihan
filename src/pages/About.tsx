@@ -69,7 +69,7 @@ const About = () => {
       {/* Hero */}
       <section className="bg-gradient-to-br from-[hsl(220,100%,13%)] to-secondary py-20">
         <div className="container mx-auto px-6 text-center">
-          <PilaLogo className="w-24 h-24 mx-auto mb-6" style={{ filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }} />
+          <PilaLogo className="w-48 h-48 mx-auto mb-6" />
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">Pila-nihan™</h1>
           <p className="text-3xl text-primary italic font-light mb-6">Ginhawa sa Bawat Pila</p>
           <p className="text-xl text-white/90 max-w-3xl mx-auto">
