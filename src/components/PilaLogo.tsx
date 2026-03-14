@@ -2,6 +2,7 @@ interface PilaLogoProps {
   size?: number;
   className?: string;
   showText?: boolean;
+  showGradient?: boolean;
 }
 
 const PilaLogo = ({ size = 60, className = "", showText = true }: PilaLogoProps) => {
