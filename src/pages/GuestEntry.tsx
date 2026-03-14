@@ -243,7 +243,7 @@ const GuestEntry = () => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#002366] via-[#1E5AA8] to-[#3B82F6] flex items-center justify-center">
         <div className="text-white text-center">
-          <div className="text-6xl mb-4 animate-pulse">🎫</div>
+          <PilaLogo className="w-16 h-16 mb-4 animate-pulse" showGradient />
           <p className="text-lg font-bold">Loading shop...</p>
         </div>
       </div>
