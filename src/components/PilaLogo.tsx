@@ -7,7 +7,7 @@ interface PilaLogoProps {
   style?: React.CSSProperties;
 }
 
-const PilaLogo = ({ className = "w-10 h-10", variant = "icon", style }: PilaLogoProps) => (
+const PilaLogo = ({ className = "w-14 h-14", variant = "icon", style }: PilaLogoProps) => (
   <img
     src={pilaLogo}
     alt="Pila-nihan logo"
