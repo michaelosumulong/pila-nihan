@@ -103,7 +103,7 @@ const Index = () => {
 
       {/* Header */}
       <div className="text-center mb-8 sm:mb-16">
-        <PilaLogo className="w-40 h-40 mx-auto mb-6" />
+        <PilaLogo className="w-40 h-40 mx-auto mb-6" showGradient />
         <h1 className="text-4xl sm:text-6xl font-bold text-white mb-3 tracking-tight">
           PILA-NIHAN™
         </h1>

@@ -31,7 +31,7 @@ const Login = () => {
 
       <div className="max-w-md mx-auto px-5 pb-10">
         <div className="flex flex-col items-center pt-8 pb-6">
-          <PilaLogo className="w-32 h-32 mb-4" />
+          <PilaLogo className="w-32 h-32 mb-4" showGradient />
           <h1 className="text-3xl font-bold text-primary tracking-wide">Merchant Login</h1>
           <p className="text-[#FFD700] italic text-lg mt-1">Ginhawa sa Bawat Pila</p>
         </div>

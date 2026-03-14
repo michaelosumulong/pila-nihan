@@ -217,7 +217,7 @@ const QueueControls = () => {
         <div className="flex items-center justify-between px-5 pt-3 pb-6">
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
           <div className="flex flex-col items-center">
-            <PilaLogo className="w-16 h-16 mb-1" />
+            <PilaLogo className="w-16 h-16 mb-1" showGradient />
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-primary">Queue Controls</h1>
               {lowBatteryMode && (
