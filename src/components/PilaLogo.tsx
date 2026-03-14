@@ -14,51 +14,67 @@ const PilaLogo = ({ className = "w-10 h-10", variant = "icon", style }: PilaLogo
     style={style}
     aria-label="Pila-nihan logo"
   >
-    {/* Ticket shape */}
+    {/* Philippine sun rays (subtle, behind ticket) */}
+    {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
+      <line
+        key={angle}
+        x1="50"
+        y1="50"
+        x2={50 + 48 * Math.cos((angle * Math.PI) / 180)}
+        y2={50 + 48 * Math.sin((angle * Math.PI) / 180)}
+        stroke="#FFD700"
+        strokeWidth="1.5"
+        opacity="0.25"
+      />
+    ))}
+
+    {/* Ticket shape - lighter blue */}
     <rect
-      x="10"
-      y="20"
-      width="80"
-      height="60"
+      x="12"
+      y="22"
+      width="76"
+      height="56"
       rx="10"
       fill="none"
-      stroke="#1E3A8A"
-      strokeWidth="4"
+      stroke="#60A5FA"
+      strokeWidth="3.5"
     />
     {/* Ticket notches */}
-    <circle cx="10" cy="42" r="6" fill="white" stroke="#1E3A8A" strokeWidth="4" />
-    <circle cx="90" cy="42" r="6" fill="white" stroke="#1E3A8A" strokeWidth="4" />
+    <circle cx="12" cy="43" r="5.5" fill="hsl(220,100%,13%)" stroke="#60A5FA" strokeWidth="3.5" />
+    <circle cx="88" cy="43" r="5.5" fill="hsl(220,100%,13%)" stroke="#60A5FA" strokeWidth="3.5" />
     {/* Dashed perforation line */}
     <line
-      x1="22"
-      y1="42"
-      x2="78"
-      y2="42"
-      stroke="#1E3A8A"
-      strokeWidth="1.5"
+      x1="24"
+      y1="43"
+      x2="76"
+      y2="43"
+      stroke="#60A5FA"
+      strokeWidth="1.2"
       strokeDasharray="4 3"
-      opacity="0.3"
+      opacity="0.25"
     />
-    {/* Stylized "P" */}
+    {/* Stylized "P" - white for contrast */}
     <path
-      d="M32,50 L32,78 M32,50 C32,50 32,46 38,44 C44,42 52,44 52,50 C52,56 44,58 38,56 C32,54 32,50 32,50"
-      stroke="#1E3A8A"
-      strokeWidth="5"
+      d="M33,51 L33,76 M33,51 C33,51 33,47 39,45 C45,43 53,45 53,51 C53,57 45,59 39,57 C33,55 33,51 33,51"
+      stroke="#FFFFFF"
+      strokeWidth="4.5"
       fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    {/* Pulse/heartbeat line accent */}
+    {/* Pulse/heartbeat line - golden */}
     <path
-      d="M56,62 L60,62 L63,54 L66,70 L69,58 L72,62 L76,62"
-      stroke="#FFB703"
-      strokeWidth="3"
+      d="M57,63 L61,63 L64,55 L67,71 L70,59 L73,63 L77,63"
+      stroke="#FFD700"
+      strokeWidth="2.5"
       fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    {/* Small golden star accent */}
-    <circle cx="64" cy="30" r="3" fill="#FFB703" />
+    {/* Three-star accent (Philippine flag inspired) */}
+    <circle cx="50" cy="30" r="2.2" fill="#FFD700" />
+    <circle cx="42" cy="33" r="1.5" fill="#FFD700" opacity="0.7" />
+    <circle cx="58" cy="33" r="1.5" fill="#FFD700" opacity="0.7" />
   </svg>
 );
 
