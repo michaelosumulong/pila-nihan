@@ -281,7 +281,7 @@ const GuestEntry = () => {
 
       {/* Header */}
       <div className="flex flex-col items-center mt-4 mb-6">
-        <PilaLogo className="w-24 h-24 mb-2" />
+        <PilaLogo className="w-24 h-24 mb-2" showGradient />
         <h1 className="text-xl font-bold text-white text-center">Welcome to {merchantName}!</h1>
         <p className="text-[#FFD700] italic text-lg">Ginhawa sa Bawat Pila</p>
       </div>
