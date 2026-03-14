@@ -9,6 +9,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import LowBatteryToggle from "@/components/LowBatteryToggle";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import PendingAudits from "@/components/PendingAudits";
+import PilaLogo from "@/components/PilaLogo";
 import VersionFooter from "@/components/VersionFooter";
 const hourlyData = [
   { hour: "8 AM", customers: 12 },
@@ -96,9 +97,7 @@ const Analytics = () => {
         <div className="flex items-center justify-between px-5 pt-3 pb-6">
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
           <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-[#3B82F6] rounded-xl flex items-center justify-center logo-glow mb-1">
-              <span className="text-3xl">📊</span>
-            </div>
+            <PilaLogo className="w-16 h-16 mb-1" />
             <h1 className="text-xl font-bold text-white">Suri Analytics</h1>
             <p className="text-[#FFD700] italic text-sm">Six Sigma Business Intelligence</p>
           </div>

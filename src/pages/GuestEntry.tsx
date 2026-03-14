@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { validateBypassCode } from "@/lib/bypass-code";
 import { addNotification } from "@/lib/notifications";
+import PilaLogo from "@/components/PilaLogo";
 
 const validateMobile = (value: string) => {
   const cleaned = value.replace(/\s+/g, "");
@@ -280,12 +281,7 @@ const GuestEntry = () => {
 
       {/* Header */}
       <div className="flex flex-col items-center mt-4 mb-6">
-        <div
-          className="w-24 h-24 bg-[#3B82F6] rounded-2xl flex items-center justify-center mb-2"
-          style={{ filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }}
-        >
-          <span className="text-6xl">🎫</span>
-        </div>
+        <PilaLogo className="w-24 h-24 mb-2" />
         <h1 className="text-xl font-bold text-white text-center">Welcome to {merchantName}!</h1>
         <p className="text-[#FFD700] italic text-lg">Ginhawa sa Bawat Pila</p>
       </div>

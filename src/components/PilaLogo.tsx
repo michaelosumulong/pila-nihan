@@ -12,7 +12,7 @@ const PilaLogo = ({ className = "w-14 h-14", variant = "icon", style }: PilaLogo
     src={pilaLogo}
     alt="Pila-nihan logo"
     className={className}
-    style={style}
+    style={{ ...style, filter: "none" }}
   />
 );
 

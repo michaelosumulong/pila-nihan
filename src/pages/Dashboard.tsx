@@ -192,9 +192,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between px-5 pt-3 pb-6">
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
           <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-[#3B82F6] rounded-xl flex items-center justify-center logo-glow mb-1">
-              <PilaLogo className="w-10 h-10" />
-            </div>
+            <PilaLogo className="w-16 h-16 mb-1" />
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-primary">Dashboard</h1>
               {lowBatteryMode && (
