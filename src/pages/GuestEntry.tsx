@@ -47,6 +47,7 @@ const DEMO_MERCHANTS: Record<string, any> = {
 const GuestEntry = () => {
   const { merchantId } = useParams();
   const navigate = useNavigate();
+  const { branding, customLogo, businessName: brandName } = useBranding();
   const buntingCount = 24;
 
   const [merchantData, setMerchantData] = useState<any>(null);
