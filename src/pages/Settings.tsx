@@ -64,7 +64,8 @@ const CATEGORIES = ["AGOS", "SULONG", "ALON"];
 const Settings = () => {
   const navigate = useNavigate();
 
-  const [merchant, setMerchant] = useState(() => {
+  // Saved merchant state (from localStorage)
+  const [savedMerchant] = useState(() => {
     const stored = localStorage.getItem("pila-merchant");
     return stored
       ? JSON.parse(stored)
@@ -79,25 +80,62 @@ const Settings = () => {
         };
   });
 
-  const [selectedPreset, setSelectedPreset] = useState(
-    merchant.branding?.id || "classic"
-  );
+  // Temp state for pending changes
+  const [tempBusinessName, setTempBusinessName] = useState(savedMerchant.businessName || "");
+  const [tempShopCode, setTempShopCode] = useState(savedMerchant.shopCode || "");
+  const [tempCategory, setTempCategory] = useState(savedMerchant.category || "AGOS");
+  const [tempTargetTime, setTempTargetTime] = useState(savedMerchant.targetHandlingTime || 8);
+  const [tempPreset, setTempPreset] = useState(savedMerchant.branding?.id || "classic");
+  const [tempLogo, setTempLogo] = useState(savedMerchant.customLogo || null);
+
   const [lowBatteryMode, setLowBatteryMode] = useState(
     localStorage.getItem("pila-low-battery") === "true"
   );
 
-  const saveMerchant = (updates: Record<string, unknown>) => {
-    const updated = { ...merchant, ...updates };
-    setMerchant(updated);
+  // Detect unsaved changes
+  const hasChanges =
+    tempBusinessName !== (savedMerchant.businessName || "") ||
+    tempShopCode !== (savedMerchant.shopCode || "") ||
+    tempCategory !== (savedMerchant.category || "AGOS") ||
+    tempTargetTime !== (savedMerchant.targetHandlingTime || 8) ||
+    tempPreset !== (savedMerchant.branding?.id || "classic") ||
+    tempLogo !== (savedMerchant.customLogo || null);
+
+  // Apply all changes
+  const applyChanges = () => {
+    const selectedBranding = BRAND_PRESETS.find((p) => p.id === tempPreset) || BRAND_PRESETS[0];
+    const updated = {
+      ...savedMerchant,
+      businessName: tempBusinessName,
+      shopCode: tempShopCode.toUpperCase().replace(/[^A-Z0-9]/g, ""),
+      category: tempCategory,
+      targetHandlingTime: Math.max(1, Math.min(120, tempTargetTime)),
+      branding: selectedBranding,
+      customLogo: tempLogo,
+    };
     localStorage.setItem("pila-merchant", JSON.stringify(updated));
-    toast.success("Settings saved!");
+    toast.success("Settings applied successfully!", {
+      description: "Your changes are now live.",
+    });
+    // Reload to apply everywhere
+    setTimeout(() => window.location.reload(), 400);
+  };
+
+  // Discard changes
+  const discardChanges = () => {
+    setTempBusinessName(savedMerchant.businessName || "");
+    setTempShopCode(savedMerchant.shopCode || "");
+    setTempCategory(savedMerchant.category || "AGOS");
+    setTempTargetTime(savedMerchant.targetHandlingTime || 8);
+    setTempPreset(savedMerchant.branding?.id || "classic");
+    setTempLogo(savedMerchant.customLogo || null);
+    toast.info("Changes discarded");
   };
 
   const handlePresetChange = (presetId: string) => {
     const preset = BRAND_PRESETS.find((p) => p.id === presetId);
     if (preset) {
-      setSelectedPreset(presetId);
-      saveMerchant({ branding: preset });
+      setTempPreset(presetId);
     }
   };
 
@@ -114,12 +152,12 @@ const Settings = () => {
     }
     const reader = new FileReader();
     reader.onloadend = () => {
-      saveMerchant({ customLogo: reader.result as string });
+      setTempLogo(reader.result as string);
     };
     reader.readAsDataURL(file);
   };
 
-  const removeLogo = () => saveMerchant({ customLogo: null });
+  const removeLogo = () => setTempLogo(null);
 
   const toggleLowBattery = () => {
     const newValue = !lowBatteryMode;
@@ -128,7 +166,7 @@ const Settings = () => {
     toast.success(`Low Battery Mode ${newValue ? "enabled" : "disabled"}`);
   };
 
-  const branding = merchant.branding || BRAND_PRESETS[0];
+  const previewBranding = BRAND_PRESETS.find((p) => p.id === tempPreset) || BRAND_PRESETS[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A2569] to-[#1E3A8A] p-4 md:p-6">
