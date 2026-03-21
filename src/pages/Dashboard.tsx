@@ -253,9 +253,9 @@ const Dashboard = () => {
 
         {/* Quick Actions */}
         <div className="flex gap-3 overflow-x-auto pb-1 mb-6 scrollbar-hide">
-          <ActionButton icon="📢" label="Call Next" bg="bg-[#10B981]" />
-          <ActionButton icon="👀" label="View Queue" bg="bg-[#3B82F6]" />
-          <ActionButton icon="⚙️" label="Settings" bg="bg-[#6B7280]" />
+          <ActionButton icon="📢" label="Call Next" bg="bg-[#10B981]" onClick={() => navigate("/queue")} />
+          <ActionButton icon="👀" label="View Queue" bg="bg-[#3B82F6]" onClick={() => navigate("/queue")} />
+          <ActionButton icon="⚙️" label="Settings" bg="bg-[#6B7280]" onClick={() => navigate("/settings")} />
           <button onClick={() => navigate("/guide?tab=merchant")} className="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-200 whitespace-nowrap flex items-center gap-1">
             📖 Quick Guide
           </button>
@@ -561,7 +561,7 @@ const Dashboard = () => {
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/queue"); }}>📋 Queue</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/analytics"); }}>📊 Analytics</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Wallet feature coming soon!")}>💰 Wallet</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Settings feature coming soon!")}>⚙️ Settings</p>
+              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/settings"); }}>⚙️ Settings</p>
               <LowBatteryToggle active={lowBatteryMode} onToggle={handleToggleBattery} />
               <div className="border-t border-gray-200 mt-2 pt-2">
                 <p className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors cursor-pointer rounded-lg" onClick={() => { localStorage.removeItem("pila-merchant"); navigate("/"); }}>
@@ -578,7 +578,7 @@ const Dashboard = () => {
         <NavTab icon="🏠" label="Dashboard" active />
         <NavTab icon="📋" label="Queue" onClick={() => navigate("/queue")} />
         <NavTab icon="💰" label="Wallet" onClick={() => toast.info("Wallet feature coming soon!")} />
-        <NavTab icon="⚙️" label="Settings" onClick={() => toast.info("Settings feature coming soon!")} />
+        <NavTab icon="⚙️" label="Settings" onClick={() => navigate("/settings")} />
       </div>
     </div>
   );
@@ -594,8 +594,8 @@ const StatCard = ({ icon, value, label, valueColor, smaller }: {
   </div>
 );
 
-const ActionButton = ({ icon, label, bg }: { icon: string; label: string; bg: string }) => (
-  <button className={`${bg} text-white rounded-xl px-6 py-3 flex items-center gap-2 whitespace-nowrap font-medium active:scale-95 transition-transform`}>
+const ActionButton = ({ icon, label, bg, onClick }: { icon: string; label: string; bg: string; onClick?: () => void }) => (
+  <button onClick={onClick} className={`${bg} text-white rounded-xl px-6 py-3 flex items-center gap-2 whitespace-nowrap font-medium active:scale-95 transition-transform`}>
     <span>{icon}</span> {label}
   </button>
 );

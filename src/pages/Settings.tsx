@@ -64,7 +64,8 @@ const CATEGORIES = ["AGOS", "SULONG", "ALON"];
 const Settings = () => {
   const navigate = useNavigate();
 
-  const [merchant, setMerchant] = useState(() => {
+  // Saved merchant state (from localStorage)
+  const [savedMerchant] = useState(() => {
     const stored = localStorage.getItem("pila-merchant");
     return stored
       ? JSON.parse(stored)
@@ -79,25 +80,62 @@ const Settings = () => {
         };
   });
 
-  const [selectedPreset, setSelectedPreset] = useState(
-    merchant.branding?.id || "classic"
-  );
+  // Temp state for pending changes
+  const [tempBusinessName, setTempBusinessName] = useState(savedMerchant.businessName || "");
+  const [tempShopCode, setTempShopCode] = useState(savedMerchant.shopCode || "");
+  const [tempCategory, setTempCategory] = useState(savedMerchant.category || "AGOS");
+  const [tempTargetTime, setTempTargetTime] = useState(savedMerchant.targetHandlingTime || 8);
+  const [tempPreset, setTempPreset] = useState(savedMerchant.branding?.id || "classic");
+  const [tempLogo, setTempLogo] = useState(savedMerchant.customLogo || null);
+
   const [lowBatteryMode, setLowBatteryMode] = useState(
     localStorage.getItem("pila-low-battery") === "true"
   );
 
-  const saveMerchant = (updates: Record<string, unknown>) => {
-    const updated = { ...merchant, ...updates };
-    setMerchant(updated);
+  // Detect unsaved changes
+  const hasChanges =
+    tempBusinessName !== (savedMerchant.businessName || "") ||
+    tempShopCode !== (savedMerchant.shopCode || "") ||
+    tempCategory !== (savedMerchant.category || "AGOS") ||
+    tempTargetTime !== (savedMerchant.targetHandlingTime || 8) ||
+    tempPreset !== (savedMerchant.branding?.id || "classic") ||
+    tempLogo !== (savedMerchant.customLogo || null);
+
+  // Apply all changes
+  const applyChanges = () => {
+    const selectedBranding = BRAND_PRESETS.find((p) => p.id === tempPreset) || BRAND_PRESETS[0];
+    const updated = {
+      ...savedMerchant,
+      businessName: tempBusinessName,
+      shopCode: tempShopCode.toUpperCase().replace(/[^A-Z0-9]/g, ""),
+      category: tempCategory,
+      targetHandlingTime: Math.max(1, Math.min(120, tempTargetTime)),
+      branding: selectedBranding,
+      customLogo: tempLogo,
+    };
     localStorage.setItem("pila-merchant", JSON.stringify(updated));
-    toast.success("Settings saved!");
+    toast.success("Settings applied successfully!", {
+      description: "Your changes are now live.",
+    });
+    // Reload to apply everywhere
+    setTimeout(() => window.location.reload(), 400);
+  };
+
+  // Discard changes
+  const discardChanges = () => {
+    setTempBusinessName(savedMerchant.businessName || "");
+    setTempShopCode(savedMerchant.shopCode || "");
+    setTempCategory(savedMerchant.category || "AGOS");
+    setTempTargetTime(savedMerchant.targetHandlingTime || 8);
+    setTempPreset(savedMerchant.branding?.id || "classic");
+    setTempLogo(savedMerchant.customLogo || null);
+    toast.info("Changes discarded");
   };
 
   const handlePresetChange = (presetId: string) => {
     const preset = BRAND_PRESETS.find((p) => p.id === presetId);
     if (preset) {
-      setSelectedPreset(presetId);
-      saveMerchant({ branding: preset });
+      setTempPreset(presetId);
     }
   };
 
@@ -114,12 +152,12 @@ const Settings = () => {
     }
     const reader = new FileReader();
     reader.onloadend = () => {
-      saveMerchant({ customLogo: reader.result as string });
+      setTempLogo(reader.result as string);
     };
     reader.readAsDataURL(file);
   };
 
-  const removeLogo = () => saveMerchant({ customLogo: null });
+  const removeLogo = () => setTempLogo(null);
 
   const toggleLowBattery = () => {
     const newValue = !lowBatteryMode;
@@ -128,14 +166,48 @@ const Settings = () => {
     toast.success(`Low Battery Mode ${newValue ? "enabled" : "disabled"}`);
   };
 
-  const branding = merchant.branding || BRAND_PRESETS[0];
+  const previewBranding = BRAND_PRESETS.find((p) => p.id === tempPreset) || BRAND_PRESETS[0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A2569] to-[#1E3A8A] p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#0A2569] to-[#1E3A8A] p-4 md:p-6 pb-24">
+      {/* Sticky Apply/Discard Bar */}
+      {hasChanges && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-[#FFB703] shadow-2xl px-4 py-3">
+          <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-lg">⚠️</span>
+              <span className="font-semibold text-gray-900">You have unsaved changes</span>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={discardChanges}
+                className="px-4 py-2 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors text-sm"
+              >
+                Discard
+              </button>
+              <button
+                onClick={applyChanges}
+                className="px-6 py-2 rounded-lg bg-[#10B981] text-white font-bold hover:bg-[#059669] transition-colors text-sm shadow-lg"
+              >
+                ✓ Apply Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="max-w-5xl mx-auto mb-6">
         <button
-          onClick={() => navigate("/dashboard")}
+          onClick={() => {
+            if (hasChanges) {
+              if (window.confirm("You have unsaved changes. Discard them?")) {
+                navigate("/dashboard");
+              }
+            } else {
+              navigate("/dashboard");
+            }
+          }}
           className="text-white hover:text-[#FFB703] flex items-center gap-2 mb-4 font-medium"
         >
           ← Back to Dashboard
@@ -154,7 +226,7 @@ const Settings = () => {
       </div>
 
       {/* Founding Merchant Banner */}
-      {merchant.foundingNumber && merchant.foundingNumber <= 50 && (
+      {savedMerchant.foundingNumber && savedMerchant.foundingNumber <= 50 && (
         <div className="max-w-5xl mx-auto mb-6">
           <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl p-4 shadow-xl border border-purple-400">
             <div className="flex items-center gap-3">
@@ -170,7 +242,7 @@ const Settings = () => {
               </div>
               <div className="bg-white/20 rounded-lg px-4 py-2 text-center">
                 <p className="text-white font-bold">
-                  #{merchant.foundingNumber}
+                  #{savedMerchant.foundingNumber}
                 </p>
                 <p className="text-white/80 text-xs">of 50</p>
               </div>
@@ -192,8 +264,8 @@ const Settings = () => {
               </label>
               <input
                 type="text"
-                value={merchant.businessName || ""}
-                onChange={(e) => saveMerchant({ businessName: e.target.value })}
+                value={tempBusinessName}
+                onChange={(e) => setTempBusinessName(e.target.value)}
                 placeholder="Your Business Name"
                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#1E3A8A] outline-none text-gray-900"
               />
@@ -204,13 +276,11 @@ const Settings = () => {
               </label>
               <input
                 type="text"
-                value={merchant.shopCode || ""}
+                value={tempShopCode}
                 onChange={(e) =>
-                  saveMerchant({
-                    shopCode: e.target.value
-                      .toUpperCase()
-                      .replace(/[^A-Z0-9]/g, ""),
-                  })
+                  setTempShopCode(
+                    e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")
+                  )
                 }
                 placeholder="SHOPCODE"
                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#1E3A8A] outline-none uppercase text-gray-900"
@@ -222,8 +292,8 @@ const Settings = () => {
                 Business Category
               </label>
               <select
-                value={merchant.category || "AGOS"}
-                onChange={(e) => saveMerchant({ category: e.target.value })}
+                value={tempCategory}
+                onChange={(e) => setTempCategory(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#1E3A8A] outline-none text-gray-900"
               >
                 {CATEGORIES.map((cat) => (
@@ -243,14 +313,11 @@ const Settings = () => {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  value={merchant.targetHandlingTime || 8}
+                  value={tempTargetTime}
                   onChange={(e) =>
-                    saveMerchant({
-                      targetHandlingTime: Math.max(
-                        1,
-                        Math.min(120, Number(e.target.value) || 1)
-                      ),
-                    })
+                    setTempTargetTime(
+                      Math.max(1, Math.min(120, Number(e.target.value) || 1))
+                    )
                   }
                   min="1"
                   max="120"
@@ -280,6 +347,31 @@ const Settings = () => {
             matches your business.
           </p>
 
+          {/* Live Preview */}
+          <div className="mb-6">
+            <p className="text-sm font-semibold text-gray-700 mb-2">Live Preview:</p>
+            <div
+              className="rounded-xl p-4 flex items-center gap-4"
+              style={{ backgroundColor: previewBranding.primary }}
+            >
+              {tempLogo ? (
+                <img src={tempLogo} alt="Logo" className="h-12 object-contain" style={{ maxWidth: "80px" }} />
+              ) : (
+                <span className="text-3xl" style={{ color: previewBranding.secondary }}>
+                  {previewBranding.emoji}
+                </span>
+              )}
+              <div>
+                <p className="font-bold" style={{ color: previewBranding.secondary }}>
+                  {tempBusinessName || "Your Business"}
+                </p>
+                <p className="text-xs italic" style={{ color: previewBranding.textOnPrimary, opacity: 0.8 }}>
+                  Ginhawa sa Bawat Pila
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Preset Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
             {BRAND_PRESETS.map((preset) => (
@@ -287,7 +379,7 @@ const Settings = () => {
                 key={preset.id}
                 onClick={() => handlePresetChange(preset.id)}
                 className={`relative p-3 md:p-4 rounded-xl border-2 transition-all ${
-                  selectedPreset === preset.id
+                  tempPreset === preset.id
                     ? "border-purple-600 bg-purple-50 shadow-lg scale-105"
                     : "border-gray-200 hover:border-gray-300 hover:shadow-md"
                 }`}
@@ -312,7 +404,7 @@ const Settings = () => {
                 <p className="text-xs text-gray-600 hidden md:block">
                   {preset.description}
                 </p>
-                {selectedPreset === preset.id && (
+                {tempPreset === preset.id && (
                   <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                     ✓
                   </div>
@@ -350,12 +442,12 @@ const Settings = () => {
                 </p>
                 <div
                   className="rounded-xl p-4 h-40 flex items-center justify-center"
-                  style={{ backgroundColor: branding.primary }}
+                  style={{ backgroundColor: previewBranding.primary }}
                 >
-                  {merchant.customLogo ? (
+                  {tempLogo ? (
                     <div className="relative">
                       <img
-                        src={merchant.customLogo}
+                        src={tempLogo}
                         alt="Custom logo"
                         className="max-h-32 max-w-full object-contain"
                         style={{ maxWidth: "150px" }}
@@ -371,14 +463,14 @@ const Settings = () => {
                     <div className="text-center">
                       <div
                         className="text-4xl mb-2"
-                        style={{ color: branding.secondary }}
+                        style={{ color: previewBranding.secondary }}
                       >
-                        {branding.emoji}
+                        {previewBranding.emoji}
                       </div>
                       <p
                         className="text-xs"
                         style={{
-                          color: branding.textOnPrimary,
+                          color: previewBranding.textOnPrimary,
                           opacity: 0.8,
                         }}
                       >
