@@ -127,13 +127,20 @@ const GuestTicket = () => {
   }, [lowBatteryMode, ticketNumber, feedbackSubmitted]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#002366] via-[#1E5AA8] to-[#3B82F6] px-6 py-4 pb-12">
+    <div
+      className="min-h-screen px-6 py-4 pb-12 brand-transition"
+      style={{ background: `linear-gradient(to bottom, ${branding.primary}, ${branding.primary}cc, ${branding.primary}99)` }}
+    >
       {/* Battery Toggle Header */}
       <div className="max-w-md mx-auto flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <PilaLogo className="w-8 h-8" />
+          {customLogo ? (
+            <img src={customLogo} alt="Logo" className="w-8 h-8 object-contain" />
+          ) : (
+            <PilaLogo className="w-8 h-8" />
+          )}
           <div>
-            <p className="text-primary font-bold text-sm">Your Ticket</p>
+            <p className="font-bold text-sm brand-transition" style={{ color: branding.secondary }}>Your Ticket</p>
             <p className="text-xs text-white/70">
               {lowBatteryMode ? "Battery Saver ON" : "Live Updates"}
             </p>
