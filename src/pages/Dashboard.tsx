@@ -11,6 +11,8 @@ import PendingAudits from "@/components/PendingAudits";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import VersionFooter from "@/components/VersionFooter";
 import PilaLogo from "@/components/PilaLogo";
+import FoundingMerchantBadge from "@/components/FoundingMerchantBadge";
+import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 
 interface MerchantData {
   id: string;
