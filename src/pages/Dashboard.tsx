@@ -253,9 +253,9 @@ const Dashboard = () => {
 
         {/* Quick Actions */}
         <div className="flex gap-3 overflow-x-auto pb-1 mb-6 scrollbar-hide">
-          <ActionButton icon="📢" label="Call Next" bg="bg-[#10B981]" />
-          <ActionButton icon="👀" label="View Queue" bg="bg-[#3B82F6]" />
-          <ActionButton icon="⚙️" label="Settings" bg="bg-[#6B7280]" />
+          <ActionButton icon="📢" label="Call Next" bg="bg-[#10B981]" onClick={() => navigate("/queue")} />
+          <ActionButton icon="👀" label="View Queue" bg="bg-[#3B82F6]" onClick={() => navigate("/queue")} />
+          <ActionButton icon="⚙️" label="Settings" bg="bg-[#6B7280]" onClick={() => navigate("/settings")} />
           <button onClick={() => navigate("/guide?tab=merchant")} className="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-200 whitespace-nowrap flex items-center gap-1">
             📖 Quick Guide
           </button>
