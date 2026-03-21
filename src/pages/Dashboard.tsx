@@ -250,7 +250,7 @@ const Dashboard = () => {
         </div>
 
         {/* Revenue Chart */}
-        <div className="bg-white rounded-2xl shadow-lg p-5 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-5 mb-6 border border-primary/20">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">7-Day Revenue</h3>
           <div className="flex items-end justify-between gap-2 h-32">
             {[
