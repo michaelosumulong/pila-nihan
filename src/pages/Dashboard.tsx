@@ -513,6 +513,13 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Trust Signals */}
+        <div className="space-y-4 mb-6">
+          <FoundingMerchantBadge />
+          <SuriValueBadge plan={merchant.plan} />
+          <AntiCorruptionBadge />
+        </div>
+
         {/* Business Profile */}
         <BusinessProfileCard />
 
