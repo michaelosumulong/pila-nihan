@@ -578,7 +578,7 @@ const Dashboard = () => {
         <NavTab icon="🏠" label="Dashboard" active />
         <NavTab icon="📋" label="Queue" onClick={() => navigate("/queue")} />
         <NavTab icon="💰" label="Wallet" onClick={() => toast.info("Wallet feature coming soon!")} />
-        <NavTab icon="⚙️" label="Settings" onClick={() => toast.info("Settings feature coming soon!")} />
+        <NavTab icon="⚙️" label="Settings" onClick={() => navigate("/settings")} />
       </div>
     </div>
   );
