@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import MerchantSignup from "./components/MerchantSignup";
 import About from "./pages/About";
 import Guide from "./pages/Guide";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/signup" element={<MerchantSignup />} />
           <Route path="/about" element={<About />} />
           <Route path="/guide" element={<Guide />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
