@@ -104,7 +104,7 @@ const About = () => {
           <h2 className="text-3xl font-bold text-foreground mb-12 text-center">Key Features</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {features.map((f) => (
-              <div key={f.title} className={`bg-card rounded-xl p-6 shadow-md border-l-4 ${f.color}`}>
+              <div key={f.title} className={`bg-card rounded-xl p-6 shadow-md border-l-4 ${f.color} border border-primary/10`}>
                 <div className="flex items-start gap-4">
                   <div className="text-4xl flex-shrink-0">{f.icon}</div>
                   <div>
