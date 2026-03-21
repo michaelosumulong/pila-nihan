@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import PilaLogo from "@/components/PilaLogo";
+import ROICalculator from "@/components/ROICalculator";
+import PricingTable from "@/components/PricingTable";
+import { AntiCorruptionBadge } from "@/components/TrustBadges";
 
 const features = [
   {
