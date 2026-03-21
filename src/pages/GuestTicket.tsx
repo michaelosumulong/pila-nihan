@@ -32,6 +32,7 @@ const GuestTicket = () => {
   const [searchParams] = useSearchParams();
   const isRecovered = searchParams.get("recovered") === "true";
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
+  const { branding, customLogo } = useBranding();
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
