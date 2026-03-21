@@ -193,14 +193,17 @@ const GuestTicket = () => {
 
       {/* Header */}
       <div className="flex flex-col items-center mt-4 mb-6">
-        <div
-          className="w-32 h-32 bg-[#3B82F6] rounded-2xl flex items-center justify-center mb-2"
-          style={lowBatteryMode ? undefined : { filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }}
+        <div className="w-32 h-32 rounded-2xl flex items-center justify-center mb-2 brand-transition"
+          style={{ backgroundColor: branding.primary }}
         >
-          <PilaLogo className="w-20 h-20" />
+          {customLogo ? (
+            <img src={customLogo} alt="Logo" className="w-20 h-20 object-contain" />
+          ) : (
+            <PilaLogo className="w-20 h-20" />
+          )}
         </div>
-        <h1 className="text-2xl font-bold text-primary">PILA-NIHAN™</h1>
-        <p className="text-[#FFD700] italic text-lg">Ginhawa sa Bawat Pila</p>
+        <h1 className="text-2xl font-bold brand-transition" style={{ color: branding.secondary }}>PILA-NIHAN™</h1>
+        <p className="italic text-lg brand-transition" style={{ color: branding.accent || branding.secondary }}>Ginhawa sa Bawat Pila</p>
       </div>
 
       {/* Ticket Card */}

@@ -102,6 +102,8 @@ const Settings = () => {
     tempPreset !== (savedMerchant.branding?.id || "classic") ||
     tempLogo !== (savedMerchant.customLogo || null);
 
+  const { refreshBranding } = useBranding();
+
   // Apply all changes
   const applyChanges = () => {
     const selectedBranding = BRAND_PRESETS.find((p) => p.id === tempPreset) || BRAND_PRESETS[0];
@@ -115,11 +117,14 @@ const Settings = () => {
       customLogo: tempLogo,
     };
     localStorage.setItem("pila-merchant", JSON.stringify(updated));
+
+    // Broadcast to all components via context + custom event
+    refreshBranding();
+    window.dispatchEvent(new CustomEvent("merchant-updated"));
+
     toast.success("Settings applied successfully!", {
-      description: "Your changes are now live.",
+      description: "Your changes are now live across all pages.",
     });
-    // Reload to apply everywhere
-    setTimeout(() => window.location.reload(), 400);
   };
 
   // Discard changes

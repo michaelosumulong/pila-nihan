@@ -88,12 +88,22 @@
 
 /* Logo - no glow */
 
+/* Brand transition classes - performance optimized */
+.brand-transition {
+  transition: background-color 0.3s ease-in-out,
+              color 0.3s ease-in-out,
+              border-color 0.3s ease-in-out;
+}
+
 /* Low Battery Mode - global optimizations */
 .low-battery-mode * {
   animation-duration: 0s !important;
   transition-duration: 0s !important;
 }
 
+.low-battery-mode .brand-transition {
+  transition: none !important;
+}
 
 .low-battery-mode .bunting {
   display: none !important;
