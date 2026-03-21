@@ -247,8 +247,8 @@ const Dashboard = () => {
         <div className="grid grid-cols-2 gap-4 mb-6">
           <StatCard icon="👥" value="24" label="Sa Pila Ngayon" valueColor="text-[#1E3A8A]" />
           <StatCard icon="✅" value="158" label="Naserve Today" valueColor="text-[#10B981]" />
-          <StatCard icon="💰" value={`₱${merchant.wallet.balance.toLocaleString()}`} label="Wallet Balance" valueColor="text-[#FFB703]" smaller />
-          <StatCard icon="🎟️" value={`₱${merchant.wallet.credits.toLocaleString()}`} label="Prepaid Credits" valueColor="text-[#3B82F6]" smaller />
+          <StatCard icon="💰" value={`₱${(merchant.wallet?.balance ?? 0).toLocaleString()}`} label="Wallet Balance" valueColor="text-[#FFB703]" smaller />
+          <StatCard icon="🎟️" value={`₱${(merchant.wallet?.credits ?? 0).toLocaleString()}`} label="Prepaid Credits" valueColor="text-[#3B82F6]" smaller />
         </div>
 
         {/* Quick Actions */}
