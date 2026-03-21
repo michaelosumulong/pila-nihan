@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { validateBypassCode } from "@/lib/bypass-code";
 import { addNotification } from "@/lib/notifications";
 import PilaLogo from "@/components/PilaLogo";
+import { useBranding } from "@/contexts/BrandingContext";
 
 const validateMobile = (value: string) => {
   const cleaned = value.replace(/\s+/g, "");
