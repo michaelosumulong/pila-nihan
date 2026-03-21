@@ -561,7 +561,7 @@ const Dashboard = () => {
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/queue"); }}>📋 Queue</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/analytics"); }}>📊 Analytics</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Wallet feature coming soon!")}>💰 Wallet</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Settings feature coming soon!")}>⚙️ Settings</p>
+              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/settings"); }}>⚙️ Settings</p>
               <LowBatteryToggle active={lowBatteryMode} onToggle={handleToggleBattery} />
               <div className="border-t border-gray-200 mt-2 pt-2">
                 <p className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors cursor-pointer rounded-lg" onClick={() => { localStorage.removeItem("pila-merchant"); navigate("/"); }}>
