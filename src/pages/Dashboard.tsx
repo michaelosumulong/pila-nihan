@@ -575,7 +575,7 @@ const Dashboard = () => {
 const StatCard = ({ icon, value, label, valueColor, smaller }: {
   icon: string; value: string; label: string; valueColor: string; smaller?: boolean;
 }) => (
-  <div className="bg-white rounded-2xl shadow-lg p-5">
+  <div className="bg-white rounded-2xl shadow-lg p-5 border border-primary/20">
     <span className="text-2xl">{icon}</span>
     <p className={`${smaller ? "text-2xl" : "text-3xl"} font-bold ${valueColor} mt-1`}>{value}</p>
     <p className="text-sm text-gray-600">{label}</p>
