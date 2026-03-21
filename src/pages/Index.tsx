@@ -245,14 +245,14 @@ const Index = () => {
 
       {/* Footer */}
       <div className="max-w-3xl mx-auto w-full mb-4">
-        <div className="bg-[hsl(var(--warning-bg))] border-l-4 border-destructive p-4 rounded-lg shadow-md flex gap-3">
-          <span className="text-2xl">⚠️</span>
+        <div className="bg-red-50 border-2 border-red-200 p-4 rounded-xl shadow-md flex items-start gap-3">
+          <span className="text-2xl flex-shrink-0">🛡️</span>
           <div>
-            <p className="text-sm font-bold text-gray-900">
-              BAWAL ANG FIXER AT UNDER-THE-TABLE!
+            <p className="text-sm font-bold text-red-800">
+              ZERO-CASH POLICY • BAWAL ANG FIXER!
             </p>
-            <p className="text-xs text-gray-700 mt-1">
-              Lahat ng bayad ay digital. Walang cash transaction sa pila.
+            <p className="text-xs text-red-600 mt-1">
+              All transactions are digital via GCash/Maya. No fixers, no under-the-table dealings.
             </p>
           </div>
         </div>

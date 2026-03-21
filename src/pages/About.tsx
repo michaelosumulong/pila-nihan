@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import PilaLogo from "@/components/PilaLogo";
+import ROICalculator from "@/components/ROICalculator";
+import PricingTable from "@/components/PricingTable";
+import { AntiCorruptionBadge } from "@/components/TrustBadges";
 
 const features = [
   {
@@ -101,7 +104,7 @@ const About = () => {
           <h2 className="text-3xl font-bold text-foreground mb-12 text-center">Key Features</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {features.map((f) => (
-              <div key={f.title} className={`bg-card rounded-xl p-6 shadow-md border-l-4 ${f.color}`}>
+              <div key={f.title} className={`bg-card rounded-xl p-6 shadow-md border-l-4 ${f.color} border border-primary/10`}>
                 <div className="flex items-start gap-4">
                   <div className="text-4xl flex-shrink-0">{f.icon}</div>
                   <div>
@@ -112,6 +115,27 @@ const About = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ROI Calculator */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-6 max-w-xl">
+          <ROICalculator />
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="py-4 bg-white">
+        <div className="container mx-auto px-6">
+          <PricingTable />
+        </div>
+      </section>
+
+      {/* Anti-Corruption */}
+      <section className="py-8 bg-gray-50">
+        <div className="container mx-auto px-6 max-w-xl">
+          <AntiCorruptionBadge />
         </div>
       </section>
 

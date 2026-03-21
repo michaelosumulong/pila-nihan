@@ -11,6 +11,8 @@ import PendingAudits from "@/components/PendingAudits";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import VersionFooter from "@/components/VersionFooter";
 import PilaLogo from "@/components/PilaLogo";
+import FoundingMerchantBadge from "@/components/FoundingMerchantBadge";
+import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 
 interface MerchantData {
   id: string;
@@ -248,7 +250,7 @@ const Dashboard = () => {
         </div>
 
         {/* Revenue Chart */}
-        <div className="bg-white rounded-2xl shadow-lg p-5 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg p-5 mb-6 border border-primary/20">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">7-Day Revenue</h3>
           <div className="flex items-end justify-between gap-2 h-32">
             {[
@@ -511,6 +513,13 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Trust Signals */}
+        <div className="space-y-4 mb-6">
+          <FoundingMerchantBadge />
+          <SuriValueBadge plan={merchant.plan} />
+          <AntiCorruptionBadge />
+        </div>
+
         {/* Business Profile */}
         <BusinessProfileCard />
 
@@ -566,7 +575,7 @@ const Dashboard = () => {
 const StatCard = ({ icon, value, label, valueColor, smaller }: {
   icon: string; value: string; label: string; valueColor: string; smaller?: boolean;
 }) => (
-  <div className="bg-white rounded-2xl shadow-lg p-5">
+  <div className="bg-white rounded-2xl shadow-lg p-5 border border-primary/20">
     <span className="text-2xl">{icon}</span>
     <p className={`${smaller ? "text-2xl" : "text-3xl"} font-bold ${valueColor} mt-1`}>{value}</p>
     <p className="text-sm text-gray-600">{label}</p>
