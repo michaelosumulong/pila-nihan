@@ -9,6 +9,7 @@ import CustomerFeedbackModal from "@/components/CustomerFeedbackModal";
 import NotificationCenter from "@/components/NotificationCenter";
 import VersionFooter from "@/components/VersionFooter";
 import PilaLogo from "@/components/PilaLogo";
+import { useBranding } from "@/contexts/BrandingContext";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
