@@ -118,6 +118,27 @@ const About = () => {
         </div>
       </section>
 
+      {/* ROI Calculator */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-6 max-w-xl">
+          <ROICalculator />
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="py-4 bg-white">
+        <div className="container mx-auto px-6">
+          <PricingTable />
+        </div>
+      </section>
+
+      {/* Anti-Corruption */}
+      <section className="py-8 bg-gray-50">
+        <div className="container mx-auto px-6 max-w-xl">
+          <AntiCorruptionBadge />
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-16 bg-gradient-to-br from-[hsl(220,100%,13%)] to-secondary">
         <div className="container mx-auto px-6 max-w-3xl text-center">
