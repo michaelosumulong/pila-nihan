@@ -594,8 +594,8 @@ const StatCard = ({ icon, value, label, valueColor, smaller }: {
   </div>
 );
 
-const ActionButton = ({ icon, label, bg }: { icon: string; label: string; bg: string }) => (
-  <button className={`${bg} text-white rounded-xl px-6 py-3 flex items-center gap-2 whitespace-nowrap font-medium active:scale-95 transition-transform`}>
+const ActionButton = ({ icon, label, bg, onClick }: { icon: string; label: string; bg: string; onClick?: () => void }) => (
+  <button onClick={onClick} className={`${bg} text-white rounded-xl px-6 py-3 flex items-center gap-2 whitespace-nowrap font-medium active:scale-95 transition-transform`}>
     <span>{icon}</span> {label}
   </button>
 );
