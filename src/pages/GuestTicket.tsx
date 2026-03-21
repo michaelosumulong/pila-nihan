@@ -9,6 +9,7 @@ import CustomerFeedbackModal from "@/components/CustomerFeedbackModal";
 import NotificationCenter from "@/components/NotificationCenter";
 import VersionFooter from "@/components/VersionFooter";
 import PilaLogo from "@/components/PilaLogo";
+import { useBranding } from "@/contexts/BrandingContext";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -31,6 +32,7 @@ const GuestTicket = () => {
   const [searchParams] = useSearchParams();
   const isRecovered = searchParams.get("recovered") === "true";
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
+  const { branding, customLogo } = useBranding();
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
@@ -125,13 +127,20 @@ const GuestTicket = () => {
   }, [lowBatteryMode, ticketNumber, feedbackSubmitted]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#002366] via-[#1E5AA8] to-[#3B82F6] px-6 py-4 pb-12">
+    <div
+      className="min-h-screen px-6 py-4 pb-12 brand-transition"
+      style={{ background: `linear-gradient(to bottom, ${branding.primary}, ${branding.primary}cc, ${branding.primary}99)` }}
+    >
       {/* Battery Toggle Header */}
       <div className="max-w-md mx-auto flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <PilaLogo className="w-8 h-8" />
+          {customLogo ? (
+            <img src={customLogo} alt="Logo" className="w-8 h-8 object-contain" />
+          ) : (
+            <PilaLogo className="w-8 h-8" />
+          )}
           <div>
-            <p className="text-primary font-bold text-sm">Your Ticket</p>
+            <p className="font-bold text-sm brand-transition" style={{ color: branding.secondary }}>Your Ticket</p>
             <p className="text-xs text-white/70">
               {lowBatteryMode ? "Battery Saver ON" : "Live Updates"}
             </p>
@@ -184,14 +193,17 @@ const GuestTicket = () => {
 
       {/* Header */}
       <div className="flex flex-col items-center mt-4 mb-6">
-        <div
-          className="w-32 h-32 bg-[#3B82F6] rounded-2xl flex items-center justify-center mb-2"
-          style={lowBatteryMode ? undefined : { filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))" }}
+        <div className="w-32 h-32 rounded-2xl flex items-center justify-center mb-2 brand-transition"
+          style={{ backgroundColor: branding.primary }}
         >
-          <PilaLogo className="w-20 h-20" />
+          {customLogo ? (
+            <img src={customLogo} alt="Logo" className="w-20 h-20 object-contain" />
+          ) : (
+            <PilaLogo className="w-20 h-20" />
+          )}
         </div>
-        <h1 className="text-2xl font-bold text-primary">PILA-NIHAN™</h1>
-        <p className="text-[#FFD700] italic text-lg">Ginhawa sa Bawat Pila</p>
+        <h1 className="text-2xl font-bold brand-transition" style={{ color: branding.secondary }}>PILA-NIHAN™</h1>
+        <p className="italic text-lg brand-transition" style={{ color: branding.accent || branding.secondary }}>Ginhawa sa Bawat Pila</p>
       </div>
 
       {/* Ticket Card */}

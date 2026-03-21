@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { validateBypassCode } from "@/lib/bypass-code";
 import { addNotification } from "@/lib/notifications";
 import PilaLogo from "@/components/PilaLogo";
+import { useBranding } from "@/contexts/BrandingContext";
 
 const validateMobile = (value: string) => {
   const cleaned = value.replace(/\s+/g, "");
@@ -46,6 +47,7 @@ const DEMO_MERCHANTS: Record<string, any> = {
 const GuestEntry = () => {
   const { merchantId } = useParams();
   const navigate = useNavigate();
+  const { branding, customLogo, businessName: brandName } = useBranding();
   const buntingCount = 24;
 
   const [merchantData, setMerchantData] = useState<any>(null);
@@ -271,7 +273,10 @@ const GuestEntry = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#002366] via-[#1E5AA8] to-[#3B82F6] px-6 py-4 pb-12">
+    <div
+      className="min-h-screen px-6 py-4 pb-12 brand-transition"
+      style={{ background: `linear-gradient(to bottom, ${branding.primary}, ${branding.primary}cc, ${branding.primary}99)` }}
+    >
       {/* Bunting */}
       <div className="bunting pt-2 pb-1">
         {Array.from({ length: buntingCount }).map((_, i) => (
@@ -281,9 +286,17 @@ const GuestEntry = () => {
 
       {/* Header */}
       <div className="flex flex-col items-center mt-4 mb-6">
-        <PilaLogo className="w-24 h-24 mb-2" />
-        <h1 className="text-xl font-bold text-white text-center">Welcome to {merchantName}!</h1>
-        <p className="text-[#FFD700] italic text-lg">Ginhawa sa Bawat Pila</p>
+        {customLogo ? (
+          <img src={customLogo} alt={brandName} className="w-24 h-24 mb-2 object-contain" style={{ maxWidth: "150px" }} />
+        ) : (
+          <PilaLogo className="w-24 h-24 mb-2" />
+        )}
+        <h1 className="text-xl font-bold text-center brand-transition" style={{ color: branding.textOnPrimary }}>
+          Welcome to {merchantName}!
+        </h1>
+        <p className="italic text-lg brand-transition" style={{ color: branding.secondary }}>
+          Ginhawa sa Bawat Pila
+        </p>
       </div>
 
       {/* Form Card */}
