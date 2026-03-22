@@ -154,8 +154,8 @@ const Settings = () => {
   const discardChanges = () => {
     setTempBusinessName(savedMerchant.businessName || "");
     setTempShopCode(savedMerchant.shopCode || "");
-    setTempCategory(savedMerchant.category || "AGOS");
-    setTempTargetTime(savedMerchant.targetHandlingTime || 8);
+    setTempCategory(LEGACY_CATEGORY_MAP[savedMerchant.category] || savedMerchant.category || "Standard");
+    setTempTargetTime(savedMerchant.targetHandlingTime || 15);
     setTempPreset(savedMerchant.branding?.id || "classic");
     setTempLogo(savedMerchant.customLogo || null);
     toast.info("Changes discarded");
