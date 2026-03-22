@@ -118,6 +118,9 @@ const Settings = () => {
     };
     localStorage.setItem("pila-merchant", JSON.stringify(updated));
 
+    // Update saved state so hasChanges becomes false immediately
+    setSavedMerchant(updated);
+
     // Broadcast to all components via context + custom event
     refreshBranding();
     window.dispatchEvent(new CustomEvent("merchant-updated"));
