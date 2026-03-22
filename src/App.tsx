@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BrandingProvider } from "@/contexts/BrandingContext";
 import Index from "./pages/Index";
+import Revenue from "./pages/Revenue";
 import Dashboard from "./pages/Dashboard";
 import QueueControls from "./pages/QueueControls";
 import Analytics from "./pages/Analytics";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/guide" element={<Guide />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/revenue" element={<Revenue />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

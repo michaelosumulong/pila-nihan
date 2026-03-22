@@ -576,7 +576,7 @@ const Dashboard = () => {
               <p className="flex items-center gap-3 px-4 py-3 bg-[#1E3A8A] text-white rounded-lg">🏠 Dashboard</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/queue"); }}>📋 Queue</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/analytics"); }}>📊 Analytics</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Wallet feature coming soon!")}>💰 Wallet</p>
+              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/revenue"); }}>💰 Revenue</p>
               <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/settings"); }}>⚙️ Settings</p>
               <LowBatteryToggle active={lowBatteryMode} onToggle={handleToggleBattery} />
               <div className="border-t border-gray-200 mt-2 pt-2">
@@ -593,7 +593,7 @@ const Dashboard = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-40">
         <NavTab icon="🏠" label="Dashboard" active />
         <NavTab icon="📋" label="Queue" onClick={() => navigate("/queue")} />
-        <NavTab icon="💰" label="Wallet" onClick={() => toast.info("Wallet feature coming soon!")} />
+        <NavTab icon="💰" label="Revenue" onClick={() => navigate("/revenue")} />
         <NavTab icon="⚙️" label="Settings" onClick={() => navigate("/settings")} />
       </div>
     </div>
