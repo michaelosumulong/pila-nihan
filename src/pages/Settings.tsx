@@ -84,7 +84,7 @@ const Settings = () => {
           businessName: "",
           shopCode: "",
           category: "Standard",
-          targetHandlingTime: 8,
+          targetHandlingTime: 15,
           branding: BRAND_PRESETS[0],
           customLogo: null,
           foundingNumber: null,
