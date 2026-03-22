@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PilaLogo from "@/components/PilaLogo";
 
-const CATEGORIES = [
-  { value: "", label: "Pumili ng kategorya..." },
-  { value: "LINGKOD", label: "LINGKOD (Government Office)" },
-  { value: "SULONG", label: "SULONG (Small Business)" },
-  { value: "AGOS", label: "AGOS (Commercial)" },
+const SERVICE_PACES = [
+  { value: "", label: "Pumili ng service pace...", time: 15 },
+  { value: "Express", label: "⚡ Express (2-5 mins per person)", time: 5 },
+  { value: "Standard", label: "🏃 Standard (10-20 mins per person)", time: 15 },
+  { value: "Technical", label: "⏳ Technical (30-60 mins per person)", time: 45 },
 ];
 
 const MerchantSignup = () => {
