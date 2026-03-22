@@ -350,7 +350,7 @@ const Settings = () => {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Target Handling Time
+                Target Handling Time (Auto-set)
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -363,14 +363,14 @@ const Settings = () => {
                   }
                   min="1"
                   max="120"
-                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#1E3A8A] outline-none text-gray-900"
+                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#1E3A8A] outline-none text-gray-900 bg-gray-50"
                 />
                 <span className="text-gray-600 font-semibold whitespace-nowrap">
                   min
                 </span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Takt Time: Average minutes per customer
+                ⏱️ Takt Time: Average minutes per customer (auto-set by Service Pace)
               </p>
             </div>
           </div>

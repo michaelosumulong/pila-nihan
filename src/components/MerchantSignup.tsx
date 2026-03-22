@@ -81,7 +81,7 @@ const MerchantSignup = () => {
       email: form.email,
       location: location || { lat: 14.5995, lng: 120.9842 },
       shopCode,
-      targetHandlingTime: 8,
+      targetHandlingTime: SERVICE_PACES.find((p) => p.value === form.category)?.time || 15,
       plan: "PANDAY",
       wallet: { balance: 0, credits: 500 },
       joinedDate: new Date().toISOString(),
