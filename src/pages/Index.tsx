@@ -108,11 +108,15 @@ const Index = () => {
 
       {/* Header */}
       <div className="text-center mb-8 sm:mb-16">
-        <PilaLogo className="w-40 h-40 mx-auto mb-6" />
-        <h1 className="text-4xl sm:text-6xl font-bold text-white mb-3 tracking-tight">
+        {customLogo ? (
+          <img src={customLogo} alt="Logo" className="w-40 h-40 mx-auto mb-6 object-contain" style={{ maxWidth: "200px" }} />
+        ) : (
+          <PilaLogo className="w-40 h-40 mx-auto mb-6" />
+        )}
+        <h1 className="text-4xl sm:text-6xl font-bold mb-3 tracking-tight brand-transition" style={{ color: branding.textOnPrimary }}>
           PILA-NIHAN™
         </h1>
-        <p className="text-xl sm:text-3xl text-primary italic font-light">
+        <p className="text-xl sm:text-3xl italic font-light brand-transition" style={{ color: branding.secondary }}>
           Ginhawa sa Bawat Pila
         </p>
       </div>
