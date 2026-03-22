@@ -184,7 +184,14 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 pb-24">
       {/* Header */}
-      <div className={lowBatteryMode ? "bg-[#1E3A8A]" : "bg-gradient-to-r from-[#1E3A8A] to-[#2563EB]"}>
+      <div
+        className="brand-transition"
+        style={{
+          background: lowBatteryMode
+            ? branding.primary
+            : `linear-gradient(to right, ${branding.primary}, ${branding.primary}dd)`
+        }}
+      >
         {!lowBatteryMode && (
         <div className="bunting pt-2 pb-1">
           {Array.from({ length: buntingCount }).map((_, i) => (
@@ -195,9 +202,13 @@ const Dashboard = () => {
         <div className="flex items-center justify-between px-5 pt-3 pb-6">
           <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
           <div className="flex flex-col items-center">
-            <PilaLogo className="w-16 h-16 mb-1" />
+            {customLogo ? (
+              <img src={customLogo} alt="Logo" className="w-16 h-16 mb-1 object-contain" style={{ maxWidth: "150px" }} />
+            ) : (
+              <PilaLogo className="w-16 h-16 mb-1" />
+            )}
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-primary">Dashboard</h1>
+              <h1 className="text-xl font-bold brand-transition" style={{ color: branding.secondary }}>Dashboard</h1>
               {lowBatteryMode && (
                 <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
                   🔋 Saver
