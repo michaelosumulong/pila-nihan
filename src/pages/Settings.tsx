@@ -121,6 +121,14 @@ const Settings = () => {
     // Update saved state so hasChanges becomes false immediately
     setSavedMerchant(updated);
 
+    // CRITICAL: Reset ALL temp states to match saved values
+    setTempBusinessName(updated.businessName);
+    setTempShopCode(updated.shopCode);
+    setTempCategory(updated.category);
+    setTempTargetTime(updated.targetHandlingTime);
+    setTempPreset(updated.branding.id);
+    setTempLogo(updated.customLogo);
+
     // Broadcast to all components via context + custom event
     refreshBranding();
     window.dispatchEvent(new CustomEvent("merchant-updated"));
