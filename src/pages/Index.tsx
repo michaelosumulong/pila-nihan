@@ -95,7 +95,10 @@ const Index = () => {
   // No dash formatting — plain text only
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[hsl(220,100%,13%)] via-[hsl(213,70%,38%)] to-[hsl(217,91%,60%)] px-4 sm:px-6 py-6 sm:py-12 flex flex-col">
+    <div
+      className="min-h-screen px-4 sm:px-6 py-6 sm:py-12 flex flex-col brand-transition"
+      style={{ background: `linear-gradient(to bottom, ${branding.primary}, ${branding.primary}cc, ${branding.primary}99)` }}
+    >
       {/* Bunting */}
       <div className="bunting mb-4">
         {Array.from({ length: BUNTING_COUNT }).map((_, i) => (
