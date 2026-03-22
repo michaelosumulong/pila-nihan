@@ -318,22 +318,35 @@ const Settings = () => {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Business Category
+                Service Pace (Galaw ng Pila)
               </label>
               <select
                 value={tempCategory}
-                onChange={(e) => setTempCategory(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const pace = SERVICE_PACES.find((p) => p.value === val);
+                  setTempCategory(val);
+                  if (pace) setTempTargetTime(pace.time);
+                }}
                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#1E3A8A] outline-none text-gray-900"
               >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
+                {SERVICE_PACES.map((pace) => (
+                  <option key={pace.value} value={pace.value}>
+                    {pace.label}
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-1">
-                AGOS (Fast) • SULONG (Medium) • ALON (Slow)
+              <p className="text-xs text-gray-500 mt-2 italic">
+                💡 This automatically sets your estimated wait time for customers
               </p>
+              <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-xs font-semibold text-blue-900 mb-2">Quick Guide:</p>
+                <div className="space-y-1 text-xs text-blue-800">
+                  <p><strong>⚡ Express:</strong> Coffee shops, take-out, retail, kiosks</p>
+                  <p><strong>🏃 Standard:</strong> Barbershops, clinics, banks, restaurants</p>
+                  <p><strong>⏳ Technical:</strong> Repairs, government offices, spa treatments</p>
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
