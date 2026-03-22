@@ -7,6 +7,7 @@ const BUNTING_COUNT = 24;
 
 const Index = () => {
   const navigate = useNavigate();
+  const { branding, customLogo } = useBranding();
   const [shopCode, setShopCode] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
