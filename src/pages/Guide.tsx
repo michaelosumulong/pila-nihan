@@ -306,6 +306,118 @@ const MerchantGuide = () => (
         </div>
       </div>
     </div>
+
+    {/* SERVICE PACE GUIDE */}
+    <div className="bg-white rounded-xl shadow-lg p-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">📊 Understanding Service Pace</h2>
+      <p className="text-gray-600 mb-6">
+        Service Pace helps customers know how long they'll wait. Choose the pace that matches your average service time.
+      </p>
+
+      <div className="space-y-6">
+        {/* Express */}
+        <div className="border-l-4 border-green-500 pl-4 py-3 bg-green-50 rounded-r-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-2xl">⚡</span>
+            <div>
+              <h3 className="font-bold text-gray-900">Express (2-5 minutes)</h3>
+              <p className="text-sm text-gray-600">Quick transactions with minimal interaction</p>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-green-900 mb-1">✅ Perfect For:</p>
+          <ul className="text-sm text-green-800 space-y-1 ml-4 list-disc">
+            <li>Coffee shops &amp; cafés — quick orders, pastries</li>
+            <li>Fast food &amp; take-out — food stalls, quick service</li>
+            <li>Retail stores — convenience stores, small purchases</li>
+            <li>Kiosks — ticket counters, bill payments, top-ups</li>
+          </ul>
+          <div className="bg-green-100 p-2 rounded mt-3">
+            <p className="text-xs text-green-900">💡 If 90% of customers are served in under 5 minutes, choose Express.</p>
+          </div>
+        </div>
+
+        {/* Standard */}
+        <div className="border-l-4 border-blue-500 pl-4 py-3 bg-blue-50 rounded-r-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-2xl">🏃</span>
+            <div>
+              <h3 className="font-bold text-gray-900">Standard (10-20 minutes)</h3>
+              <p className="text-sm text-gray-600">Full service with moderate interaction</p>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-blue-900 mb-1">✅ Perfect For:</p>
+          <ul className="text-sm text-blue-800 space-y-1 ml-4 list-disc">
+            <li>Barbershops &amp; salons — haircuts, basic styling</li>
+            <li>Medical clinics — consultations, check-ups</li>
+            <li>Banks &amp; payment centers — transactions, applications</li>
+            <li>Restaurants (dine-in) — full meal service</li>
+            <li>Government services — simple document processing</li>
+          </ul>
+          <div className="bg-blue-100 p-2 rounded mt-3">
+            <p className="text-xs text-blue-900">💡 Standard is the most common choice and the default setting.</p>
+          </div>
+        </div>
+
+        {/* Technical */}
+        <div className="border-l-4 border-orange-500 pl-4 py-3 bg-orange-50 rounded-r-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-2xl">⏳</span>
+            <div>
+              <h3 className="font-bold text-gray-900">Technical (30-60 minutes)</h3>
+              <p className="text-sm text-gray-600">Complex services requiring detailed work</p>
+            </div>
+          </div>
+          <p className="text-sm font-semibold text-orange-900 mb-1">✅ Perfect For:</p>
+          <ul className="text-sm text-orange-800 space-y-1 ml-4 list-disc">
+            <li>Computer repair — diagnostics, troubleshooting</li>
+            <li>Automotive services — maintenance, detailing</li>
+            <li>Spa &amp; wellness — massage therapy, treatments</li>
+            <li>Legal services — consultations, document prep</li>
+            <li>Government services — complex applications, renewals</li>
+          </ul>
+          <div className="bg-orange-100 p-2 rounded mt-3">
+            <p className="text-xs text-orange-900">💡 Choose Technical if you rarely finish under 30 minutes.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Decision Guide */}
+      <div className="mt-6 p-4 bg-purple-50 border-l-4 border-purple-500 rounded-r-lg">
+        <h3 className="font-bold text-purple-900 mb-3">🤔 Still Not Sure? Quick Decision:</h3>
+        <ol className="text-sm text-purple-800 space-y-2">
+          <li><strong>1.</strong> How long does your <em>average</em> customer take?</li>
+          <li><strong>2.</strong> Under 5 minutes? → Choose <strong>⚡ Express</strong></li>
+          <li><strong>3.</strong> Between 10-20 minutes? → Choose <strong>🏃 Standard</strong></li>
+          <li><strong>4.</strong> Over 30 minutes? → Choose <strong>⏳ Technical</strong></li>
+        </ol>
+      </div>
+
+      {/* Common Mistakes */}
+      <div className="mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+        <h3 className="font-bold text-red-900 mb-3">⚠️ Common Mistakes to Avoid</h3>
+        <div className="space-y-2 text-sm text-red-800">
+          <p>❌ <strong>Choosing based on your fastest service</strong> — use your average, not your best case.</p>
+          <p>❌ <strong>Setting unrealistic times to attract customers</strong> — honesty reduces complaints.</p>
+          <p>❌ <strong>Never updating as your business changes</strong> — revisit Settings when adding new services.</p>
+        </div>
+      </div>
+
+      {/* Real Examples */}
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-green-50 rounded-lg p-4 text-center">
+          <p className="font-bold text-green-900">⚡ Express</p>
+          <p className="text-sm text-green-800 mt-1">"Kape Tindahan" — 3 min avg</p>
+        </div>
+        <div className="bg-blue-50 rounded-lg p-4 text-center">
+          <p className="font-bold text-blue-900">🏃 Standard</p>
+          <p className="text-sm text-blue-800 mt-1">"Galing Gupit Barbershop" — 15 min avg</p>
+        </div>
+        <div className="bg-orange-50 rounded-lg p-4 text-center">
+          <p className="font-bold text-orange-900">⏳ Technical</p>
+          <p className="text-sm text-orange-800 mt-1">"Spa Relax" — 60 min avg</p>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
