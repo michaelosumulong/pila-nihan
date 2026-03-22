@@ -66,7 +66,7 @@ const Settings = () => {
   const navigate = useNavigate();
 
   // Saved merchant state (from localStorage)
-  const [savedMerchant] = useState(() => {
+  const [savedMerchant, setSavedMerchant] = useState(() => {
     const stored = localStorage.getItem("pila-merchant");
     return stored
       ? JSON.parse(stored)
@@ -117,6 +117,9 @@ const Settings = () => {
       customLogo: tempLogo,
     };
     localStorage.setItem("pila-merchant", JSON.stringify(updated));
+
+    // Update saved state so hasChanges becomes false immediately
+    setSavedMerchant(updated);
 
     // Broadcast to all components via context + custom event
     refreshBranding();
