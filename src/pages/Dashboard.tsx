@@ -29,9 +29,13 @@ interface MerchantData {
 }
 
 const CATEGORY_MAP: Record<string, { label: string; bg: string; text: string }> = {
+  Express: { label: "⚡ Express", bg: "bg-green-100", text: "text-green-800" },
+  Standard: { label: "🏃 Standard", bg: "bg-blue-100", text: "text-blue-800" },
+  Technical: { label: "⏳ Technical", bg: "bg-orange-100", text: "text-orange-800" },
+  // Legacy fallbacks
   LINGKOD: { label: "Government", bg: "bg-purple-100", text: "text-purple-800" },
-  SULONG: { label: "Small Business", bg: "bg-green-100", text: "text-green-800" },
-  AGOS: { label: "Commercial", bg: "bg-blue-100", text: "text-blue-800" },
+  SULONG: { label: "🏃 Standard", bg: "bg-green-100", text: "text-green-800" },
+  AGOS: { label: "⚡ Express", bg: "bg-blue-100", text: "text-blue-800" },
 };
 
 const Dashboard = () => {

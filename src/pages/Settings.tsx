@@ -346,6 +346,15 @@ const Settings = () => {
                   <p><strong>🏃 Standard:</strong> Barbershops, clinics, banks, restaurants</p>
                   <p><strong>⏳ Technical:</strong> Repairs, government offices, spa treatments</p>
                 </div>
+                <div className="mt-2 pt-2 border-t border-blue-200">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/guide?tab=merchant")}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-semibold underline"
+                  >
+                    → See full guide with examples
+                  </button>
+                </div>
               </div>
             </div>
             <div>
