@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PilaLogo from "@/components/PilaLogo";
 
-const CATEGORIES = [
-  { value: "", label: "Pumili ng kategorya..." },
-  { value: "LINGKOD", label: "LINGKOD (Government Office)" },
-  { value: "SULONG", label: "SULONG (Small Business)" },
-  { value: "AGOS", label: "AGOS (Commercial)" },
+const SERVICE_PACES = [
+  { value: "", label: "Pumili ng service pace...", time: 15 },
+  { value: "Express", label: "⚡ Express (2-5 mins per person)", time: 5 },
+  { value: "Standard", label: "🏃 Standard (10-20 mins per person)", time: 15 },
+  { value: "Technical", label: "⏳ Technical (30-60 mins per person)", time: 45 },
 ];
 
 const MerchantSignup = () => {
@@ -81,7 +81,7 @@ const MerchantSignup = () => {
       email: form.email,
       location: location || { lat: 14.5995, lng: 120.9842 },
       shopCode,
-      targetHandlingTime: 8,
+      targetHandlingTime: SERVICE_PACES.find((p) => p.value === form.category)?.time || 15,
       plan: "PANDAY",
       wallet: { balance: 0, credits: 500 },
       joinedDate: new Date().toISOString(),
@@ -139,23 +139,37 @@ const MerchantSignup = () => {
             required
           />
 
-          {/* Category */}
+          {/* Service Pace */}
           <div>
             <label className="block text-sm font-medium text-white/90 mb-1">
-              Category <span className="text-red-400">*</span>
+              Service Pace <span className="text-red-400">*</span>
             </label>
             <select
               value={form.category}
-              onChange={(e) => update("category", e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                const pace = SERVICE_PACES.find((p) => p.value === val);
+                update("category", val);
+                if (pace && pace.value) {
+                  setForm((f) => ({ ...f, category: val }));
+                }
+              }}
               className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#FFD700] appearance-none"
             >
-              {CATEGORIES.map((c) => (
+              {SERVICE_PACES.map((c) => (
                 <option key={c.value} value={c.value} className="text-gray-900">
                   {c.label}
                 </option>
               ))}
             </select>
             {errors.category && <p className="text-red-400 text-xs mt-1">{errors.category}</p>}
+            <div className="mt-2 p-2 bg-white/5 rounded-lg border border-white/10">
+              <p className="text-xs text-white/70">
+                <strong>⚡ Express:</strong> Coffee, retail &nbsp;|&nbsp;
+                <strong>🏃 Standard:</strong> Clinics, banks &nbsp;|&nbsp;
+                <strong>⏳ Technical:</strong> Repairs, gov't
+              </p>
+            </div>
           </div>
 
           {/* Address */}

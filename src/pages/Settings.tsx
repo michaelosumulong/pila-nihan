@@ -60,7 +60,17 @@ const BRAND_PRESETS = [
 
 export { BRAND_PRESETS };
 
-const CATEGORIES = ["AGOS", "SULONG", "ALON"];
+const SERVICE_PACES = [
+  { value: "Express", label: "⚡ Express (2-5 mins per person)", time: 5 },
+  { value: "Standard", label: "🏃 Standard (10-20 mins per person)", time: 15 },
+  { value: "Technical", label: "⏳ Technical (30-60 mins per person)", time: 45 },
+];
+
+const LEGACY_CATEGORY_MAP: Record<string, string> = {
+  AGOS: "Express",
+  SULONG: "Standard",
+  ALON: "Technical",
+};
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -73,8 +83,8 @@ const Settings = () => {
       : {
           businessName: "",
           shopCode: "",
-          category: "AGOS",
-          targetHandlingTime: 8,
+          category: "Standard",
+          targetHandlingTime: 15,
           branding: BRAND_PRESETS[0],
           customLogo: null,
           foundingNumber: null,
@@ -84,8 +94,10 @@ const Settings = () => {
   // Temp state for pending changes
   const [tempBusinessName, setTempBusinessName] = useState(savedMerchant.businessName || "");
   const [tempShopCode, setTempShopCode] = useState(savedMerchant.shopCode || "");
-  const [tempCategory, setTempCategory] = useState(savedMerchant.category || "AGOS");
-  const [tempTargetTime, setTempTargetTime] = useState(savedMerchant.targetHandlingTime || 8);
+  const [tempCategory, setTempCategory] = useState(
+    LEGACY_CATEGORY_MAP[savedMerchant.category] || savedMerchant.category || "Standard"
+  );
+  const [tempTargetTime, setTempTargetTime] = useState(savedMerchant.targetHandlingTime || 15);
   const [tempPreset, setTempPreset] = useState(savedMerchant.branding?.id || "classic");
   const [tempLogo, setTempLogo] = useState(savedMerchant.customLogo || null);
 
@@ -97,8 +109,8 @@ const Settings = () => {
   const hasChanges =
     tempBusinessName !== (savedMerchant.businessName || "") ||
     tempShopCode !== (savedMerchant.shopCode || "") ||
-    tempCategory !== (savedMerchant.category || "AGOS") ||
-    tempTargetTime !== (savedMerchant.targetHandlingTime || 8) ||
+    tempCategory !== (LEGACY_CATEGORY_MAP[savedMerchant.category] || savedMerchant.category || "Standard") ||
+    tempTargetTime !== (savedMerchant.targetHandlingTime || 15) ||
     tempPreset !== (savedMerchant.branding?.id || "classic") ||
     tempLogo !== (savedMerchant.customLogo || null);
 
@@ -142,8 +154,8 @@ const Settings = () => {
   const discardChanges = () => {
     setTempBusinessName(savedMerchant.businessName || "");
     setTempShopCode(savedMerchant.shopCode || "");
-    setTempCategory(savedMerchant.category || "AGOS");
-    setTempTargetTime(savedMerchant.targetHandlingTime || 8);
+    setTempCategory(LEGACY_CATEGORY_MAP[savedMerchant.category] || savedMerchant.category || "Standard");
+    setTempTargetTime(savedMerchant.targetHandlingTime || 15);
     setTempPreset(savedMerchant.branding?.id || "classic");
     setTempLogo(savedMerchant.customLogo || null);
     toast.info("Changes discarded");
@@ -306,26 +318,39 @@ const Settings = () => {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Business Category
+                Service Pace (Galaw ng Pila)
               </label>
               <select
                 value={tempCategory}
-                onChange={(e) => setTempCategory(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const pace = SERVICE_PACES.find((p) => p.value === val);
+                  setTempCategory(val);
+                  if (pace) setTempTargetTime(pace.time);
+                }}
                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#1E3A8A] outline-none text-gray-900"
               >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
+                {SERVICE_PACES.map((pace) => (
+                  <option key={pace.value} value={pace.value}>
+                    {pace.label}
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-1">
-                AGOS (Fast) • SULONG (Medium) • ALON (Slow)
+              <p className="text-xs text-gray-500 mt-2 italic">
+                💡 This automatically sets your estimated wait time for customers
               </p>
+              <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-xs font-semibold text-blue-900 mb-2">Quick Guide:</p>
+                <div className="space-y-1 text-xs text-blue-800">
+                  <p><strong>⚡ Express:</strong> Coffee shops, take-out, retail, kiosks</p>
+                  <p><strong>🏃 Standard:</strong> Barbershops, clinics, banks, restaurants</p>
+                  <p><strong>⏳ Technical:</strong> Repairs, government offices, spa treatments</p>
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Target Handling Time
+                Target Handling Time (Auto-set)
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -338,14 +363,14 @@ const Settings = () => {
                   }
                   min="1"
                   max="120"
-                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#1E3A8A] outline-none text-gray-900"
+                  className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#1E3A8A] outline-none text-gray-900 bg-gray-50"
                 />
                 <span className="text-gray-600 font-semibold whitespace-nowrap">
                   min
                 </span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Takt Time: Average minutes per customer
+                ⏱️ Takt Time: Average minutes per customer (auto-set by Service Pace)
               </p>
             </div>
           </div>
