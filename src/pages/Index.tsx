@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PilaLogo from "@/components/PilaLogo";
+import { useBranding } from "@/contexts/BrandingContext";
 const BUNTING_COUNT = 24;
 
 const Index = () => {
   const navigate = useNavigate();
+  const { branding, customLogo } = useBranding();
   const [shopCode, setShopCode] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -93,7 +95,10 @@ const Index = () => {
   // No dash formatting — plain text only
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[hsl(220,100%,13%)] via-[hsl(213,70%,38%)] to-[hsl(217,91%,60%)] px-4 sm:px-6 py-6 sm:py-12 flex flex-col">
+    <div
+      className="min-h-screen px-4 sm:px-6 py-6 sm:py-12 flex flex-col brand-transition"
+      style={{ background: `linear-gradient(to bottom, ${branding.primary}, ${branding.primary}cc, ${branding.primary}99)` }}
+    >
       {/* Bunting */}
       <div className="bunting mb-4">
         {Array.from({ length: BUNTING_COUNT }).map((_, i) => (
@@ -103,11 +108,15 @@ const Index = () => {
 
       {/* Header */}
       <div className="text-center mb-8 sm:mb-16">
-        <PilaLogo className="w-40 h-40 mx-auto mb-6" />
-        <h1 className="text-4xl sm:text-6xl font-bold text-white mb-3 tracking-tight">
+        {customLogo ? (
+          <img src={customLogo} alt="Logo" className="w-40 h-40 mx-auto mb-6 object-contain" style={{ maxWidth: "200px" }} />
+        ) : (
+          <PilaLogo className="w-40 h-40 mx-auto mb-6" />
+        )}
+        <h1 className="text-4xl sm:text-6xl font-bold mb-3 tracking-tight brand-transition" style={{ color: branding.textOnPrimary }}>
           PILA-NIHAN™
         </h1>
-        <p className="text-xl sm:text-3xl text-primary italic font-light">
+        <p className="text-xl sm:text-3xl italic font-light brand-transition" style={{ color: branding.secondary }}>
           Ginhawa sa Bawat Pila
         </p>
       </div>
