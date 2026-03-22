@@ -139,23 +139,37 @@ const MerchantSignup = () => {
             required
           />
 
-          {/* Category */}
+          {/* Service Pace */}
           <div>
             <label className="block text-sm font-medium text-white/90 mb-1">
-              Category <span className="text-red-400">*</span>
+              Service Pace <span className="text-red-400">*</span>
             </label>
             <select
               value={form.category}
-              onChange={(e) => update("category", e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                const pace = SERVICE_PACES.find((p) => p.value === val);
+                update("category", val);
+                if (pace && pace.value) {
+                  setForm((f) => ({ ...f, category: val }));
+                }
+              }}
               className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#FFD700] appearance-none"
             >
-              {CATEGORIES.map((c) => (
+              {SERVICE_PACES.map((c) => (
                 <option key={c.value} value={c.value} className="text-gray-900">
                   {c.label}
                 </option>
               ))}
             </select>
             {errors.category && <p className="text-red-400 text-xs mt-1">{errors.category}</p>}
+            <div className="mt-2 p-2 bg-white/5 rounded-lg border border-white/10">
+              <p className="text-xs text-white/70">
+                <strong>⚡ Express:</strong> Coffee, retail &nbsp;|&nbsp;
+                <strong>🏃 Standard:</strong> Clinics, banks &nbsp;|&nbsp;
+                <strong>⏳ Technical:</strong> Repairs, gov't
+              </p>
+            </div>
           </div>
 
           {/* Address */}
