@@ -109,8 +109,8 @@ const Settings = () => {
   const hasChanges =
     tempBusinessName !== (savedMerchant.businessName || "") ||
     tempShopCode !== (savedMerchant.shopCode || "") ||
-    tempCategory !== (savedMerchant.category || "AGOS") ||
-    tempTargetTime !== (savedMerchant.targetHandlingTime || 8) ||
+    tempCategory !== (LEGACY_CATEGORY_MAP[savedMerchant.category] || savedMerchant.category || "Standard") ||
+    tempTargetTime !== (savedMerchant.targetHandlingTime || 15) ||
     tempPreset !== (savedMerchant.branding?.id || "classic") ||
     tempLogo !== (savedMerchant.customLogo || null);
 
