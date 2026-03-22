@@ -94,6 +94,7 @@ const GuestEntry = () => {
   const merchantName = merchantData?.businessName || "Pila-nihan Queue System";
   const merchantLocation = merchantData?.location || { lat: 14.5995, lng: 120.9842 };
   const merchantCategory = migrateLegacyCategory(merchantData?.category || "Standard");
+  const businessCategory = merchantData?.businessCategory || "sulong";
   const targetTime = merchantData?.targetHandlingTime || 15;
 
   // --- Queue type selection (step-based) ---
@@ -170,6 +171,7 @@ const GuestEntry = () => {
 
   // --- Pricing ---
   const expressPrice = EXPRESS_PRICING[merchantCategory] || 100;
+  const canShowExpress = businessCategory !== "lingkod";
   const regularWait = `${targetTime * 3} mins`;
   const expressWait = `${targetTime} mins`;
 
@@ -350,36 +352,38 @@ const GuestEntry = () => {
             </div>
           </button>
 
-          {/* EXPRESS PASS (Paid) */}
-          <button
-            type="button"
-            onClick={() => { setSelectedType("express"); setStep("form"); }}
-            className="w-full p-5 rounded-2xl border-4 hover:scale-[1.02] transition-all relative overflow-hidden shadow-2xl text-left"
-            style={{
-              borderColor: branding.secondary,
-              background: `linear-gradient(135deg, ${branding.secondary}30 0%, ${branding.secondary}50 100%)`,
-            }}
-          >
-            {/* Glow badge */}
-            <div
-              className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold animate-pulse"
-              style={{ backgroundColor: branding.secondary, color: branding.primary }}
+          {/* EXPRESS PASS (Paid) - Hidden for LINGKOD (government) */}
+          {canShowExpress && (
+            <button
+              type="button"
+              onClick={() => { setSelectedType("express"); setStep("form"); }}
+              className="w-full p-5 rounded-2xl border-4 hover:scale-[1.02] transition-all relative overflow-hidden shadow-2xl text-left"
+              style={{
+                borderColor: branding.secondary,
+                background: `linear-gradient(135deg, ${branding.secondary}30 0%, ${branding.secondary}50 100%)`,
+              }}
             >
-              ⚡ EXPRESS
-            </div>
+              {/* Glow badge */}
+              <div
+                className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold animate-pulse"
+                style={{ backgroundColor: branding.secondary, color: branding.primary }}
+              >
+                ⚡ EXPRESS
+              </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-xs font-mono opacity-70" style={{ color: branding.textOnPrimary }}>Option 02</span>
-                <p className="text-xl font-bold" style={{ color: branding.textOnPrimary }}>⚡ EXPRESS PASS</p>
-                <p className="text-sm opacity-80" style={{ color: branding.textOnPrimary }}>Jump the line (1:2 Ratio)</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-mono opacity-70" style={{ color: branding.textOnPrimary }}>Option 02</span>
+                  <p className="text-xl font-bold" style={{ color: branding.textOnPrimary }}>⚡ EXPRESS PASS</p>
+                  <p className="text-sm opacity-80" style={{ color: branding.textOnPrimary }}>Jump the line (1:2 Ratio)</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold" style={{ color: branding.secondary }}>₱{expressPrice}</p>
+                  <p className="text-xs opacity-70" style={{ color: branding.textOnPrimary }}>~{expressWait}</p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold" style={{ color: branding.secondary }}>₱{expressPrice}</p>
-                <p className="text-xs opacity-70" style={{ color: branding.textOnPrimary }}>~{expressWait}</p>
-              </div>
-            </div>
-          </button>
+            </button>
+          )}
 
           {/* SOCIAL PRIORITY (Free, verified) */}
           <button
