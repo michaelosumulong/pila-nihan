@@ -83,7 +83,7 @@ const Settings = () => {
       : {
           businessName: "",
           shopCode: "",
-          category: "AGOS",
+          category: "Standard",
           targetHandlingTime: 8,
           branding: BRAND_PRESETS[0],
           customLogo: null,
