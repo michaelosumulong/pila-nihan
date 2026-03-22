@@ -39,6 +39,7 @@ const Dashboard = () => {
   const [merchant, setMerchant] = useState<MerchantData | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
+  const { branding, customLogo } = useBranding();
   const [shopCode, setShopCode] = useState("");
   const [isEditingCode, setIsEditingCode] = useState(false);
   const [editableCode, setEditableCode] = useState("");
