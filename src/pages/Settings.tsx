@@ -66,7 +66,7 @@ const Settings = () => {
   const navigate = useNavigate();
 
   // Saved merchant state (from localStorage)
-  const [savedMerchant] = useState(() => {
+  const [savedMerchant, setSavedMerchant] = useState(() => {
     const stored = localStorage.getItem("pila-merchant");
     return stored
       ? JSON.parse(stored)
