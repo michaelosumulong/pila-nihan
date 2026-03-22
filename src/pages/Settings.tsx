@@ -94,8 +94,10 @@ const Settings = () => {
   // Temp state for pending changes
   const [tempBusinessName, setTempBusinessName] = useState(savedMerchant.businessName || "");
   const [tempShopCode, setTempShopCode] = useState(savedMerchant.shopCode || "");
-  const [tempCategory, setTempCategory] = useState(savedMerchant.category || "AGOS");
-  const [tempTargetTime, setTempTargetTime] = useState(savedMerchant.targetHandlingTime || 8);
+  const [tempCategory, setTempCategory] = useState(
+    LEGACY_CATEGORY_MAP[savedMerchant.category] || savedMerchant.category || "Standard"
+  );
+  const [tempTargetTime, setTempTargetTime] = useState(savedMerchant.targetHandlingTime || 15);
   const [tempPreset, setTempPreset] = useState(savedMerchant.branding?.id || "classic");
   const [tempLogo, setTempLogo] = useState(savedMerchant.customLogo || null);
 
