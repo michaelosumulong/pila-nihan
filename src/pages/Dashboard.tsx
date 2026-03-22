@@ -593,7 +593,7 @@ const Dashboard = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-40">
         <NavTab icon="🏠" label="Dashboard" active />
         <NavTab icon="📋" label="Queue" onClick={() => navigate("/queue")} />
-        <NavTab icon="💰" label="Wallet" onClick={() => toast.info("Wallet feature coming soon!")} />
+        <NavTab icon="💰" label="Revenue" onClick={() => navigate("/revenue")} />
         <NavTab icon="⚙️" label="Settings" onClick={() => navigate("/settings")} />
       </div>
     </div>
