@@ -94,6 +94,7 @@ const GuestEntry = () => {
   const merchantName = merchantData?.businessName || "Pila-nihan Queue System";
   const merchantLocation = merchantData?.location || { lat: 14.5995, lng: 120.9842 };
   const merchantCategory = migrateLegacyCategory(merchantData?.category || "Standard");
+  const businessCategory = merchantData?.businessCategory || "sulong";
   const targetTime = merchantData?.targetHandlingTime || 15;
 
   // --- Queue type selection (step-based) ---
