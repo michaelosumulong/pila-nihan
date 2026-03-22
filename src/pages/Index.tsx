@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PilaLogo from "@/components/PilaLogo";
+import { useBranding } from "@/contexts/BrandingContext";
 const BUNTING_COUNT = 24;
 
 const Index = () => {
