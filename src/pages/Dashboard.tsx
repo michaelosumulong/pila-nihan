@@ -13,7 +13,7 @@ import VersionFooter from "@/components/VersionFooter";
 import PilaLogo from "@/components/PilaLogo";
 import FoundingMerchantBadge from "@/components/FoundingMerchantBadge";
 import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
-
+import { useBranding } from "@/contexts/BrandingContext";
 interface MerchantData {
   id: string;
   businessName: string;
