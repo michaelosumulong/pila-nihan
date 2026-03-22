@@ -171,6 +171,7 @@ const GuestEntry = () => {
 
   // --- Pricing ---
   const expressPrice = EXPRESS_PRICING[merchantCategory] || 100;
+  const canShowExpress = businessCategory !== "lingkod";
   const regularWait = `${targetTime * 3} mins`;
   const expressWait = `${targetTime} mins`;
 
