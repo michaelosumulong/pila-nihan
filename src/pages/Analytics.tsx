@@ -87,24 +87,12 @@ const Analytics = () => {
       <div className="px-4">
         {/* PAGE HEADER */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-1">
-                📊 {merchant?.servicePlan === 'suri' ? 'SURI Analytics' : 'Analytics Dashboard'}
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                {merchant?.servicePlan === 'suri'
-                  ? 'Six Sigma Business Intelligence powered by AI'
-                  : 'Advanced insights and performance metrics'
-                }
-              </p>
-            </div>
-            {merchant?.servicePlan === 'suri' && (
-              <div className="bg-purple-600 px-4 py-2 rounded-full">
-                <span className="text-white font-bold text-sm">🤖 AI POWERED</span>
-              </div>
-            )}
-          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-1">
+            📊 Analytics Dashboard
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Advanced insights and performance metrics
+          </p>
         </div>
         {lowBatteryMode && (
           <LowBatteryBanner lastRefresh={lastRefresh} onRefresh={() => { manualRefresh(); toast.success("Analytics refreshed!"); }} />
