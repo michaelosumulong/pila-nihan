@@ -129,6 +129,11 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    const interval = setInterval(() => setNoShowMetrics(getNoShowMetrics()), 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   if (!merchant) return null;
 
   const cat = CATEGORY_MAP[merchant.category] || { label: merchant.category, bg: "bg-gray-100", text: "text-gray-800" };
