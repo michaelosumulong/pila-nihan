@@ -130,9 +130,18 @@ const Revenue = () => {
   const projectedMonthly = Math.round(revenueStats.today * 30);
 
   return (
-    <div className="min-h-screen bg-background pb-8">
+    <div className="min-h-screen bg-background pb-8 px-6">
+      {/* PAGE HEADER */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground mb-1">
+          💰 Revenue Dashboard
+        </h1>
+        <p className="text-muted-foreground text-lg">
+          Track your Express Pass earnings
+        </p>
+      </div>
 
-      <div className="max-w-5xl mx-auto px-4 -mt-4 space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         {/* LINGKOD Warning */}
         {isLingkod && (
           <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 flex gap-3 items-start">

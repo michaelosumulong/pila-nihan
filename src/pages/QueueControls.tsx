@@ -204,7 +204,16 @@ const QueueControls = () => {
 
 
       {/* Main Content */}
-      <div className="px-6 -mt-4">
+      <div className="px-6">
+        {/* PAGE HEADER */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-1">
+            Queue Controls 🎫
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Manage your queue and call customers
+          </p>
+        </div>
         {lowBatteryMode && (
           <LowBatteryBanner lastRefresh={lastRefresh} onRefresh={() => { manualRefresh(); toast.success("Queue refreshed!"); }} />
         )}

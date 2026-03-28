@@ -84,7 +84,16 @@ const Analytics = () => {
   return (
     <div className="min-h-screen bg-gray-100 pb-6">
 
-      <div className="px-4 -mt-4">
+      <div className="px-4">
+        {/* PAGE HEADER */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-1">
+            📊 Analytics Dashboard
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Advanced insights and performance metrics
+          </p>
+        </div>
         {lowBatteryMode && (
           <LowBatteryBanner lastRefresh={lastRefresh} onRefresh={() => { manualRefresh(); toast.success("Analytics refreshed!"); }} />
         )}

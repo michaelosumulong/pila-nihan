@@ -190,7 +190,16 @@ const Dashboard = () => {
     <div className="min-h-screen bg-muted/30 pb-6">
 
       {/* Main Content */}
-      <div className="px-6 -mt-4">
+      <div className="px-6">
+        {/* PAGE HEADER */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-1">
+            Welcome back, {merchant?.businessName || 'Merchant'}! 👋
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Here's your queue performance at a glance
+          </p>
+        </div>
         {lowBatteryMode && (
           <LowBatteryBanner lastRefresh={lastRefresh} onRefresh={() => { manualRefresh(); toast.success("Dashboard refreshed!"); }} />
         )}

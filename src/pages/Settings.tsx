@@ -199,6 +199,15 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A2569] to-[#1E3A8A] p-4 md:p-6 pb-24">
+      {/* PAGE HEADER */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-[#FFB703] mb-1">
+          ⚙️ Settings
+        </h1>
+        <p className="text-[#FDFBD4] text-lg">
+          Customize your Pila-nihan experience
+        </p>
+      </div>
       {/* Sticky Apply/Discard Bar */}
       {hasChanges && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-[#FFB703] shadow-2xl px-4 py-3">
