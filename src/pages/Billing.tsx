@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, Zap, Crown, AlertCircle, CreditCard, Shield } from "lucide-react";
+import { Check, Zap, Crown, AlertCircle, CreditCard, Shield, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useBranding } from "@/contexts/BrandingContext";
 import PilaLogo from "@/components/PilaLogo";
