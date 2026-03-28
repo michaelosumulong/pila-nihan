@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BrandingProvider } from "@/contexts/BrandingContext";
 import Index from "./pages/Index";
 import Revenue from "./pages/Revenue";
+import Billing from "./pages/Billing";
 import Dashboard from "./pages/Dashboard";
 import QueueControls from "./pages/QueueControls";
 import Analytics from "./pages/Analytics";
