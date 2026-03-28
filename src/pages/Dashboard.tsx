@@ -53,6 +53,7 @@ const Dashboard = () => {
   const [showFiveWhys, setShowFiveWhys] = useState(false);
   const [fiveWhysIssue, setFiveWhysIssue] = useState("");
   const [backlogItems, setBacklogItems] = useState<any[]>([]);
+  const [noShowMetrics, setNoShowMetrics] = useState(getNoShowMetrics());
 
   useEffect(() => {
     const raw = localStorage.getItem("pila-merchant");
