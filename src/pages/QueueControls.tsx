@@ -252,7 +252,11 @@ const QueueControls = () => {
           <span className={`${cat.bg} ${cat.text} rounded-full px-3 py-1 text-sm font-semibold inline-block mb-2`}>
             {cat.label}
           </span>
-          <p className="text-sm text-gray-600">⏱️ Waited: {currentServing.waitTime} minutes</p>
+          <p className="text-sm text-gray-600 mb-3">⏱️ Waited: {currentServing.waitTime} minutes</p>
+          {/* No-Show Timer */}
+          <div className="flex justify-center">
+            <NoShowTimer calledAt={currentServing.calledAt} ticketNumber={currentServing.ticketNumber} />
+          </div>
         </div>
 
         {/* Control Buttons */}
