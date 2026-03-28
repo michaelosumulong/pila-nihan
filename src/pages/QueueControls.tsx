@@ -156,7 +156,23 @@ const QueueControls = () => {
       toast.error("No customer currently being served");
       return;
     }
-    if (!confirm(`Mark ${currentServing.ticketNumber} - ${currentServing.customerName} as No-Show?`)) return;
+
+    const forced = isForcedNoShow(currentServing.calledAt);
+    const message = forced
+      ? `Timer has NOT expired yet. Mark ${currentServing.ticketNumber} as no-show anyway?\n\n(This will be logged as "forced no-show")`
+      : `Confirm: Mark ${currentServing.ticketNumber} - ${currentServing.customerName} as No-Show?`;
+
+    if (!confirm(message)) return;
+
+    const loss = getCOPQ(currentServing.servicePace);
+
+    recordNoShow({
+      ticketId: `${Date.now()}`,
+      ticketNumber: currentServing.ticketNumber,
+      customerName: currentServing.customerName,
+      servicePace: currentServing.servicePace,
+      timeCalled: currentServing.calledAt,
+    });
 
     updateAnalytics("no_show");
     logQueueAction({
@@ -178,9 +194,16 @@ const QueueControls = () => {
     } catch {}
 
     setNoShowCount((prev) => prev + 1);
-    toast.warning(`${currentServing.ticketNumber} marked as No-Show`, {
-      description: "Customer did not respond after being called",
-    });
+
+    if (forced) {
+      toast.error("Marked as FORCED no-show (before 30-min deadline)", {
+        description: `COPQ: ₱${loss} • This affects customer satisfaction`,
+      });
+    } else {
+      toast.warning(`${currentServing.ticketNumber} marked as No-Show`, {
+        description: `COPQ: ₱${loss} lost revenue recorded`,
+      });
+    }
     callNext();
   };
 
