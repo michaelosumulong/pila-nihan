@@ -117,6 +117,25 @@ export default function DashboardLayout() {
             </span>
           )}
         </div>
+
+        {/* Prepaid Credits Widget */}
+        <div className="px-4 pt-4 border-b border-white/10 pb-4">
+          <div className="bg-white/5 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-white/60 text-xs font-semibold">Prepaid Credits</span>
+              <CreditCard size={14} className="text-[#FFB703]" />
+            </div>
+            <p className="text-2xl font-black text-[#FFB703] mb-3">
+              ₱{(merchant?.prepaidCredits || 0).toLocaleString()}
+            </p>
+            <button
+              onClick={() => navigate('/billing?action=topup')}
+              className="w-full py-2 bg-[#FFB703] text-[#0A2569] rounded-lg font-bold text-sm hover:bg-[#FF8C00] transition-colors"
+            >
+              + Top Up
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Navigation */}
