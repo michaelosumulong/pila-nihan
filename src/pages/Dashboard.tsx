@@ -42,7 +42,7 @@ const CATEGORY_MAP: Record<string, { label: string; bg: string; text: string }> 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [merchant, setMerchant] = useState<MerchantData | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // kept for legacy compat
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
   const { branding, customLogo } = useBranding();
   const [shopCode, setShopCode] = useState("");
