@@ -4,13 +4,10 @@ import { toast } from "sonner";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useLowBattery } from "@/hooks/use-low-battery";
 import WalkInModal from "@/components/WalkInModal";
-import NotificationCenter from "@/components/NotificationCenter";
 import { addNotification } from "@/lib/notifications";
 import OfflineBanner from "@/components/OfflineBanner";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
-import LowBatteryToggle from "@/components/LowBatteryToggle";
 import VersionFooter from "@/components/VersionFooter";
-import PilaLogo from "@/components/PilaLogo";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -49,7 +46,7 @@ const logQueueAction = (action: Record<string, string>) => {
 const QueueControls = () => {
   const navigate = useNavigate();
   const isOnline = useOnlineStatus();
-  const [menuOpen, setMenuOpen] = useState(false);
+  
   const [showWalkIn, setShowWalkIn] = useState(false);
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
   const buntingCount = 24;
@@ -202,34 +199,9 @@ const QueueControls = () => {
   const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
 
   return (
-    <div className={`min-h-screen bg-gray-100 pb-24 ${!isOnline ? "pt-10" : ""}`}>
+    <div className={`min-h-screen bg-gray-100 pb-6 ${!isOnline ? "pt-10" : ""}`}>
       <OfflineBanner isOnline={isOnline} />
 
-      {/* Header */}
-      <div className={lowBatteryMode ? "bg-[#1E3A8A]" : "bg-gradient-to-r from-[#1E3A8A] to-[#2563EB]"}>
-        {!lowBatteryMode && (
-        <div className="bunting pt-2 pb-1">
-          {Array.from({ length: buntingCount }).map((_, i) => (
-            <div key={i} className="bunting-triangle" />
-          ))}
-        </div>
-        )}
-        <div className="flex items-center justify-between px-5 pt-3 pb-6">
-          <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
-          <div className="flex flex-col items-center">
-            <PilaLogo className="w-16 h-16 mb-1" />
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-primary">Queue Controls</h1>
-              {lowBatteryMode && (
-                <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
-                  🔋
-                </span>
-              )}
-            </div>
-          </div>
-          <NotificationCenter variant="dark" />
-        </div>
-      </div>
 
       {/* Main Content */}
       <div className="px-6 -mt-4">
@@ -344,49 +316,9 @@ const QueueControls = () => {
       {/* Walk-in Modal */}
       <WalkInModal open={showWalkIn} onClose={() => setShowWalkIn(false)} onTicketCreated={handleWalkInCreated} />
 
-      {/* Slide-out Menu */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMenuOpen(false)} />
-          <div className="relative w-64 bg-white h-full shadow-xl p-6 z-10 animate-in slide-in-from-left">
-            <p className="text-gray-900 font-bold text-lg">Menu</p>
-            <p className="text-gray-600 text-sm mb-6">Queue Controls</p>
-            <nav className="space-y-1 text-sm">
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/dashboard"); }}>🏠 Dashboard</p>
-              <p className="flex items-center gap-3 px-4 py-3 bg-[#1E3A8A] text-white rounded-lg">📋 Queue</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/analytics"); }}>📊 Analytics</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Wallet feature coming soon!")}>💰 Wallet</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Settings feature coming soon!")}>⚙️ Settings</p>
-              <LowBatteryToggle active={lowBatteryMode} onToggle={handleToggleBattery} />
-              <div className="border-t border-gray-200 mt-2 pt-2">
-                <p className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors cursor-pointer rounded-lg" onClick={() => { localStorage.removeItem("pila-merchant"); navigate("/"); }}>
-                  🚪 Logout
-                </p>
-              </div>
-            </nav>
-          </div>
-        </div>
-      )}
-
-      {/* Bottom Nav */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-40">
-        <NavTab icon="🏠" label="Dashboard" onClick={() => navigate("/dashboard")} />
-        <NavTab icon="📋" label="Queue" active />
-        <NavTab icon="💰" label="Wallet" onClick={() => toast.info("Wallet feature coming soon!")} />
-        <NavTab icon="⚙️" label="Settings" onClick={() => toast.info("Settings feature coming soon!")} />
-      </div>
     </div>
   );
 };
 
-const NavTab = ({ icon, label, active, onClick }: { icon: string; label: string; active?: boolean; onClick?: () => void }) => (
-  <div
-    className={`flex flex-col items-center text-xs cursor-pointer hover:text-gray-600 transition-colors ${active ? "text-[#FFB703]" : "text-gray-400"}`}
-    onClick={onClick}
-  >
-    <span className="text-xl">{icon}</span>
-    <span className="mt-0.5">{label}</span>
-  </div>
-);
 
 export default QueueControls;

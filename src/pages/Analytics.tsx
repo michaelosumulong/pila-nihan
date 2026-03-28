@@ -6,10 +6,8 @@ import {
 } from "recharts";
 import { useLowBattery } from "@/hooks/use-low-battery";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
-import LowBatteryToggle from "@/components/LowBatteryToggle";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import PendingAudits from "@/components/PendingAudits";
-import PilaLogo from "@/components/PilaLogo";
 import VersionFooter from "@/components/VersionFooter";
 const hourlyData = [
   { hour: "8 AM", customers: 12 },
@@ -36,7 +34,7 @@ const trendData = [
 
 const Analytics = () => {
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
+  
   const [loaded, setLoaded] = useState(false);
   const [noShowStats, setNoShowStats] = useState({ count: 0, rate: 0, totalServed: 158 });
   const [showFiveWhys, setShowFiveWhys] = useState(false);
@@ -84,26 +82,7 @@ const Analytics = () => {
     : { label: "NEEDS ATTENTION", cls: "bg-red-100 text-red-800" };
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-24">
-      {/* Header */}
-      <div className={lowBatteryMode ? "bg-[#1E3A8A]" : "bg-gradient-to-r from-[#1E3A8A] to-[#2563EB]"}>
-        {!lowBatteryMode && (
-        <div className="bunting pt-2 pb-1">
-          {Array.from({ length: buntingCount }).map((_, i) => (
-            <div key={i} className="bunting-triangle" />
-          ))}
-        </div>
-        )}
-        <div className="flex items-center justify-between px-5 pt-3 pb-6">
-          <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
-          <div className="flex flex-col items-center">
-            <PilaLogo className="w-16 h-16 mb-1" />
-            <h1 className="text-xl font-bold text-white">Suri Analytics</h1>
-            <p className="text-[#FFD700] italic text-sm">Six Sigma Business Intelligence</p>
-          </div>
-          <span className="bg-[#FFD700] text-[#1E3A8A] px-3 py-1 rounded-full text-xs font-bold">SURI TIER</span>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-100 pb-6">
 
       <div className="px-4 -mt-4">
         {lowBatteryMode && (
@@ -366,39 +345,7 @@ const Analytics = () => {
         <VersionFooter />
       </div>
 
-      {/* Slide-out Menu */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMenuOpen(false)} />
-          <div className="relative w-64 bg-white h-full shadow-xl p-6 z-10 animate-in slide-in-from-left">
-            <p className="text-gray-900 font-bold text-lg">Menu</p>
-            <p className="text-gray-600 text-sm mb-6">Analytics</p>
-            <nav className="space-y-1 text-sm">
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/dashboard"); }}>🏠 Dashboard</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/queue"); }}>📋 Queue</p>
-              <p className="flex items-center gap-3 px-4 py-3 bg-[#1E3A8A] text-white rounded-lg">📊 Analytics</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Wallet feature coming soon!")}>💰 Wallet</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => toast.info("Settings feature coming soon!")}>⚙️ Settings</p>
-              <LowBatteryToggle active={lowBatteryMode} onToggle={handleToggleBattery} />
-              <div className="border-t border-gray-200 mt-2 pt-2">
-                <p className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors cursor-pointer rounded-lg" onClick={() => { localStorage.removeItem("pila-merchant"); navigate("/"); }}>
-                  🚪 Logout
-                </p>
-              </div>
-            </nav>
-          </div>
-        </div>
-      )}
-
       <FiveWhysModal open={showFiveWhys} onClose={() => { setShowFiveWhys(false); setFiveWhysIssue(""); }} initialIssue={fiveWhysIssue} />
-
-      {/* Bottom Nav */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-40">
-        <NavTab icon="🏠" label="Dashboard" onClick={() => navigate("/dashboard")} />
-        <NavTab icon="📋" label="Queue" onClick={() => navigate("/queue")} />
-        <NavTab icon="📊" label="Analytics" active />
-        <NavTab icon="⚙️" label="Settings" onClick={() => toast.info("Settings feature coming soon!")} />
-      </div>
     </div>
   );
 };
@@ -431,14 +378,5 @@ const ScoreCard = ({ icon, metric, label, status, statusColor, loaded, delay }: 
   </div>
 );
 
-const NavTab = ({ icon, label, active, onClick }: { icon: string; label: string; active?: boolean; onClick?: () => void }) => (
-  <div
-    className={`flex flex-col items-center text-xs cursor-pointer hover:text-gray-600 transition-colors ${active ? "text-[#FFB703]" : "text-gray-400"}`}
-    onClick={onClick}
-  >
-    <span className="text-xl">{icon}</span>
-    <span className="mt-0.5">{label}</span>
-  </div>
-);
 
 export default Analytics;
