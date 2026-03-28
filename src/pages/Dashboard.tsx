@@ -10,24 +10,11 @@ import BusinessProfileCard from "@/components/BusinessProfileCard";
 import PendingAudits from "@/components/PendingAudits";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import VersionFooter from "@/components/VersionFooter";
-import PilaLogo from "@/components/PilaLogo";
+// PilaLogo now in DashboardLayout
 import FoundingMerchantBadge from "@/components/FoundingMerchantBadge";
 import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
-import {
-  LayoutDashboard,
-  ListOrdered,
-  DollarSign,
-  BarChart3,
-  Settings,
-  CreditCard,
-  LogOut,
-  User,
-  Zap,
-  Battery,
-  BatteryLow,
-  Lock,
-} from "lucide-react";
+// Lucide icons now in DashboardLayout
 interface MerchantData {
   id: string;
   businessName: string;
@@ -200,71 +187,37 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-24">
-      {/* Header */}
+    <div className="min-h-screen bg-muted/30 pb-6">
+      {/* Welcome Header */}
       <div
-        className="brand-transition"
+        className="brand-transition px-6 py-6"
         style={{
           background: lowBatteryMode
             ? branding.primary
             : `linear-gradient(to right, ${branding.primary}, ${branding.primary}dd)`
         }}
       >
-        {!lowBatteryMode && (
-        <div className="bunting pt-2 pb-1">
-          {Array.from({ length: buntingCount }).map((_, i) => (
-            <div key={i} className="bunting-triangle" />
-          ))}
-        </div>
-        )}
-        <div className="flex items-center justify-between px-5 pt-3 pb-6">
-          <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl">☰</button>
-          <div className="flex flex-col items-center">
-            {customLogo ? (
-              <img src={customLogo} alt="Logo" className="w-16 h-16 mb-1 object-contain" style={{ maxWidth: "150px" }} />
-            ) : (
-              <PilaLogo className="w-16 h-16 mb-1" />
-            )}
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold brand-transition" style={{ color: branding.secondary }}>Dashboard</h1>
-              {lowBatteryMode && (
-                <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
-                  🔋 Saver
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate("/settings")}
-              className="text-white hover:text-[#FFB703] transition-colors p-2"
-              title="Settings"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </button>
-            <NotificationCenter variant="dark" />
-          </div>
-        </div>
-
-        {/* Welcome */}
-        <div className="px-6 pb-8">
+        <div className="flex items-center justify-between mb-2">
           <p className="text-white text-xl">
             Maligayang araw, <span className="font-bold">{merchant.businessName}</span>!
           </p>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-white/70 text-sm">Category:</span>
-            <span className={`${cat.bg} ${cat.text} text-xs font-semibold px-2.5 py-0.5 rounded-full`}>
-              {cat.label}
+          <NotificationCenter variant="dark" />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-white/70 text-sm">Category:</span>
+          <span className={`${cat.bg} ${cat.text} text-xs font-semibold px-2.5 py-0.5 rounded-full`}>
+            {cat.label}
+          </span>
+          {isSuriVerified && (
+            <span className="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              🛡️ Suri-Verified
             </span>
-            {isSuriVerified && (
-              <span className="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                🛡️ Suri-Verified
-              </span>
-            )}
-          </div>
+          )}
+          {lowBatteryMode && (
+            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
+              🔋 Saver
+            </span>
+          )}
         </div>
       </div>
 
@@ -578,145 +531,6 @@ const Dashboard = () => {
       </div>
 
       <FiveWhysModal open={showFiveWhys} onClose={() => { setShowFiveWhys(false); setFiveWhysIssue(""); }} initialIssue={fiveWhysIssue} />
-
-      {/* Slide-out Menu */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMenuOpen(false)} />
-          <div className="relative w-64 bg-[#0A2569] h-full shadow-xl z-10 animate-in slide-in-from-left flex flex-col">
-            {/* Logo Header */}
-            <div className="p-5 border-b border-white/10">
-              <div className="flex items-center gap-3 mb-3">
-                {customLogo ? (
-                  <img src={customLogo} alt="Logo" className="h-12 w-12 object-contain rounded-lg" />
-                ) : (
-                  <div className="w-12 h-12 bg-[#FFB703] rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">{branding?.emoji || '🇵🇭'}</span>
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-white font-bold text-sm leading-tight truncate">
-                    {merchant.businessName || 'Pila-nihan'}
-                  </h2>
-                  <p className="text-white/60 text-xs font-mono">
-                    {(merchant as any)?.shopCode || shopCode || 'DEMO'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-[#FFB703] text-[#0A2569] rounded-full text-xs font-black uppercase">
-                  {(merchant as any)?.servicePlan || 'PANDAY'}
-                </span>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="flex-1 p-4 space-y-1 text-sm">
-              {[
-                { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", active: true },
-                { icon: ListOrdered, label: "Queue Controls", path: "/queue" },
-                { icon: DollarSign, label: "Revenue", path: "/revenue" },
-                { icon: BarChart3, label: "Analytics", path: "/analytics", premium: true, requiredPlan: "sinag" as const },
-                { icon: Settings, label: "Settings", path: "/settings" },
-              ].map((item) => {
-                const isLocked = item.premium && item.requiredPlan && (() => {
-                  const plan = (merchant as any)?.servicePlan || "panday";
-                  const h: Record<string, number> = { panday: 0, sinag: 1, suri: 2 };
-                  return (h[plan] || 0) < (h[item.requiredPlan] || 0);
-                })();
-                return (
-                  <p
-                    key={item.path}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer ${
-                      item.active
-                        ? "bg-[#FFB703] text-[#0A2569] font-bold shadow-lg"
-                        : isLocked
-                        ? "text-white/40 hover:text-white/60"
-                        : "text-white/80 hover:bg-white/10 hover:text-white"
-                    }`}
-                    onClick={() => {
-                      if (!item.active) {
-                        setMenuOpen(false);
-                        navigate(item.path);
-                      }
-                    }}
-                  >
-                    <item.icon size={18} />
-                    {item.label}
-                    {item.premium && <Zap size={12} className="ml-auto text-yellow-400" />}
-                    {isLocked && <Lock size={12} className="ml-1 text-white/40" />}
-                  </p>
-                );
-              })}
-
-              {/* Subscription Link */}
-              <p
-                className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer mt-4 border-2 border-purple-400/50 text-purple-300 hover:bg-purple-900/30"
-                onClick={() => { setMenuOpen(false); navigate("/settings"); }}
-              >
-                <CreditCard size={18} />
-                Subscription
-              </p>
-            </nav>
-
-            {/* User Profile + Low Battery + Logout */}
-            <div className="p-4 border-t border-white/10">
-              {/* User Profile */}
-              <div className="bg-white/5 rounded-lg p-3 mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#FFB703] flex items-center justify-center flex-shrink-0">
-                    <User size={20} className="text-[#0A2569]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold text-sm truncate">
-                      {merchant.ownerName || merchant.businessName || 'Merchant'}
-                    </p>
-                    <p className="text-white/60 text-xs truncate">
-                      {merchant.mobile || (merchant as any)?.contactNumber || (merchant as any)?.email || 'No contact'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Low Battery Toggle */}
-              <div className="bg-white/5 rounded-lg p-3 mb-3">
-                <button
-                  onClick={handleToggleBattery}
-                  className="w-full flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    {lowBatteryMode ? <BatteryLow size={16} className="text-green-400" /> : <Battery size={16} className="text-white/60" />}
-                    <div>
-                      <span className="text-white text-xs font-semibold">Low Battery Mode</span>
-                      <p className="text-white/40 text-[10px]">{lowBatteryMode ? 'Active (60s refresh)' : 'Inactive (5s refresh)'}</p>
-                    </div>
-                  </div>
-                  <div className={`w-10 h-6 rounded-full transition-colors ${lowBatteryMode ? 'bg-green-500' : 'bg-gray-600'}`}>
-                    <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform mt-1 ${lowBatteryMode ? 'translate-x-5' : 'translate-x-1'}`} />
-                  </div>
-                </button>
-              </div>
-
-              {/* Logout */}
-              <button
-                onClick={() => { localStorage.removeItem("pila-merchant"); navigate("/"); }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-all border border-red-400/20"
-              >
-                <LogOut size={18} />
-                <span className="font-semibold text-sm">Logout</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bottom Nav */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-40">
-        <NavTab icon="🏠" label="Dashboard" active />
-        <NavTab icon="📋" label="Queue" onClick={() => navigate("/queue")} />
-        <NavTab icon="💰" label="Revenue" onClick={() => navigate("/revenue")} />
-        <NavTab icon="⚙️" label="Settings" onClick={() => navigate("/settings")} />
-      </div>
     </div>
   );
 };
