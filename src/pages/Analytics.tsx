@@ -6,10 +6,8 @@ import {
 } from "recharts";
 import { useLowBattery } from "@/hooks/use-low-battery";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
-import LowBatteryToggle from "@/components/LowBatteryToggle";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import PendingAudits from "@/components/PendingAudits";
-import PilaLogo from "@/components/PilaLogo";
 import VersionFooter from "@/components/VersionFooter";
 const hourlyData = [
   { hour: "8 AM", customers: 12 },
