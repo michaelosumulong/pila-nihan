@@ -320,14 +320,5 @@ const QueueControls = () => {
   );
 };
 
-const NavTab = ({ icon, label, active, onClick }: { icon: string; label: string; active?: boolean; onClick?: () => void }) => (
-  <div
-    className={`flex flex-col items-center text-xs cursor-pointer hover:text-gray-600 transition-colors ${active ? "text-[#FFB703]" : "text-gray-400"}`}
-    onClick={onClick}
-  >
-    <span className="text-xl">{icon}</span>
-    <span className="mt-0.5">{label}</span>
-  </div>
-);
 
 export default QueueControls;
