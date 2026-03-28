@@ -82,7 +82,7 @@ const Analytics = () => {
     : { label: "NEEDS ATTENTION", cls: "bg-red-100 text-red-800" };
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#0A2569] to-[#1E3A8A] pb-6 p-6">
 
       <div className="px-4">
         {/* PAGE HEADER */}
