@@ -130,6 +130,19 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
+  // Initialize SURI AI recommendations
+  useEffect(() => {
+    const lastGenerated = localStorage.getItem('pila-suri-last-generated');
+    const today = new Date().toDateString();
+
+    if (!localStorage.getItem('pila-suri-recommendations') || lastGenerated !== today) {
+      const recs = generateDMAICRecommendations();
+      localStorage.setItem('pila-suri-recommendations', JSON.stringify(recs));
+      localStorage.setItem('pila-suri-last-generated', today);
+      console.log(`🧠 SURI AI: Generated ${recs.length} DMAIC recommendations`);
+    }
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => setNoShowMetrics(getNoShowMetrics()), 30000);
     return () => clearInterval(interval);
