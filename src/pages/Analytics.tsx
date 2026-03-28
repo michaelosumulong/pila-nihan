@@ -9,6 +9,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import PendingAudits from "@/components/PendingAudits";
 import VersionFooter from "@/components/VersionFooter";
+import { getNoShowMetrics, getNoShowAnalysis, type NoShowRecord } from "@/utils/noShowEngine";
 const hourlyData = [
   { hour: "8 AM", customers: 12 },
   { hour: "9 AM", customers: 28 },

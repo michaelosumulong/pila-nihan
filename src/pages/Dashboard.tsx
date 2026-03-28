@@ -14,6 +14,8 @@ import VersionFooter from "@/components/VersionFooter";
 import FoundingMerchantBadge from "@/components/FoundingMerchantBadge";
 import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
+import { getNoShowMetrics } from "@/utils/noShowEngine";
+import { AlertCircle, TrendingDown, Crown } from "lucide-react";
 // Lucide icons now in DashboardLayout
 interface MerchantData {
   id: string;
