@@ -215,6 +215,60 @@ export default function Billing() {
           </div>
         </div>
 
+        {/* Prepaid Credits Management */}
+        <div className="bg-white rounded-xl p-6 shadow-xl mb-8 border-2 border-green-500">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-lg bg-green-100 flex items-center justify-center">
+                <CreditCard className="text-green-600" size={32} />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 font-semibold mb-1">Prepaid Credits</p>
+                <h2 className="text-3xl font-black text-gray-900">
+                  ₱{(merchant?.prepaidCredits || 0).toLocaleString()}
+                </h2>
+                <p className="text-xs text-gray-500 mt-1">
+                  Available for Express Pass features
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                toast.info('GCash/Maya Integration Coming Soon', {
+                  description: 'For beta, credits are simulated'
+                });
+              }}
+              className="px-6 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 flex items-center gap-2 shadow-lg"
+            >
+              <Plus size={18} />
+              Top Up Credits
+            </button>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="font-bold text-gray-900 mb-3 text-sm">What are Prepaid Credits?</h3>
+            <p className="text-sm text-gray-700 mb-3">
+              Prepaid credits are used to fund the merchant's share (40%) of Express Pass revenue.
+              When customers purchase Express Pass priority, 60% goes to Pila-nihan platform and 40%
+              goes to your merchant account from your prepaid balance.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <button className="p-3 bg-white rounded-lg border-2 border-gray-200 hover:border-green-500 transition-colors">
+                <p className="text-2xl font-bold text-gray-900">₱500</p>
+                <p className="text-xs text-gray-500">Quick Top-Up</p>
+              </button>
+              <button className="p-3 bg-white rounded-lg border-2 border-gray-200 hover:border-green-500 transition-colors">
+                <p className="text-2xl font-bold text-gray-900">₱1,000</p>
+                <p className="text-xs text-gray-500">Standard</p>
+              </button>
+              <button className="p-3 bg-white rounded-lg border-2 border-gray-200 hover:border-green-500 transition-colors">
+                <p className="text-2xl font-bold text-gray-900">₱5,000</p>
+                <p className="text-xs text-gray-500">Business</p>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Plan Comparison */}
         <div id="plans" className="mb-8">
           <h2 className="text-xl font-bold text-white mb-6">Choose Your Plan</h2>
