@@ -15,6 +15,7 @@ import FoundingMerchantBadge from "@/components/FoundingMerchantBadge";
 import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
 import { getNoShowMetrics } from "@/utils/noShowEngine";
+import { generateDMAICRecommendations } from "@/utils/suriEngine";
 import { AlertCircle, TrendingDown, Crown } from "lucide-react";
 // Lucide icons now in DashboardLayout
 interface MerchantData {
@@ -128,6 +129,19 @@ const Dashboard = () => {
       navigate("/");
     }
   }, [navigate]);
+
+  // Initialize SURI AI recommendations
+  useEffect(() => {
+    const lastGenerated = localStorage.getItem('pila-suri-last-generated');
+    const today = new Date().toDateString();
+
+    if (!localStorage.getItem('pila-suri-recommendations') || lastGenerated !== today) {
+      const recs = generateDMAICRecommendations();
+      localStorage.setItem('pila-suri-recommendations', JSON.stringify(recs));
+      localStorage.setItem('pila-suri-last-generated', today);
+      console.log(`🧠 SURI AI: Generated ${recs.length} DMAIC recommendations`);
+    }
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => setNoShowMetrics(getNoShowMetrics()), 30000);
