@@ -67,6 +67,8 @@ const QueueControls = () => {
     customerName: "Juan Dela Cruz",
     category: "regular",
     waitTime: 8,
+    calledAt: new Date().toISOString(),
+    servicePace: "standard",
   });
 
   const [queueList, setQueueList] = useState([
