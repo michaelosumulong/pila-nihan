@@ -14,6 +14,20 @@ import PilaLogo from "@/components/PilaLogo";
 import FoundingMerchantBadge from "@/components/FoundingMerchantBadge";
 import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
+import {
+  LayoutDashboard,
+  ListOrdered,
+  DollarSign,
+  BarChart3,
+  Settings,
+  CreditCard,
+  LogOut,
+  User,
+  Zap,
+  Battery,
+  BatteryLow,
+  Lock,
+} from "lucide-react";
 interface MerchantData {
   id: string;
   businessName: string;
@@ -598,11 +612,51 @@ const Dashboard = () => {
 
             {/* Navigation */}
             <nav className="flex-1 p-4 space-y-1 text-sm">
-              <p className="flex items-center gap-3 px-4 py-3 bg-[#FFB703]/20 text-[#FFB703] rounded-lg font-semibold">🏠 Dashboard</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/10 hover:text-white transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/queue"); }}>📋 Queue Controls</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/10 hover:text-white transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/revenue"); }}>💰 Revenue</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/10 hover:text-white transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/analytics"); }}>📊 Analytics</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/10 hover:text-white transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/settings"); }}>⚙️ Settings</p>
+              {[
+                { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", active: true },
+                { icon: ListOrdered, label: "Queue Controls", path: "/queue" },
+                { icon: DollarSign, label: "Revenue", path: "/revenue" },
+                { icon: BarChart3, label: "Analytics", path: "/analytics", premium: true, requiredPlan: "sinag" as const },
+                { icon: Settings, label: "Settings", path: "/settings" },
+              ].map((item) => {
+                const isLocked = item.premium && item.requiredPlan && (() => {
+                  const plan = (merchant as any)?.servicePlan || "panday";
+                  const h: Record<string, number> = { panday: 0, sinag: 1, suri: 2 };
+                  return (h[plan] || 0) < (h[item.requiredPlan] || 0);
+                })();
+                return (
+                  <p
+                    key={item.path}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer ${
+                      item.active
+                        ? "bg-[#FFB703] text-[#0A2569] font-bold shadow-lg"
+                        : isLocked
+                        ? "text-white/40 hover:text-white/60"
+                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                    }`}
+                    onClick={() => {
+                      if (!item.active) {
+                        setMenuOpen(false);
+                        navigate(item.path);
+                      }
+                    }}
+                  >
+                    <item.icon size={18} />
+                    {item.label}
+                    {item.premium && <Zap size={12} className="ml-auto text-yellow-400" />}
+                    {isLocked && <Lock size={12} className="ml-1 text-white/40" />}
+                  </p>
+                );
+              })}
+
+              {/* Subscription Link */}
+              <p
+                className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer mt-4 border-2 border-purple-400/50 text-purple-300 hover:bg-purple-900/30"
+                onClick={() => { setMenuOpen(false); navigate("/settings"); }}
+              >
+                <CreditCard size={18} />
+                Subscription
+              </p>
             </nav>
 
             {/* User Profile + Low Battery + Logout */}
@@ -611,7 +665,7 @@ const Dashboard = () => {
               <div className="bg-white/5 rounded-lg p-3 mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#FFB703] flex items-center justify-center flex-shrink-0">
-                    <span className="text-lg">👤</span>
+                    <User size={20} className="text-[#0A2569]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-semibold text-sm truncate">
@@ -630,9 +684,12 @@ const Dashboard = () => {
                   onClick={handleToggleBattery}
                   className="w-full flex items-center justify-between"
                 >
-                  <div>
-                    <span className="text-white text-xs font-semibold">🔋 Low Battery Mode</span>
-                    <p className="text-white/40 text-[10px]">{lowBatteryMode ? 'Active (60s refresh)' : 'Inactive (5s refresh)'}</p>
+                  <div className="flex items-center gap-2">
+                    {lowBatteryMode ? <BatteryLow size={16} className="text-green-400" /> : <Battery size={16} className="text-white/60" />}
+                    <div>
+                      <span className="text-white text-xs font-semibold">Low Battery Mode</span>
+                      <p className="text-white/40 text-[10px]">{lowBatteryMode ? 'Active (60s refresh)' : 'Inactive (5s refresh)'}</p>
+                    </div>
                   </div>
                   <div className={`w-10 h-6 rounded-full transition-colors ${lowBatteryMode ? 'bg-green-500' : 'bg-gray-600'}`}>
                     <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform mt-1 ${lowBatteryMode ? 'translate-x-5' : 'translate-x-1'}`} />
@@ -645,7 +702,8 @@ const Dashboard = () => {
                 onClick={() => { localStorage.removeItem("pila-merchant"); navigate("/"); }}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-all border border-red-400/20"
               >
-                🚪 <span className="font-semibold text-sm">Logout</span>
+                <LogOut size={18} />
+                <span className="font-semibold text-sm">Logout</span>
               </button>
             </div>
           </div>
