@@ -42,7 +42,7 @@ const CATEGORY_MAP: Record<string, { label: string; bg: string; text: string }> 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [merchant, setMerchant] = useState<MerchantData | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false); // kept for legacy compat
+  
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
   const { branding, customLogo } = useBranding();
   const [shopCode, setShopCode] = useState("");
@@ -188,38 +188,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-muted/30 pb-6">
-      {/* Welcome Header */}
-      <div
-        className="brand-transition px-6 py-6"
-        style={{
-          background: lowBatteryMode
-            ? branding.primary
-            : `linear-gradient(to right, ${branding.primary}, ${branding.primary}dd)`
-        }}
-      >
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-white text-xl">
-            Maligayang araw, <span className="font-bold">{merchant.businessName}</span>!
-          </p>
-          <NotificationCenter variant="dark" />
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-white/70 text-sm">Category:</span>
-          <span className={`${cat.bg} ${cat.text} text-xs font-semibold px-2.5 py-0.5 rounded-full`}>
-            {cat.label}
-          </span>
-          {isSuriVerified && (
-            <span className="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-              🛡️ Suri-Verified
-            </span>
-          )}
-          {lowBatteryMode && (
-            <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
-              🔋 Saver
-            </span>
-          )}
-        </div>
-      </div>
 
       {/* Main Content */}
       <div className="px-6 -mt-4">

@@ -227,20 +227,6 @@ const Settings = () => {
 
       {/* Header */}
       <div className="max-w-5xl mx-auto mb-6">
-        <button
-          onClick={() => {
-            if (hasChanges) {
-              if (window.confirm("You have unsaved changes. Discard them?")) {
-                navigate("/dashboard");
-              }
-            } else {
-              navigate("/dashboard");
-            }
-          }}
-          className="text-white hover:text-[#FFB703] flex items-center gap-2 mb-4 font-medium"
-        >
-          ← Back to Dashboard
-        </button>
         <div className="flex items-center gap-3">
           <PilaLogo className="w-12 h-12" />
           <div>

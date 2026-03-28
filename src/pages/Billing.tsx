@@ -111,24 +111,6 @@ export default function Billing() {
 
   return (
     <div className="min-h-screen pb-6">
-      <div
-        className="px-6 py-6 brand-transition"
-        style={{ background: `linear-gradient(135deg, ${branding.primary}, ${branding.primary}dd)` }}
-      >
-        <div className="flex items-center gap-3 mb-2">
-          {customLogo ? (
-            <img src={customLogo} alt="Logo" className="w-10 h-10 object-contain rounded-lg" />
-          ) : (
-            <PilaLogo className="w-10 h-10" />
-          )}
-          <h1 className="text-3xl font-black" style={{ color: branding.secondary }}>
-            Subscription & Billing
-          </h1>
-        </div>
-        <p className="text-white/70 text-sm">
-          Manage your Pila-nihan subscription and payment details
-        </p>
-      </div>
       <div className="max-w-5xl mx-auto px-4 py-6">
 
         {/* Current Plan Summary */}

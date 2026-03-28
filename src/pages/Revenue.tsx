@@ -131,43 +131,6 @@ const Revenue = () => {
 
   return (
     <div className="min-h-screen bg-background pb-8">
-      {/* Header */}
-      <div
-        className="brand-transition px-5 pt-5 pb-8"
-        style={{ backgroundColor: branding.primary }}
-      >
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/dashboard")}
-          className="text-white/80 hover:text-white hover:bg-white/10 mb-3 -ml-2"
-        >
-          ← Back to Dashboard
-        </Button>
-
-        <div className="flex items-center justify-between">
-          <div>
-            <h1
-              className="text-3xl font-bold brand-text"
-              style={{ color: branding.secondary }}
-            >
-              💰 Revenue
-            </h1>
-            <p className="text-white/70 text-sm mt-1">
-              Express Pass earnings from customers
-            </p>
-          </div>
-          <Badge
-            variant="secondary"
-            className="text-xs"
-            style={{
-              backgroundColor: branding.secondary + "30",
-              color: branding.secondary,
-            }}
-          >
-            {merchant.businessCategory?.toUpperCase() || "SULONG"}
-          </Badge>
-        </div>
-      </div>
 
       <div className="max-w-5xl mx-auto px-4 -mt-4 space-y-6">
         {/* LINGKOD Warning */}
