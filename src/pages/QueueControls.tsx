@@ -8,6 +8,8 @@ import { addNotification } from "@/lib/notifications";
 import OfflineBanner from "@/components/OfflineBanner";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import VersionFooter from "@/components/VersionFooter";
+import NoShowTimer from "@/components/NoShowTimer";
+import { recordNoShow, isForcedNoShow, getCOPQ } from "@/utils/noShowEngine";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
