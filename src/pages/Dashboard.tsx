@@ -569,22 +569,85 @@ const Dashboard = () => {
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMenuOpen(false)} />
-          <div className="relative w-64 bg-white h-full shadow-xl p-6 z-10 animate-in slide-in-from-left">
-            <p className="text-gray-900 font-bold text-lg">{merchant.ownerName}</p>
-            <p className="text-gray-600 text-sm mb-6">{merchant.mobile}</p>
-            <nav className="space-y-1 text-sm">
-              <p className="flex items-center gap-3 px-4 py-3 bg-[#1E3A8A] text-white rounded-lg">🏠 Dashboard</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/queue"); }}>📋 Queue</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/analytics"); }}>📊 Analytics</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/revenue"); }}>💰 Revenue</p>
-              <p className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-[#1E3A8A] transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/settings"); }}>⚙️ Settings</p>
-              <LowBatteryToggle active={lowBatteryMode} onToggle={handleToggleBattery} />
-              <div className="border-t border-gray-200 mt-2 pt-2">
-                <p className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors cursor-pointer rounded-lg" onClick={() => { localStorage.removeItem("pila-merchant"); navigate("/"); }}>
-                  🚪 Logout
-                </p>
+          <div className="relative w-64 bg-[#0A2569] h-full shadow-xl z-10 animate-in slide-in-from-left flex flex-col">
+            {/* Logo Header */}
+            <div className="p-5 border-b border-white/10">
+              <div className="flex items-center gap-3 mb-3">
+                {customLogo ? (
+                  <img src={customLogo} alt="Logo" className="h-12 w-12 object-contain rounded-lg" />
+                ) : (
+                  <div className="w-12 h-12 bg-[#FFB703] rounded-lg flex items-center justify-center">
+                    <span className="text-2xl">{branding?.emoji || '🇵🇭'}</span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-white font-bold text-sm leading-tight truncate">
+                    {merchant.businessName || 'Pila-nihan'}
+                  </h2>
+                  <p className="text-white/60 text-xs font-mono">
+                    {(merchant as any)?.shopCode || shopCode || 'DEMO'}
+                  </p>
+                </div>
               </div>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-[#FFB703] text-[#0A2569] rounded-full text-xs font-black uppercase">
+                  {(merchant as any)?.servicePlan || 'PANDAY'}
+                </span>
+              </div>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 p-4 space-y-1 text-sm">
+              <p className="flex items-center gap-3 px-4 py-3 bg-[#FFB703]/20 text-[#FFB703] rounded-lg font-semibold">🏠 Dashboard</p>
+              <p className="flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/10 hover:text-white transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/queue"); }}>📋 Queue Controls</p>
+              <p className="flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/10 hover:text-white transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/revenue"); }}>💰 Revenue</p>
+              <p className="flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/10 hover:text-white transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/analytics"); }}>📊 Analytics</p>
+              <p className="flex items-center gap-3 px-4 py-3 text-white/80 hover:bg-white/10 hover:text-white transition-colors cursor-pointer rounded-lg" onClick={() => { setMenuOpen(false); navigate("/settings"); }}>⚙️ Settings</p>
             </nav>
+
+            {/* User Profile + Low Battery + Logout */}
+            <div className="p-4 border-t border-white/10">
+              {/* User Profile */}
+              <div className="bg-white/5 rounded-lg p-3 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#FFB703] flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg">👤</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-semibold text-sm truncate">
+                      {merchant.ownerName || merchant.businessName || 'Merchant'}
+                    </p>
+                    <p className="text-white/60 text-xs truncate">
+                      {merchant.mobile || (merchant as any)?.contactNumber || (merchant as any)?.email || 'No contact'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Low Battery Toggle */}
+              <div className="bg-white/5 rounded-lg p-3 mb-3">
+                <button
+                  onClick={handleToggleBattery}
+                  className="w-full flex items-center justify-between"
+                >
+                  <div>
+                    <span className="text-white text-xs font-semibold">🔋 Low Battery Mode</span>
+                    <p className="text-white/40 text-[10px]">{lowBatteryMode ? 'Active (60s refresh)' : 'Inactive (5s refresh)'}</p>
+                  </div>
+                  <div className={`w-10 h-6 rounded-full transition-colors ${lowBatteryMode ? 'bg-green-500' : 'bg-gray-600'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform mt-1 ${lowBatteryMode ? 'translate-x-5' : 'translate-x-1'}`} />
+                  </div>
+                </button>
+              </div>
+
+              {/* Logout */}
+              <button
+                onClick={() => { localStorage.removeItem("pila-merchant"); navigate("/"); }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-all border border-red-400/20"
+              >
+                🚪 <span className="font-semibold text-sm">Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
