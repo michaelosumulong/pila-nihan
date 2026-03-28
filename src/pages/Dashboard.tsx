@@ -14,6 +14,8 @@ import VersionFooter from "@/components/VersionFooter";
 import FoundingMerchantBadge from "@/components/FoundingMerchantBadge";
 import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
+import { getNoShowMetrics } from "@/utils/noShowEngine";
+import { AlertCircle, TrendingDown, Crown } from "lucide-react";
 // Lucide icons now in DashboardLayout
 interface MerchantData {
   id: string;
@@ -51,6 +53,7 @@ const Dashboard = () => {
   const [showFiveWhys, setShowFiveWhys] = useState(false);
   const [fiveWhysIssue, setFiveWhysIssue] = useState("");
   const [backlogItems, setBacklogItems] = useState<any[]>([]);
+  const [noShowMetrics, setNoShowMetrics] = useState(getNoShowMetrics());
 
   useEffect(() => {
     const raw = localStorage.getItem("pila-merchant");
@@ -125,6 +128,11 @@ const Dashboard = () => {
       navigate("/");
     }
   }, [navigate]);
+
+  useEffect(() => {
+    const interval = setInterval(() => setNoShowMetrics(getNoShowMetrics()), 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (!merchant) return null;
 
@@ -241,6 +249,67 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
+
+        {/* REVENUE LEAKAGE ALERT */}
+        {noShowMetrics.count > 0 && (
+          <div className="bg-white rounded-2xl shadow-2xl p-6 mb-6 border-l-8 border-red-500">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <TrendingDown className="text-red-600" size={24} />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <AlertCircle size={18} className="text-red-500" />
+                  <h3 className="text-lg font-bold text-red-600">💸 Revenue Leakage Alert</h3>
+                </div>
+                <p className="text-3xl font-black text-red-600 mb-1">
+                  ₱{noShowMetrics.totalLost.toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-600 mb-3">
+                  Lost today due to {noShowMetrics.count} no-shows ({noShowMetrics.rate}% no-show rate)
+                </p>
+
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="bg-red-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-500">📊 Projected Monthly</p>
+                    <p className="text-lg font-bold text-red-600">₱{noShowMetrics.projectedMonthly.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-red-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-500">📈 Projected Yearly</p>
+                    <p className="text-lg font-bold text-red-600">₱{noShowMetrics.projectedYearly.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {noShowMetrics.forcedPercentage > 30 && (
+                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded mb-3">
+                    <p className="text-sm text-yellow-800">
+                      ⚠️ {noShowMetrics.forcedPercentage}% of no-shows were marked before the 30-min deadline. This may hurt customer satisfaction.
+                    </p>
+                  </div>
+                )}
+
+                {merchant?.plan !== 'SURI' && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <p className="text-sm text-purple-700 mb-3">
+                      SURI AI can analyze no-show patterns and help you recover up to{' '}
+                      <strong>₱{Math.round(noShowMetrics.projectedMonthly * 0.6).toLocaleString()}/month</strong>
+                    </p>
+                    <button
+                      onClick={() => navigate('/billing')}
+                      className="w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-105"
+                    >
+                      <Crown size={18} />
+                      Upgrade to SURI AI (₱3,499/mo)
+                    </button>
+                    <p className="text-xs text-purple-500 mt-2 text-center">
+                      Save ₱{Math.round(noShowMetrics.projectedMonthly * 0.6 - 3499).toLocaleString()}/month = {Math.round((noShowMetrics.projectedMonthly * 0.6 / 3499) * 10) / 10}x ROI
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Suri Quality Alerts */}
         {backlogItems.length > 0 ? (

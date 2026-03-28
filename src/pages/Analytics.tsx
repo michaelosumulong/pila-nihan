@@ -9,6 +9,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import PendingAudits from "@/components/PendingAudits";
 import VersionFooter from "@/components/VersionFooter";
+import { getNoShowMetrics, getNoShowAnalysis, type NoShowRecord } from "@/utils/noShowEngine";
 const hourlyData = [
   { hour: "8 AM", customers: 12 },
   { hour: "9 AM", customers: 28 },
@@ -343,6 +344,70 @@ const Analytics = () => {
 
 
 
+
+        {/* No-Show Intelligence */}
+        {(() => {
+          const nsMetrics = getNoShowMetrics();
+          const nsAnalysis = getNoShowAnalysis();
+          const merchantRaw = localStorage.getItem("pila-merchant");
+          const merchantData = merchantRaw ? JSON.parse(merchantRaw) : null;
+          return (
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+              <h3 className="text-xl font-bold text-[#1E3A8A] mb-4">🚫 No-Show Intelligence</h3>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div className="bg-red-50 rounded-xl p-4 text-center">
+                  <p className="text-3xl font-bold text-red-600">{nsMetrics.count}</p>
+                  <p className="text-xs text-gray-500">Today's No-Shows</p>
+                </div>
+                <div className="bg-orange-50 rounded-xl p-4 text-center">
+                  <p className="text-3xl font-bold text-orange-600">{nsMetrics.rate}%</p>
+                  <p className="text-xs text-gray-500">No-Show Rate</p>
+                </div>
+                <div className="bg-red-50 rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-red-700">₱{nsMetrics.totalLost.toLocaleString()}</p>
+                  <p className="text-xs text-gray-500">COPQ Today</p>
+                </div>
+                <div className="bg-yellow-50 rounded-xl p-4 text-center">
+                  <p className="text-3xl font-bold text-yellow-600">{nsMetrics.forcedPercentage}%</p>
+                  <p className="text-xs text-gray-500">Forced Early</p>
+                </div>
+              </div>
+
+              {nsAnalysis && merchantData?.plan === 'SURI' && (
+                <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-lg mb-4">
+                  <p className="font-bold text-purple-700 mb-2">🤖 SURI AI Insights:</p>
+                  <ul className="text-sm text-gray-700 space-y-1">
+                    <li>• Peak no-show hour: {nsAnalysis.peakHour}:00</li>
+                    <li>• Worst service pace: {nsAnalysis.worstPace}</li>
+                    <li>• Forced no-shows: {nsAnalysis.forcedRate}% (may hurt satisfaction)</li>
+                  </ul>
+                </div>
+              )}
+
+              <div>
+                <h4 className="font-bold text-gray-700 text-sm mb-3">Recent No-Shows:</h4>
+                {nsMetrics.history.length > 0 ? (
+                  <div className="space-y-2">
+                    {nsMetrics.history.slice(0, 5).map((ns: NoShowRecord, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-gray-800">{ns.ticketNumber}</span>
+                          <span className="text-sm text-gray-500">{ns.customerName}</span>
+                          {ns.forced && (
+                            <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-bold">FORCED</span>
+                          )}
+                        </div>
+                        <span className="text-red-600 font-bold">-₱{ns.estimatedLoss}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-400 py-4">No no-shows recorded yet today ✅</p>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Performance Scorecard */}
         <div className="grid grid-cols-3 gap-4 mb-6">

@@ -8,6 +8,8 @@ import { addNotification } from "@/lib/notifications";
 import OfflineBanner from "@/components/OfflineBanner";
 import LowBatteryBanner from "@/components/LowBatteryBanner";
 import VersionFooter from "@/components/VersionFooter";
+import NoShowTimer from "@/components/NoShowTimer";
+import { recordNoShow, isForcedNoShow, getCOPQ } from "@/utils/noShowEngine";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -65,6 +67,8 @@ const QueueControls = () => {
     customerName: "Juan Dela Cruz",
     category: "regular",
     waitTime: 8,
+    calledAt: new Date().toISOString(),
+    servicePace: "standard",
   });
 
   const [queueList, setQueueList] = useState([
@@ -97,6 +101,8 @@ const QueueControls = () => {
         customerName: nextTicket.name,
         category: nextTicket.category,
         waitTime: nextTicket.waitTime,
+        calledAt: new Date().toISOString(),
+        servicePace: nextTicket.category === "express" ? "express" : nextTicket.category === "priority" ? "technical" : "standard",
       });
       setQueueList((prev) => prev.filter((t) => t.id !== nextTicket!.id));
       if (nextTicket.category === "regular") {
@@ -150,7 +156,23 @@ const QueueControls = () => {
       toast.error("No customer currently being served");
       return;
     }
-    if (!confirm(`Mark ${currentServing.ticketNumber} - ${currentServing.customerName} as No-Show?`)) return;
+
+    const forced = isForcedNoShow(currentServing.calledAt);
+    const message = forced
+      ? `Timer has NOT expired yet. Mark ${currentServing.ticketNumber} as no-show anyway?\n\n(This will be logged as "forced no-show")`
+      : `Confirm: Mark ${currentServing.ticketNumber} - ${currentServing.customerName} as No-Show?`;
+
+    if (!confirm(message)) return;
+
+    const loss = getCOPQ(currentServing.servicePace);
+
+    recordNoShow({
+      ticketId: `${Date.now()}`,
+      ticketNumber: currentServing.ticketNumber,
+      customerName: currentServing.customerName,
+      servicePace: currentServing.servicePace,
+      timeCalled: currentServing.calledAt,
+    });
 
     updateAnalytics("no_show");
     logQueueAction({
@@ -172,9 +194,16 @@ const QueueControls = () => {
     } catch {}
 
     setNoShowCount((prev) => prev + 1);
-    toast.warning(`${currentServing.ticketNumber} marked as No-Show`, {
-      description: "Customer did not respond after being called",
-    });
+
+    if (forced) {
+      toast.error("Marked as FORCED no-show (before 30-min deadline)", {
+        description: `COPQ: ₱${loss} • This affects customer satisfaction`,
+      });
+    } else {
+      toast.warning(`${currentServing.ticketNumber} marked as No-Show`, {
+        description: `COPQ: ₱${loss} lost revenue recorded`,
+      });
+    }
     callNext();
   };
 
@@ -223,7 +252,11 @@ const QueueControls = () => {
           <span className={`${cat.bg} ${cat.text} rounded-full px-3 py-1 text-sm font-semibold inline-block mb-2`}>
             {cat.label}
           </span>
-          <p className="text-sm text-gray-600">⏱️ Waited: {currentServing.waitTime} minutes</p>
+          <p className="text-sm text-gray-600 mb-3">⏱️ Waited: {currentServing.waitTime} minutes</p>
+          {/* No-Show Timer */}
+          <div className="flex justify-center">
+            <NoShowTimer calledAt={currentServing.calledAt} ticketNumber={currentServing.ticketNumber} />
+          </div>
         </div>
 
         {/* Control Buttons */}
