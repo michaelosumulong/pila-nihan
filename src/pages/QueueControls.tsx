@@ -101,6 +101,8 @@ const QueueControls = () => {
         customerName: nextTicket.name,
         category: nextTicket.category,
         waitTime: nextTicket.waitTime,
+        calledAt: new Date().toISOString(),
+        servicePace: nextTicket.category === "express" ? "express" : nextTicket.category === "priority" ? "technical" : "standard",
       });
       setQueueList((prev) => prev.filter((t) => t.id !== nextTicket!.id));
       if (nextTicket.category === "regular") {
