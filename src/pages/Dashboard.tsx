@@ -131,6 +131,11 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
+  // Initialize queue on dashboard load
+  useEffect(() => {
+    loadQueue();
+  }, []);
+
   // Initialize SURI AI recommendations
   useEffect(() => {
     const lastGenerated = localStorage.getItem('pila-suri-last-generated');
