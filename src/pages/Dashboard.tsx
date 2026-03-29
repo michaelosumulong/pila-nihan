@@ -16,6 +16,7 @@ import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
 import { getNoShowMetrics } from "@/utils/noShowEngine";
 import { generateDMAICRecommendations } from "@/utils/suriEngine";
+import { loadQueue } from "@/utils/queueEngine";
 import { AlertCircle, TrendingDown, Crown } from "lucide-react";
 // Lucide icons now in DashboardLayout
 interface MerchantData {
@@ -129,6 +130,11 @@ const Dashboard = () => {
       navigate("/");
     }
   }, [navigate]);
+
+  // Initialize queue on dashboard load
+  useEffect(() => {
+    loadQueue();
+  }, []);
 
   // Initialize SURI AI recommendations
   useEffect(() => {
