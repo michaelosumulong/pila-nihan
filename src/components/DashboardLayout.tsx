@@ -222,8 +222,14 @@ export default function DashboardLayout() {
         {/* Logout */}
         <button
           onClick={() => {
-            if (window.confirm("Are you sure you want to logout?")) {
+            if (window.confirm("Are you sure you want to logout? This will clear all data.")) {
               localStorage.removeItem("pila-merchant");
+              localStorage.removeItem("pila-queue");
+              localStorage.removeItem("pila-queue-actions");
+              localStorage.removeItem("pila-analytics");
+              localStorage.removeItem("pila-suri-recommendations");
+              localStorage.removeItem("pila-suri-last-generated");
+              localStorage.removeItem("pila-active-ticket");
               navigate("/");
             }
           }}

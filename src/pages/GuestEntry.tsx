@@ -9,6 +9,7 @@ import { addNotification } from "@/lib/notifications";
 import PilaLogo from "@/components/PilaLogo";
 import { useBranding } from "@/contexts/BrandingContext";
 import { migrateLegacyCategory } from "@/utils/migrateLegacyData";
+import { loadQueue, saveQueue, type Ticket } from "@/utils/queueEngine";
 
 const validateMobile = (value: string) => {
   const cleaned = value.replace(/\s+/g, "");
@@ -191,7 +192,8 @@ const GuestEntry = () => {
       return;
     }
     try {
-      const existingTickets = JSON.parse(localStorage.getItem("tickets") || "[]");
+      const queue = loadQueue();
+      const existingTickets = queue.tickets;
       const prefix = selectedType === "regular" ? "R" : "P";
       const sameTypeTickets = existingTickets.filter((t: any) => t.ticketNumber?.startsWith(prefix));
       const nextNumber = String(sameTypeTickets.length + 1).padStart(3, "0");
@@ -201,38 +203,20 @@ const GuestEntry = () => {
       const isPriority = selectedType === "express" || selectedType === "social";
       const paidAmount = selectedType === "express" ? expressPrice : 0;
 
-      const newTicket = {
+      const newTicket: Ticket = {
         id: `ticket-${Date.now()}`,
-        merchant_id: merchantData?.id || merchantId || "default",
         ticketNumber,
         customerName: name.trim(),
-        mobile: mobile.trim(),
-        category: selectedType === "social" ? "priority" : selectedType,
-        queueType: selectedType,
         status: "waiting",
-        joined_at: new Date().toISOString(),
-        called_at: null,
-        serving_started_at: null,
-        completed_at: null,
-        wait_time_minutes: null,
-        handling_time_minutes: null,
-        is_social_priority: selectedType === "social",
-        priority_reason: selectedType === "social" ? "senior_pwd_pregnant" : null,
-        is_express: selectedType === "express",
-        paid_amount: paidAmount,
-        position: waitingTickets.length + 1,
-        totalInQueue: waitingTickets.length + 1,
-        estimatedWaitMinutes: isPriority
-          ? Math.ceil((waitingTickets.filter((t: any) => t.category === "priority" || t.queueType === "express" || t.queueType === "social").length + 1) * targetTime)
-          : (waitingTickets.length + 1) * targetTime,
-        nowServing: existingTickets.find((t: any) => t.status === "serving")?.ticketNumber || "N/A",
-        customer_location: customerLocation,
-        distance_from_merchant: distance,
-        push_notifications_enabled: enablePushNotifications,
+        servicePace: selectedType === "social" ? "priority" : selectedType === "express" ? "express" : "regular",
+        created_at: new Date().toISOString(),
+        estimatedLoss: selectedType === "express" ? 0 : 150, // Express tickets have no loss
       };
 
-      existingTickets.push(newTicket);
-      localStorage.setItem("tickets", JSON.stringify(existingTickets));
+      queue.tickets.push(newTicket);
+      queue.lastTicketNumber = Math.max(queue.lastTicketNumber, parseInt(nextNumber));
+      queue.merchantId = merchantData?.id || merchantId || "default";
+      saveQueue(queue);
 
       // Track express revenue
       if (selectedType === "express" && paidAmount > 0) {
