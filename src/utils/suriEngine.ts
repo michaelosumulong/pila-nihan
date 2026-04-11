@@ -4,6 +4,7 @@
  */
 
 import { getNoShowMetrics } from './noShowEngine';
+import { loadQueue } from './queueEngine';
 
 export interface SuriMetrics {
   avgCycleTime: number;
@@ -51,10 +52,11 @@ export interface DMAICrecommendation {
   actualImpact?: number;
 }
 
-// Helper to load tickets from localStorage
+// Helper to load tickets from the shared queue model
 const loadTickets = (): any[] => {
   try {
-    return JSON.parse(localStorage.getItem('tickets') || '[]');
+    const queue = loadQueue();
+    return queue.tickets || [];
   } catch {
     return [];
   }

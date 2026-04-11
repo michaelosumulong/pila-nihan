@@ -10,6 +10,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import VersionFooter from "@/components/VersionFooter";
 import NoShowTimer from "@/components/NoShowTimer";
 import { recordNoShow, isForcedNoShow, getCOPQ } from "@/utils/noShowEngine";
+import { loadQueue, saveQueue } from "@/utils/queueEngine";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -45,6 +46,23 @@ const logQueueAction = (action: Record<string, string>) => {
   localStorage.setItem("pila-queue-actions", JSON.stringify(actions));
 };
 
+const mapQueueTicket = (ticket: any) => ({
+  id: ticket.id,
+  ticketNumber: ticket.ticketNumber,
+  name: ticket.customerName,
+  category: ticket.category || ticket.servicePace || "regular",
+  waitTime: ticket.estimatedWaitMinutes || 0,
+});
+
+const mapServingTicket = (ticket: any) => ({
+  ticketNumber: ticket.ticketNumber,
+  customerName: ticket.customerName,
+  category: ticket.category || ticket.servicePace || "regular",
+  waitTime: ticket.estimatedWaitMinutes || 0,
+  calledAt: ticket.called_at || new Date().toISOString(),
+  servicePace: ticket.servicePace || "standard",
+});
+
 const QueueControls = () => {
   const navigate = useNavigate();
   const isOnline = useOnlineStatus();
@@ -79,39 +97,48 @@ const QueueControls = () => {
     { id: 5, ticketNumber: "R-058", name: "Jose Martinez", category: "regular", waitTime: 22 },
   ]);
 
+  useEffect(() => {
+    const queue = loadQueue();
+    const waitingTickets = queue.tickets.filter((ticket: any) => ticket.status === "waiting");
+    setQueueList(waitingTickets.map(mapQueueTicket));
+
+    const activeTicket = queue.tickets.find((ticket: any) => ticket.status === "called" || ticket.status === "serving");
+    if (activeTicket) {
+      setCurrentServing(mapServingTicket(activeTicket));
+    }
+  }, []);
+
   const [servedCount, setServedCount] = useState({ regular: 0, express: 0 });
   const [servedToday, setServedToday] = useState(158);
   const [noShowCount, setNoShowCount] = useState(0);
 
   const callNext = () => {
-    let nextTicket;
-    const priorityTicket = queueList.find((t) => t.category === "priority");
-    if (priorityTicket) {
-      nextTicket = priorityTicket;
-    } else if (servedCount.regular >= 2) {
-      const expressTicket = queueList.find((t) => t.category === "express");
-      nextTicket = expressTicket || queueList.find((t) => t.category === "regular");
-    } else {
-      nextTicket = queueList.find((t) => t.category === "regular") || queueList[0];
+    const queue = loadQueue();
+    const waitingTickets = queue.tickets.filter((ticket: any) => ticket.status === "waiting");
+
+    let nextTicket = waitingTickets.find((t: any) => t.servicePace === "priority");
+    if (!nextTicket) {
+      nextTicket = servedCount.regular >= 2
+        ? waitingTickets.find((t: any) => t.servicePace === "express") || waitingTickets.find((t: any) => t.servicePace === "regular")
+        : waitingTickets.find((t: any) => t.servicePace === "regular") || waitingTickets[0];
     }
 
     if (nextTicket) {
-      setCurrentServing({
-        ticketNumber: nextTicket.ticketNumber,
-        customerName: nextTicket.name,
-        category: nextTicket.category,
-        waitTime: nextTicket.waitTime,
-        calledAt: new Date().toISOString(),
-        servicePace: nextTicket.category === "express" ? "express" : nextTicket.category === "priority" ? "technical" : "standard",
-      });
-      setQueueList((prev) => prev.filter((t) => t.id !== nextTicket!.id));
-      if (nextTicket.category === "regular") {
+      nextTicket.status = "called";
+      nextTicket.called_at = new Date().toISOString();
+      nextTicket.servicePace = nextTicket.servicePace || (nextTicket.category === "priority" ? "priority" : nextTicket.category === "express" ? "express" : "standard");
+      saveQueue(queue);
+
+      setCurrentServing(mapServingTicket(nextTicket));
+      setQueueList(waitingTickets.filter((t: any) => t.id !== nextTicket.id).map(mapQueueTicket));
+
+      if (nextTicket.servicePace === "regular") {
         setServedCount((prev) => ({ ...prev, regular: prev.regular + 1 }));
-      } else if (nextTicket.category === "express") {
+      } else if (nextTicket.servicePace === "express") {
         setServedCount({ regular: 0, express: servedCount.express + 1 });
       }
       setServedToday((prev) => prev + 1);
-      toast.success(`Now serving ${nextTicket.ticketNumber} - ${nextTicket.name}`);
+      toast.success(`Now serving ${nextTicket.ticketNumber} - ${nextTicket.customerName}`);
       addNotification({
         title: "YOUR TURN!",
         message: `Ticket ${nextTicket.ticketNumber} — please proceed to the counter now.`,
@@ -129,30 +156,26 @@ const QueueControls = () => {
       return;
     }
 
-    // Load queue from localStorage and update ticket status
-    const queueData = localStorage.getItem('pila-queue');
-    if (queueData) {
-      const queue = JSON.parse(queueData);
-      const ticketIndex = queue.tickets.findIndex((t: any) => t.ticketNumber === currentServing.ticketNumber);
+    const queue = loadQueue();
+    const ticketIndex = queue.tickets.findIndex((t: any) => t.ticketNumber === currentServing.ticketNumber);
 
-      if (ticketIndex !== -1) {
-        const ticket = queue.tickets[ticketIndex];
-        ticket.status = 'completed';
-        ticket.completedAt = new Date().toISOString();
+    if (ticketIndex !== -1) {
+      const ticket = queue.tickets[ticketIndex];
+      ticket.status = 'served';
+      ticket.served_at = new Date().toISOString();
 
-        if (!ticket.calledAt) {
-          console.warn('Ticket was not properly called, setting calledAt retroactively');
-          ticket.calledAt = new Date(Date.now() - 60000).toISOString();
-        }
-
-        localStorage.setItem('pila-queue', JSON.stringify(queue));
-
-        console.log('✅ Ticket completed:', ticket.ticketNumber);
-        console.log('   Called at:', ticket.calledAt);
-        console.log('   Completed at:', ticket.completedAt);
-        const serviceTime = (new Date(ticket.completedAt).getTime() - new Date(ticket.calledAt).getTime()) / 1000;
-        console.log('   Service time:', Math.round(serviceTime), 'seconds');
+      if (!ticket.called_at) {
+        console.warn('Ticket was not properly called, setting called_at retroactively');
+        ticket.called_at = new Date(Date.now() - 60000).toISOString();
       }
+
+      saveQueue(queue);
+
+      console.log('✅ Ticket completed:', ticket.ticketNumber);
+      console.log('   Called at:', ticket.called_at);
+      console.log('   Served at:', ticket.served_at);
+      const serviceTime = (new Date(ticket.served_at).getTime() - new Date(ticket.called_at).getTime()) / 1000;
+      console.log('   Service time:', Math.round(serviceTime), 'seconds');
     }
 
     updateAnalytics("completed");
