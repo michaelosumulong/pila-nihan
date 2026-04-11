@@ -128,6 +128,33 @@ const QueueControls = () => {
       toast.error("No customer currently being served");
       return;
     }
+
+    // Load queue from localStorage and update ticket status
+    const queueData = localStorage.getItem('pila-queue');
+    if (queueData) {
+      const queue = JSON.parse(queueData);
+      const ticketIndex = queue.tickets.findIndex((t: any) => t.ticketNumber === currentServing.ticketNumber);
+
+      if (ticketIndex !== -1) {
+        const ticket = queue.tickets[ticketIndex];
+        ticket.status = 'completed';
+        ticket.completedAt = new Date().toISOString();
+
+        if (!ticket.calledAt) {
+          console.warn('Ticket was not properly called, setting calledAt retroactively');
+          ticket.calledAt = new Date(Date.now() - 60000).toISOString();
+        }
+
+        localStorage.setItem('pila-queue', JSON.stringify(queue));
+
+        console.log('✅ Ticket completed:', ticket.ticketNumber);
+        console.log('   Called at:', ticket.calledAt);
+        console.log('   Completed at:', ticket.completedAt);
+        const serviceTime = (new Date(ticket.completedAt).getTime() - new Date(ticket.calledAt).getTime()) / 1000;
+        console.log('   Service time:', Math.round(serviceTime), 'seconds');
+      }
+    }
+
     updateAnalytics("completed");
     logQueueAction({
       action_type: "completed",
