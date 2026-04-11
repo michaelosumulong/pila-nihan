@@ -16,7 +16,7 @@ import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
 import { getNoShowMetrics } from "@/utils/noShowEngine";
 import { generateDMAICRecommendations } from "@/utils/suriEngine";
-import { loadQueue } from "@/utils/queueEngine";
+import { loadQueue, saveQueue } from "@/utils/queueEngine";
 import { AlertCircle, TrendingDown, Crown } from "lucide-react";
 // Lucide icons now in DashboardLayout
 interface MerchantData {
@@ -133,6 +133,70 @@ const Dashboard = () => {
 
   // Initialize queue on dashboard load
   useEffect(() => {
+    // Initialize demo merchant if none exists
+    const merchantData = localStorage.getItem("pila-merchant");
+    if (!merchantData || merchantData === "{}") {
+      const demoMerchant = {
+        id: "demo-pilanihan",
+        businessName: "Pilanihan Demo",
+        shopCode: "PILANI",
+        category: "Express",
+        plan: "suri",
+        servicePlan: "suri",
+        created_at: new Date().toISOString(),
+        prepaidCredits: 500
+      };
+      localStorage.setItem("pila-merchant", JSON.stringify(demoMerchant));
+      console.log("✅ Initialized demo merchant:", demoMerchant.shopCode);
+    }
+
+    // Initialize queue with demo tickets if empty
+    const queue = loadQueue();
+    if (queue.tickets.length === 0) {
+      const demoTickets = [
+        {
+          id: "demo-1",
+          ticketNumber: "PILANI-001",
+          customerName: "Juan Dela Cruz",
+          status: "waiting",
+          servicePace: "regular",
+          created_at: new Date(Date.now() - 300000).toISOString(), // 5 min ago
+          called_at: null,
+          served_at: null,
+          category: "regular",
+          estimatedWaitMinutes: 5
+        },
+        {
+          id: "demo-2", 
+          ticketNumber: "PILANI-002",
+          customerName: "Maria Santos",
+          status: "waiting",
+          servicePace: "express",
+          created_at: new Date(Date.now() - 180000).toISOString(), // 3 min ago
+          called_at: null,
+          served_at: null,
+          category: "express",
+          estimatedWaitMinutes: 3
+        },
+        {
+          id: "demo-3",
+          ticketNumber: "PILANI-003", 
+          customerName: "Pedro Reyes",
+          status: "waiting",
+          servicePace: "regular",
+          created_at: new Date(Date.now() - 120000).toISOString(), // 2 min ago
+          called_at: null,
+          served_at: null,
+          category: "regular",
+          estimatedWaitMinutes: 2
+        }
+      ];
+      queue.tickets = demoTickets;
+      queue.lastTicketNumber = 3;
+      saveQueue(queue);
+      console.log("✅ Initialized demo queue with", demoTickets.length, "tickets");
+    }
+
     loadQueue();
   }, []);
 
