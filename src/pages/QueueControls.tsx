@@ -10,7 +10,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import VersionFooter from "@/components/VersionFooter";
 import NoShowTimer from "@/components/NoShowTimer";
 import { recordNoShow, isForcedNoShow, getCOPQ } from "@/utils/noShowEngine";
-import { loadQueue, saveQueue, updateTicketStatus, type Ticket } from "@/utils/queueEngine";
+import { loadQueue, fetchQueue, updateTicketStatus, subscribeToQueue, type Ticket, type Queue } from "@/utils/queueEngine";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -97,28 +97,30 @@ const QueueControls = () => {
   });
 
   const [queueList, setQueueList] = useState<Array<{ id: string; ticketNumber: string; name: string; category: string; waitTime: number }>>([]);
-  const [queueData, setQueueData] = useState(() => loadQueue());
+  const [queueData, setQueueData] = useState<Queue>(() => loadQueue());
 
-  // Real-time sync: pull fresh queue from storage on mount + every 5s (paused in low-battery mode)
+  // Real-time sync via Supabase: initial fetch + realtime subscription
   useEffect(() => {
-    const refresh = () => {
-      const fresh = loadQueue();
-      setQueueData(fresh);
+    const cachedMerchantId = loadQueue().merchantId;
+    const merchantId = cachedMerchantId && cachedMerchantId !== "default" ? cachedMerchantId : undefined;
 
+    const applyQueue = (fresh: Queue) => {
+      setQueueData(fresh);
       const waiting = fresh.tickets.filter((t: Ticket) => t.status === "waiting" || !t.status);
       setQueueList(waiting.map(mapQueueTicket));
-
       const active = fresh.tickets.find((t: Ticket) => t.status === "called" || t.status === "serving");
-      if (active) {
-        setCurrentServing(mapServingTicket(active));
-      }
+      if (active) setCurrentServing(mapServingTicket(active));
     };
 
-    refresh();
+    // Initial cloud fetch
+    fetchQueue(merchantId).then(applyQueue).catch((err) => {
+      console.error("Initial fetchQueue failed:", err);
+    });
 
+    // Realtime subscription (skipped in low-battery mode to conserve resources)
     if (!lowBatteryMode) {
-      const interval = setInterval(refresh, 5000);
-      return () => clearInterval(interval);
+      const unsubscribe = subscribeToQueue(merchantId, applyQueue);
+      return unsubscribe;
     }
   }, [lowBatteryMode]);
 
