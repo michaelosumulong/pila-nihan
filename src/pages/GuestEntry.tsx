@@ -10,6 +10,7 @@ import PilaLogo from "@/components/PilaLogo";
 import { useBranding } from "@/contexts/BrandingContext";
 import { migrateLegacyCategory } from "@/utils/migrateLegacyData";
 import { loadQueue, saveQueue, addTicketToQueue, type Ticket } from "@/utils/queueEngine";
+import { supabase } from "@/lib/supabase";
 
 const validateMobile = (value: string) => {
   const cleaned = value.replace(/\s+/g, "");
