@@ -131,7 +131,7 @@ const QueueControls = () => {
   const servedToday = queueData.tickets.filter((t: Ticket) => t.status === "served").length;
   const cancelledToday = queueData.tickets.filter((t: Ticket) => t.status === "cancelled").length;
 
-  const callNext = () => {
+  const callNext = async () => {
     const queue = loadQueue();
     const waitingTickets = queue.tickets.filter((t: Ticket) => t.status === "waiting" || !t.status);
 
@@ -148,16 +148,21 @@ const QueueControls = () => {
     }
 
     if (nextTicket) {
-      // Use Storage Adapter helper
-      updateTicketStatus(nextTicket.id, "called", {
+      const ok = await updateTicketStatus(nextTicket.id, "called", {
         called_at: new Date().toISOString(),
         servicePace: nextTicket.servicePace || "regular",
       });
 
+      if (!ok) {
+        toast.error("Failed to call next ticket. Check your connection.");
+        return;
+      }
+
+      // Realtime subscription will push the update; also refresh locally for snappy UX
       const updated = loadQueue();
       setQueueData(updated);
-      const updatedTicket = updated.tickets.find((t) => t.id === nextTicket!.id)!;
-      setCurrentServing(mapServingTicket(updatedTicket));
+      const updatedTicket = updated.tickets.find((t) => t.id === nextTicket!.id);
+      if (updatedTicket) setCurrentServing(mapServingTicket(updatedTicket));
       setQueueList(updated.tickets.filter((t) => t.status === "waiting" || !t.status).map(mapQueueTicket));
 
       if (nextTicket.servicePace === "regular") {
