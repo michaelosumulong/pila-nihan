@@ -6,11 +6,12 @@ export interface Ticket {
   id: string;
   ticketNumber: string;
   customerName: string;
-  status: 'waiting' | 'called' | 'serving' | 'served' | 'no_show';
+  status: 'waiting' | 'called' | 'serving' | 'served' | 'no_show' | 'cancelled';
   servicePace?: 'regular' | 'express' | 'priority';
   created_at: string;
   called_at?: string;
   served_at?: string;
+  cancelledAt?: string;
   estimatedLoss?: number;
 }
 
