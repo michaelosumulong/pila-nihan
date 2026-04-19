@@ -126,7 +126,7 @@ const QueueControls = () => {
     if (nextTicket) {
       nextTicket.status = "called";
       nextTicket.called_at = new Date().toISOString();
-      nextTicket.servicePace = nextTicket.servicePace || (nextTicket.category === "priority" ? "priority" : nextTicket.category === "express" ? "express" : "standard");
+      nextTicket.servicePace = nextTicket.servicePace || "regular";
       saveQueue(queue);
 
       setCurrentServing(mapServingTicket(nextTicket));
