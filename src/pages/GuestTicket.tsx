@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { XCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLowBattery } from "@/hooks/use-low-battery";
@@ -30,6 +31,7 @@ const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3
 const GuestTicket = () => {
   const { ticketNumber } = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const isRecovered = searchParams.get("recovered") === "true";
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
   const { branding, customLogo } = useBranding();
@@ -111,6 +113,41 @@ const GuestTicket = () => {
         description: "Please show valid ID to staff for verification",
       });
     }
+  };
+
+  // Auto-cleanup active session when tab closes (does NOT cancel ticket)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem("pila-active-ticket");
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  // Leave queue — marks ticket as cancelled (preserves data for SURI analytics)
+  const handleLeaveQueue = () => {
+    if (!window.confirm("Leave the queue? You will lose your place in line.")) return;
+
+    const tn = ticketNumber || ticketData.ticketNumber;
+    try {
+      const queueData = localStorage.getItem("pila-queue");
+      if (queueData) {
+        const queue = JSON.parse(queueData);
+        const idx = queue.tickets.findIndex((t: any) => t.ticketNumber === tn);
+        if (idx !== -1) {
+          queue.tickets[idx].status = "cancelled";
+          queue.tickets[idx].cancelledAt = new Date().toISOString();
+          localStorage.setItem("pila-queue", JSON.stringify(queue));
+          console.log("📊 Customer cancelled:", tn, "at", new Date().toLocaleTimeString());
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to mark ticket cancelled", e);
+    }
+
+    localStorage.removeItem("pila-active-ticket");
+    toast.info("You have left the queue");
+    navigate("/");
   };
 
   // Smart auto-refresh based on battery mode
@@ -367,14 +404,22 @@ const GuestTicket = () => {
         </div>
       </div>
 
-      {/* Report Issue */}
-      <div className="max-w-md mx-auto text-center mb-4">
+      {/* Report Issue + Leave Queue */}
+      <div className="max-w-md mx-auto text-center mb-4 space-y-3">
         <button
           onClick={() => toast.info("Contact support: +63 917 PILA-HELP")}
-          className="text-sm text-gray-300 underline"
+          className="text-sm text-gray-300 underline block w-full"
         >
           ⚠️ Report an Issue
         </button>
+        <button
+          onClick={handleLeaveQueue}
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all shadow-lg active:scale-95"
+        >
+          <XCircle className="w-5 h-5" />
+          Leave Queue
+        </button>
+        <p className="text-xs text-white/60 italic">You can join again anytime via the merchant's QR code.</p>
       </div>
 
       {/* Auto-refresh indicator */}
