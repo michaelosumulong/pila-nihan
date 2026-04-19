@@ -34,6 +34,22 @@ export interface MudaAnalysis {
     severity: 'low' | 'medium' | 'high';
     description: string;
   };
+  abandonment: {
+    type: string;
+    count: number;
+    rate: number;
+    severity: 'low' | 'medium' | 'high';
+    description: string;
+  };
+}
+
+export interface CancellationAnalysis {
+  totalCancelled: number;
+  cancellationRate: number;
+  peakCancellationHours: number[];
+  mostCancelledServiceType: string;
+  avgWaitTimeBeforeCancellation: number;
+  severity: 'low' | 'medium' | 'high';
 }
 
 export interface DMAICrecommendation {
@@ -160,7 +176,73 @@ export const detectMuda = (): MudaAnalysis => {
       : 'No significant peak hour issues',
   };
 
-  return { waiting: waitingWaste, overprocessing, motion };
+  const cancellations = analyzeCancellations();
+
+  return {
+    waiting: waitingWaste,
+    overprocessing,
+    motion,
+    abandonment: {
+      type: 'Customer Abandonment',
+      count: cancellations.totalCancelled,
+      rate: cancellations.cancellationRate,
+      severity: cancellations.severity,
+      description: `${cancellations.totalCancelled} customers left queue (${cancellations.cancellationRate}% abandonment rate)`,
+    },
+  };
+};
+
+export const analyzeCancellations = (): CancellationAnalysis => {
+  const tickets = loadTickets();
+  const cancelled = tickets.filter((t: any) => t.status === 'cancelled');
+  const total = tickets.length || 1;
+
+  const cancellationRate = Math.round((cancelled.length / total) * 100 * 10) / 10;
+
+  const hourCounts: Record<number, number> = {};
+  cancelled.forEach((t: any) => {
+    if (t.cancelledAt) {
+      const hour = new Date(t.cancelledAt).getHours();
+      hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+    }
+  });
+
+  const peakCancellationHours = Object.keys(hourCounts)
+    .filter((h) => hourCounts[parseInt(h)] >= 2)
+    .map((h) => parseInt(h));
+
+  const serviceCounts = cancelled.reduce((acc: Record<string, number>, t: any) => {
+    const pace = t.servicePace || 'regular';
+    acc[pace] = (acc[pace] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const mostCancelledServiceType =
+    Object.keys(serviceCounts).sort((a, b) => serviceCounts[b] - serviceCounts[a])[0] || 'none';
+
+  const waitTimes = cancelled
+    .filter((t: any) => t.created_at && t.cancelledAt)
+    .map(
+      (t: any) =>
+        (new Date(t.cancelledAt).getTime() - new Date(t.created_at).getTime()) / 60000
+    );
+
+  const avgWaitTimeBeforeCancellation =
+    waitTimes.length > 0
+      ? Math.round(waitTimes.reduce((a: number, b: number) => a + b, 0) / waitTimes.length)
+      : 0;
+
+  const severity: 'low' | 'medium' | 'high' =
+    cancellationRate > 20 ? 'high' : cancellationRate > 10 ? 'medium' : 'low';
+
+  return {
+    totalCancelled: cancelled.length,
+    cancellationRate,
+    peakCancellationHours,
+    mostCancelledServiceType,
+    avgWaitTimeBeforeCancellation,
+    severity,
+  };
 };
 
 export const generateDMAICRecommendations = (): DMAICrecommendation[] => {
@@ -275,6 +357,60 @@ export const generateDMAICRecommendations = (): DMAICrecommendation[] => {
     priority: 'low',
     status: 'pending',
   });
+
+  // Cancellation analysis recommendations
+  const cancellationData = analyzeCancellations();
+
+  if (cancellationData.severity === 'high') {
+    recommendations.push({
+      id: `analyze-cancellation-${Date.now()}-8`,
+      timestamp: new Date().toISOString(),
+      phase: 'ANALYZE',
+      category: 'efficiency',
+      problem: `High cancellation rate (${cancellationData.cancellationRate}%) - customers leaving queue`,
+      recommendation: `Root cause: Average ${cancellationData.avgWaitTimeBeforeCancellation} min wait before abandonment. Customers lose patience.`,
+      expectedImpact: 'Understand customer patience threshold',
+      estimatedROI: 0,
+      priority: 'high',
+      status: 'pending',
+    });
+  }
+
+  if (cancellationData.cancellationRate > 15) {
+    const potentialRecovery = Math.round(cancellationData.totalCancelled * 150);
+    recommendations.push({
+      id: `improve-cancellation-${Date.now()}-9`,
+      timestamp: new Date().toISOString(),
+      phase: 'IMPROVE',
+      category: 'efficiency',
+      problem: `${cancellationData.totalCancelled} customers abandoned queue this month`,
+      recommendation:
+        'Reduce wait times: Add SMS notifications, show real-time queue progress, or add express counters',
+      expectedImpact: `Recover 50% of abandoned customers = ${Math.round(
+        cancellationData.totalCancelled * 0.5
+      )} more served`,
+      estimatedROI: potentialRecovery,
+      priority: 'high',
+      status: 'pending',
+    });
+  }
+
+  if (cancellationData.peakCancellationHours.length > 0) {
+    recommendations.push({
+      id: `improve-cancellation-peak-${Date.now()}-10`,
+      timestamp: new Date().toISOString(),
+      phase: 'IMPROVE',
+      category: 'takt',
+      problem: `Most cancellations occur at ${cancellationData.peakCancellationHours.join(', ')}:00 hours`,
+      recommendation: `Schedule extra staff during ${cancellationData.peakCancellationHours.join(
+        '/'
+      )}:00 to reduce abandonment`,
+      expectedImpact: 'Reduce peak-hour cancellations by 60%',
+      estimatedROI: 4000,
+      priority: 'medium',
+      status: 'pending',
+    });
+  }
 
   return recommendations.sort((a, b) => {
     const priorityOrder = { high: 0, medium: 1, low: 2 };
