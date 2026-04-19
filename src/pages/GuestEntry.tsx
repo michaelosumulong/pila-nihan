@@ -255,7 +255,7 @@ const GuestEntry = () => {
         servicePace: selectedType === "social" ? "priority" : selectedType === "express" ? "express" : "regular",
         priorityPaid: selectedType === "express",
         priorityAmount: paidAmount,
-        merchantId: merchantData?.id || merchantId || undefined,
+        merchantId: merchantData?.id && !String(merchantData.id).startsWith("demo-") ? merchantData.id : undefined,
         estimatedLoss: selectedType === "express" ? 0 : 150,
       });
 
