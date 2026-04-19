@@ -34,6 +34,22 @@ export interface MudaAnalysis {
     severity: 'low' | 'medium' | 'high';
     description: string;
   };
+  abandonment: {
+    type: string;
+    count: number;
+    rate: number;
+    severity: 'low' | 'medium' | 'high';
+    description: string;
+  };
+}
+
+export interface CancellationAnalysis {
+  totalCancelled: number;
+  cancellationRate: number;
+  peakCancellationHours: number[];
+  mostCancelledServiceType: string;
+  avgWaitTimeBeforeCancellation: number;
+  severity: 'low' | 'medium' | 'high';
 }
 
 export interface DMAICrecommendation {
