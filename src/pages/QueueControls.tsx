@@ -10,7 +10,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import VersionFooter from "@/components/VersionFooter";
 import NoShowTimer from "@/components/NoShowTimer";
 import { recordNoShow, isForcedNoShow, getCOPQ } from "@/utils/noShowEngine";
-import { loadQueue, saveQueue } from "@/utils/queueEngine";
+import { loadQueue, saveQueue, updateTicketStatus, type Ticket } from "@/utils/queueEngine";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -80,73 +80,99 @@ const QueueControls = () => {
     }
   };
 
-  const [currentServing, setCurrentServing] = useState({
-    ticketNumber: "R-055",
-    customerName: "Juan Dela Cruz",
+  const [currentServing, setCurrentServing] = useState<{
+    ticketNumber: string;
+    customerName: string;
+    category: string;
+    waitTime: number;
+    calledAt: string;
+    servicePace: string;
+  }>({
+    ticketNumber: "",
+    customerName: "",
     category: "regular",
-    waitTime: 8,
+    waitTime: 0,
     calledAt: new Date().toISOString(),
-    servicePace: "standard",
+    servicePace: "regular",
   });
 
-  const [queueList, setQueueList] = useState([
-    { id: 1, ticketNumber: "R-056", name: "Maria Santos", category: "regular", waitTime: 12 },
-    { id: 2, ticketNumber: "E-012", name: "Pedro Reyes", category: "express", waitTime: 15 },
-    { id: 3, ticketNumber: "R-057", name: "Ana Garcia", category: "regular", waitTime: 18 },
-    { id: 4, ticketNumber: "P-003", name: "Lola Rosa (Senior)", category: "priority", waitTime: 20 },
-    { id: 5, ticketNumber: "R-058", name: "Jose Martinez", category: "regular", waitTime: 22 },
-  ]);
+  const [queueList, setQueueList] = useState<Array<{ id: string; ticketNumber: string; name: string; category: string; waitTime: number }>>([]);
+  const [queueData, setQueueData] = useState(() => loadQueue());
 
+  // Real-time sync: pull fresh queue from storage on mount + every 5s (paused in low-battery mode)
   useEffect(() => {
-    const queue = loadQueue();
-    const waitingTickets = queue.tickets.filter((ticket: any) => ticket.status === "waiting");
-    setQueueList(waitingTickets.map(mapQueueTicket));
+    const refresh = () => {
+      const fresh = loadQueue();
+      setQueueData(fresh);
 
-    const activeTicket = queue.tickets.find((ticket: any) => ticket.status === "called" || ticket.status === "serving");
-    if (activeTicket) {
-      setCurrentServing(mapServingTicket(activeTicket));
+      const waiting = fresh.tickets.filter((t: Ticket) => t.status === "waiting" || !t.status);
+      setQueueList(waiting.map(mapQueueTicket));
+
+      const active = fresh.tickets.find((t: Ticket) => t.status === "called" || t.status === "serving");
+      if (active) {
+        setCurrentServing(mapServingTicket(active));
+      }
+    };
+
+    refresh();
+
+    if (!lowBatteryMode) {
+      const interval = setInterval(refresh, 5000);
+      return () => clearInterval(interval);
     }
-  }, []);
+  }, [lowBatteryMode]);
 
   const [servedCount, setServedCount] = useState({ regular: 0, express: 0 });
-  const [servedToday, setServedToday] = useState(158);
   const [noShowCount, setNoShowCount] = useState(0);
+
+  // Today's stats from real queue data
+  const servedToday = queueData.tickets.filter((t: Ticket) => t.status === "served").length;
+  const cancelledToday = queueData.tickets.filter((t: Ticket) => t.status === "cancelled").length;
 
   const callNext = () => {
     const queue = loadQueue();
-    const waitingTickets = queue.tickets.filter((ticket: any) => ticket.status === "waiting");
+    const waitingTickets = queue.tickets.filter((t: Ticket) => t.status === "waiting" || !t.status);
 
-    let nextTicket = waitingTickets.find((t: any) => t.servicePace === "priority");
+    if (waitingTickets.length === 0) {
+      toast.info("Queue is empty!");
+      return;
+    }
+
+    let nextTicket = waitingTickets.find((t: Ticket) => t.servicePace === "priority");
     if (!nextTicket) {
       nextTicket = servedCount.regular >= 2
-        ? waitingTickets.find((t: any) => t.servicePace === "express") || waitingTickets.find((t: any) => t.servicePace === "regular")
-        : waitingTickets.find((t: any) => t.servicePace === "regular") || waitingTickets[0];
+        ? waitingTickets.find((t: Ticket) => t.servicePace === "express") || waitingTickets.find((t: Ticket) => t.servicePace === "regular")
+        : waitingTickets.find((t: Ticket) => t.servicePace === "regular") || waitingTickets[0];
     }
 
     if (nextTicket) {
-      nextTicket.status = "called";
-      nextTicket.called_at = new Date().toISOString();
-      nextTicket.servicePace = nextTicket.servicePace || "regular";
-      saveQueue(queue);
+      // Use Storage Adapter helper
+      updateTicketStatus(nextTicket.id, "called", {
+        called_at: new Date().toISOString(),
+        servicePace: nextTicket.servicePace || "regular",
+      });
 
-      setCurrentServing(mapServingTicket(nextTicket));
-      setQueueList(waitingTickets.filter((t: any) => t.id !== nextTicket.id).map(mapQueueTicket));
+      const updated = loadQueue();
+      setQueueData(updated);
+      const updatedTicket = updated.tickets.find((t) => t.id === nextTicket!.id)!;
+      setCurrentServing(mapServingTicket(updatedTicket));
+      setQueueList(updated.tickets.filter((t) => t.status === "waiting" || !t.status).map(mapQueueTicket));
 
       if (nextTicket.servicePace === "regular") {
         setServedCount((prev) => ({ ...prev, regular: prev.regular + 1 }));
       } else if (nextTicket.servicePace === "express") {
         setServedCount({ regular: 0, express: servedCount.express + 1 });
       }
-      setServedToday((prev) => prev + 1);
+
       toast.success(`Now serving ${nextTicket.ticketNumber} - ${nextTicket.customerName}`);
+      console.log("📢 Called ticket:", nextTicket.ticketNumber, "| Service:", nextTicket.servicePace);
+
       addNotification({
         title: "YOUR TURN!",
         message: `Ticket ${nextTicket.ticketNumber} — please proceed to the counter now.`,
         type: "alert",
         ticketNumber: nextTicket.ticketNumber,
       });
-    } else {
-      toast.info("Queue is empty!");
     }
   };
 
@@ -262,16 +288,10 @@ const QueueControls = () => {
   };
 
   const handleWalkInCreated = (ticket: any) => {
-    setQueueList((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        ticketNumber: ticket.ticketNumber,
-        name: ticket.customerName,
-        category: ticket.category,
-        waitTime: ticket.estimatedWaitMinutes,
-      },
-    ]);
+    // Walk-in is already saved to localStorage by WalkInModal — refresh from storage
+    const fresh = loadQueue();
+    setQueueData(fresh);
+    setQueueList(fresh.tickets.filter((t: Ticket) => t.status === "waiting" || !t.status).map(mapQueueTicket));
   };
 
   const cat = CATEGORY_STYLES[currentServing.category] || CATEGORY_STYLES.regular;
