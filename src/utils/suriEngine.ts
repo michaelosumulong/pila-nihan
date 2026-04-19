@@ -358,6 +358,60 @@ export const generateDMAICRecommendations = (): DMAICrecommendation[] => {
     status: 'pending',
   });
 
+  // Cancellation analysis recommendations
+  const cancellationData = analyzeCancellations();
+
+  if (cancellationData.severity === 'high') {
+    recommendations.push({
+      id: `analyze-cancellation-${Date.now()}-8`,
+      timestamp: new Date().toISOString(),
+      phase: 'ANALYZE',
+      category: 'efficiency',
+      problem: `High cancellation rate (${cancellationData.cancellationRate}%) - customers leaving queue`,
+      recommendation: `Root cause: Average ${cancellationData.avgWaitTimeBeforeCancellation} min wait before abandonment. Customers lose patience.`,
+      expectedImpact: 'Understand customer patience threshold',
+      estimatedROI: 0,
+      priority: 'high',
+      status: 'pending',
+    });
+  }
+
+  if (cancellationData.cancellationRate > 15) {
+    const potentialRecovery = Math.round(cancellationData.totalCancelled * 150);
+    recommendations.push({
+      id: `improve-cancellation-${Date.now()}-9`,
+      timestamp: new Date().toISOString(),
+      phase: 'IMPROVE',
+      category: 'efficiency',
+      problem: `${cancellationData.totalCancelled} customers abandoned queue this month`,
+      recommendation:
+        'Reduce wait times: Add SMS notifications, show real-time queue progress, or add express counters',
+      expectedImpact: `Recover 50% of abandoned customers = ${Math.round(
+        cancellationData.totalCancelled * 0.5
+      )} more served`,
+      estimatedROI: potentialRecovery,
+      priority: 'high',
+      status: 'pending',
+    });
+  }
+
+  if (cancellationData.peakCancellationHours.length > 0) {
+    recommendations.push({
+      id: `improve-cancellation-peak-${Date.now()}-10`,
+      timestamp: new Date().toISOString(),
+      phase: 'IMPROVE',
+      category: 'takt',
+      problem: `Most cancellations occur at ${cancellationData.peakCancellationHours.join(', ')}:00 hours`,
+      recommendation: `Schedule extra staff during ${cancellationData.peakCancellationHours.join(
+        '/'
+      )}:00 to reduce abandonment`,
+      expectedImpact: 'Reduce peak-hour cancellations by 60%',
+      estimatedROI: 4000,
+      priority: 'medium',
+      status: 'pending',
+    });
+  }
+
   return recommendations.sort((a, b) => {
     const priorityOrder = { high: 0, medium: 1, low: 2 };
     return priorityOrder[a.priority] - priorityOrder[b.priority];
