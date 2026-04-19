@@ -9,7 +9,7 @@ import { addNotification } from "@/lib/notifications";
 import PilaLogo from "@/components/PilaLogo";
 import { useBranding } from "@/contexts/BrandingContext";
 import { migrateLegacyCategory } from "@/utils/migrateLegacyData";
-import { loadQueue, saveQueue, type Ticket } from "@/utils/queueEngine";
+import { loadQueue, saveQueue, addTicketToQueue, type Ticket } from "@/utils/queueEngine";
 
 const validateMobile = (value: string) => {
   const cleaned = value.replace(/\s+/g, "");
@@ -200,23 +200,20 @@ const GuestEntry = () => {
       const ticketNumber = `${prefix}-${nextNumber}`;
       const waitingTickets = existingTickets.filter((t: any) => t.status === "waiting");
 
-      const isPriority = selectedType === "express" || selectedType === "social";
       const paidAmount = selectedType === "express" ? expressPrice : 0;
 
-      const newTicket: Ticket = {
-        id: `ticket-${Date.now()}`,
+      // Route through Storage Adapter helper (single source of truth)
+      const newTicket = addTicketToQueue({
         ticketNumber,
         customerName: name.trim(),
-        status: "waiting",
         servicePace: selectedType === "social" ? "priority" : selectedType === "express" ? "express" : "regular",
-        created_at: new Date().toISOString(),
-        estimatedLoss: selectedType === "express" ? 0 : 150, // Express tickets have no loss
-      };
+        estimatedLoss: selectedType === "express" ? 0 : 150,
+      });
 
-      queue.tickets.push(newTicket);
-      queue.lastTicketNumber = Math.max(queue.lastTicketNumber, parseInt(nextNumber));
-      queue.merchantId = merchantData?.id || merchantId || "default";
-      saveQueue(queue);
+      // Persist merchantId on the queue (Storage Adapter doesn't know about merchant)
+      const queueAfter = loadQueue();
+      queueAfter.merchantId = merchantData?.id || merchantId || "default";
+      saveQueue(queueAfter);
 
       // Track express revenue
       if (selectedType === "express" && paidAmount > 0) {
@@ -226,7 +223,7 @@ const GuestEntry = () => {
       }
 
       localStorage.setItem("pila-active-ticket", JSON.stringify({
-        ticketNumber,
+        ticketNumber: newTicket.ticketNumber,
         customerName: name.trim(),
         status: "waiting",
         queueType: selectedType,
