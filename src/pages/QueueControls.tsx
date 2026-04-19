@@ -183,32 +183,33 @@ const QueueControls = () => {
     }
   };
 
-  const markServed = () => {
+  const markServed = async () => {
     if (!currentServing.ticketNumber) {
       toast.error("No customer currently being served");
       return;
     }
 
     const queue = loadQueue();
-    const ticketIndex = queue.tickets.findIndex((t: any) => t.ticketNumber === currentServing.ticketNumber);
+    const ticket = queue.tickets.find((t) => t.ticketNumber === currentServing.ticketNumber);
 
-    if (ticketIndex !== -1) {
-      const ticket = queue.tickets[ticketIndex];
-      ticket.status = 'served';
-      ticket.served_at = new Date().toISOString();
+    if (ticket) {
+      const calledAt = ticket.called_at || new Date(Date.now() - 60000).toISOString();
+      const servedAt = new Date().toISOString();
 
-      if (!ticket.called_at) {
-        console.warn('Ticket was not properly called, setting called_at retroactively');
-        ticket.called_at = new Date(Date.now() - 60000).toISOString();
+      const ok = await updateTicketStatus(ticket.id, "served", {
+        called_at: calledAt,
+        served_at: servedAt,
+      });
+
+      if (!ok) {
+        toast.error("Failed to mark as served. Check your connection.");
+        return;
       }
 
-      saveQueue(queue);
-
-      console.log('✅ Ticket completed:', ticket.ticketNumber);
-      console.log('   Called at:', ticket.called_at);
-      console.log('   Served at:', ticket.served_at);
-      const serviceTime = (new Date(ticket.served_at).getTime() - new Date(ticket.called_at).getTime()) / 1000;
-      console.log('   Service time:', Math.round(serviceTime), 'seconds');
+      console.log("✅ Ticket completed:", ticket.ticketNumber);
+      console.log("   Called at:", calledAt, "| Served at:", servedAt);
+      const serviceTime = (new Date(servedAt).getTime() - new Date(calledAt).getTime()) / 1000;
+      console.log("   Service time:", Math.round(serviceTime), "seconds");
     }
 
     updateAnalytics("completed");
