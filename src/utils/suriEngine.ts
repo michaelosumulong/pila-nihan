@@ -176,7 +176,73 @@ export const detectMuda = (): MudaAnalysis => {
       : 'No significant peak hour issues',
   };
 
-  return { waiting: waitingWaste, overprocessing, motion };
+  const cancellations = analyzeCancellations();
+
+  return {
+    waiting: waitingWaste,
+    overprocessing,
+    motion,
+    abandonment: {
+      type: 'Customer Abandonment',
+      count: cancellations.totalCancelled,
+      rate: cancellations.cancellationRate,
+      severity: cancellations.severity,
+      description: `${cancellations.totalCancelled} customers left queue (${cancellations.cancellationRate}% abandonment rate)`,
+    },
+  };
+};
+
+export const analyzeCancellations = (): CancellationAnalysis => {
+  const tickets = loadTickets();
+  const cancelled = tickets.filter((t: any) => t.status === 'cancelled');
+  const total = tickets.length || 1;
+
+  const cancellationRate = Math.round((cancelled.length / total) * 100 * 10) / 10;
+
+  const hourCounts: Record<number, number> = {};
+  cancelled.forEach((t: any) => {
+    if (t.cancelledAt) {
+      const hour = new Date(t.cancelledAt).getHours();
+      hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+    }
+  });
+
+  const peakCancellationHours = Object.keys(hourCounts)
+    .filter((h) => hourCounts[parseInt(h)] >= 2)
+    .map((h) => parseInt(h));
+
+  const serviceCounts = cancelled.reduce((acc: Record<string, number>, t: any) => {
+    const pace = t.servicePace || 'regular';
+    acc[pace] = (acc[pace] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const mostCancelledServiceType =
+    Object.keys(serviceCounts).sort((a, b) => serviceCounts[b] - serviceCounts[a])[0] || 'none';
+
+  const waitTimes = cancelled
+    .filter((t: any) => t.created_at && t.cancelledAt)
+    .map(
+      (t: any) =>
+        (new Date(t.cancelledAt).getTime() - new Date(t.created_at).getTime()) / 60000
+    );
+
+  const avgWaitTimeBeforeCancellation =
+    waitTimes.length > 0
+      ? Math.round(waitTimes.reduce((a: number, b: number) => a + b, 0) / waitTimes.length)
+      : 0;
+
+  const severity: 'low' | 'medium' | 'high' =
+    cancellationRate > 20 ? 'high' : cancellationRate > 10 ? 'medium' : 'low';
+
+  return {
+    totalCancelled: cancelled.length,
+    cancellationRate,
+    peakCancellationHours,
+    mostCancelledServiceType,
+    avgWaitTimeBeforeCancellation,
+    severity,
+  };
 };
 
 export const generateDMAICRecommendations = (): DMAICrecommendation[] => {
