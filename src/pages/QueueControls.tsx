@@ -10,7 +10,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import VersionFooter from "@/components/VersionFooter";
 import NoShowTimer from "@/components/NoShowTimer";
 import { recordNoShow, isForcedNoShow, getCOPQ } from "@/utils/noShowEngine";
-import { loadQueue, saveQueue, updateTicketStatus, type Ticket } from "@/utils/queueEngine";
+import { loadQueue, fetchQueue, updateTicketStatus, subscribeToQueue, type Ticket, type Queue } from "@/utils/queueEngine";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -97,28 +97,30 @@ const QueueControls = () => {
   });
 
   const [queueList, setQueueList] = useState<Array<{ id: string; ticketNumber: string; name: string; category: string; waitTime: number }>>([]);
-  const [queueData, setQueueData] = useState(() => loadQueue());
+  const [queueData, setQueueData] = useState<Queue>(() => loadQueue());
 
-  // Real-time sync: pull fresh queue from storage on mount + every 5s (paused in low-battery mode)
+  // Real-time sync via Supabase: initial fetch + realtime subscription
   useEffect(() => {
-    const refresh = () => {
-      const fresh = loadQueue();
-      setQueueData(fresh);
+    const cachedMerchantId = loadQueue().merchantId;
+    const merchantId = cachedMerchantId && cachedMerchantId !== "default" ? cachedMerchantId : undefined;
 
+    const applyQueue = (fresh: Queue) => {
+      setQueueData(fresh);
       const waiting = fresh.tickets.filter((t: Ticket) => t.status === "waiting" || !t.status);
       setQueueList(waiting.map(mapQueueTicket));
-
       const active = fresh.tickets.find((t: Ticket) => t.status === "called" || t.status === "serving");
-      if (active) {
-        setCurrentServing(mapServingTicket(active));
-      }
+      if (active) setCurrentServing(mapServingTicket(active));
     };
 
-    refresh();
+    // Initial cloud fetch
+    fetchQueue(merchantId).then(applyQueue).catch((err) => {
+      console.error("Initial fetchQueue failed:", err);
+    });
 
+    // Realtime subscription (skipped in low-battery mode to conserve resources)
     if (!lowBatteryMode) {
-      const interval = setInterval(refresh, 5000);
-      return () => clearInterval(interval);
+      const unsubscribe = subscribeToQueue(merchantId, applyQueue);
+      return unsubscribe;
     }
   }, [lowBatteryMode]);
 
@@ -129,7 +131,7 @@ const QueueControls = () => {
   const servedToday = queueData.tickets.filter((t: Ticket) => t.status === "served").length;
   const cancelledToday = queueData.tickets.filter((t: Ticket) => t.status === "cancelled").length;
 
-  const callNext = () => {
+  const callNext = async () => {
     const queue = loadQueue();
     const waitingTickets = queue.tickets.filter((t: Ticket) => t.status === "waiting" || !t.status);
 
@@ -146,16 +148,21 @@ const QueueControls = () => {
     }
 
     if (nextTicket) {
-      // Use Storage Adapter helper
-      updateTicketStatus(nextTicket.id, "called", {
+      const ok = await updateTicketStatus(nextTicket.id, "called", {
         called_at: new Date().toISOString(),
         servicePace: nextTicket.servicePace || "regular",
       });
 
+      if (!ok) {
+        toast.error("Failed to call next ticket. Check your connection.");
+        return;
+      }
+
+      // Realtime subscription will push the update; also refresh locally for snappy UX
       const updated = loadQueue();
       setQueueData(updated);
-      const updatedTicket = updated.tickets.find((t) => t.id === nextTicket!.id)!;
-      setCurrentServing(mapServingTicket(updatedTicket));
+      const updatedTicket = updated.tickets.find((t) => t.id === nextTicket!.id);
+      if (updatedTicket) setCurrentServing(mapServingTicket(updatedTicket));
       setQueueList(updated.tickets.filter((t) => t.status === "waiting" || !t.status).map(mapQueueTicket));
 
       if (nextTicket.servicePace === "regular") {
@@ -176,32 +183,33 @@ const QueueControls = () => {
     }
   };
 
-  const markServed = () => {
+  const markServed = async () => {
     if (!currentServing.ticketNumber) {
       toast.error("No customer currently being served");
       return;
     }
 
     const queue = loadQueue();
-    const ticketIndex = queue.tickets.findIndex((t: any) => t.ticketNumber === currentServing.ticketNumber);
+    const ticket = queue.tickets.find((t) => t.ticketNumber === currentServing.ticketNumber);
 
-    if (ticketIndex !== -1) {
-      const ticket = queue.tickets[ticketIndex];
-      ticket.status = 'served';
-      ticket.served_at = new Date().toISOString();
+    if (ticket) {
+      const calledAt = ticket.called_at || new Date(Date.now() - 60000).toISOString();
+      const servedAt = new Date().toISOString();
 
-      if (!ticket.called_at) {
-        console.warn('Ticket was not properly called, setting called_at retroactively');
-        ticket.called_at = new Date(Date.now() - 60000).toISOString();
+      const ok = await updateTicketStatus(ticket.id, "served", {
+        called_at: calledAt,
+        served_at: servedAt,
+      });
+
+      if (!ok) {
+        toast.error("Failed to mark as served. Check your connection.");
+        return;
       }
 
-      saveQueue(queue);
-
-      console.log('✅ Ticket completed:', ticket.ticketNumber);
-      console.log('   Called at:', ticket.called_at);
-      console.log('   Served at:', ticket.served_at);
-      const serviceTime = (new Date(ticket.served_at).getTime() - new Date(ticket.called_at).getTime()) / 1000;
-      console.log('   Service time:', Math.round(serviceTime), 'seconds');
+      console.log("✅ Ticket completed:", ticket.ticketNumber);
+      console.log("   Called at:", calledAt, "| Served at:", servedAt);
+      const serviceTime = (new Date(servedAt).getTime() - new Date(calledAt).getTime()) / 1000;
+      console.log("   Service time:", Math.round(serviceTime), "seconds");
     }
 
     updateAnalytics("completed");
