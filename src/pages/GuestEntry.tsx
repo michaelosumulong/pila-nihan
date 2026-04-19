@@ -185,7 +185,7 @@ const GuestEntry = () => {
     locationStatus === "within_range";
 
   // --- Submit ---
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) {
       toast.error("Please fill in all required fields correctly.");
@@ -202,15 +202,19 @@ const GuestEntry = () => {
 
       const paidAmount = selectedType === "express" ? expressPrice : 0;
 
-      // Route through Storage Adapter helper (single source of truth)
-      const newTicket = addTicketToQueue({
+      // Route through Storage Adapter helper (Supabase-backed)
+      const newTicket = await addTicketToQueue({
         ticketNumber,
         customerName: name.trim(),
+        customerPhone: mobile.trim(),
         servicePace: selectedType === "social" ? "priority" : selectedType === "express" ? "express" : "regular",
+        priorityPaid: selectedType === "express",
+        priorityAmount: paidAmount,
+        merchantId: merchantData?.id || merchantId || undefined,
         estimatedLoss: selectedType === "express" ? 0 : 150,
       });
 
-      // Persist merchantId on the queue (Storage Adapter doesn't know about merchant)
+      // Persist merchantId on cached queue (for legacy callers)
       const queueAfter = loadQueue();
       queueAfter.merchantId = merchantData?.id || merchantId || "default";
       saveQueue(queueAfter);
@@ -246,8 +250,9 @@ const GuestEntry = () => {
         description: `Your ticket: ${ticketNumber} | Position: #${waitingTickets.length + 1}`,
       });
       navigate(`/ticket/${ticketNumber}`);
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+    } catch (err: any) {
+      console.error("handleSubmit failed:", err);
+      toast.error(err?.message || "Something went wrong. Please try again.");
     }
   };
 
