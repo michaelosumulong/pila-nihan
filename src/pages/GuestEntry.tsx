@@ -10,6 +10,7 @@ import PilaLogo from "@/components/PilaLogo";
 import { useBranding } from "@/contexts/BrandingContext";
 import { migrateLegacyCategory } from "@/utils/migrateLegacyData";
 import { loadQueue, saveQueue, addTicketToQueue, type Ticket } from "@/utils/queueEngine";
+import { supabase } from "@/lib/supabase";
 
 const validateMobile = (value: string) => {
   const cleaned = value.replace(/\s+/g, "");
@@ -71,25 +72,69 @@ const GuestEntry = () => {
   const [merchantError, setMerchantError] = useState(false);
 
   useEffect(() => {
-    const cleanId = merchantId?.toLowerCase().replace(/[^a-z0-9]/g, "") || "";
-    if (!cleanId || cleanId === "merchantid") {
-      toast.error("Invalid shop link", { description: "Please enter a valid shop code on the home page.", duration: 5000 });
-      navigate("/");
-      return;
-    }
-    const stored = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
-    const storedCode = stored.shopCode?.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (storedCode === cleanId) {
-      setMerchantData(stored);
-      setMerchantLoading(false);
-    } else if (DEMO_MERCHANTS[cleanId]) {
-      setMerchantData(DEMO_MERCHANTS[cleanId]);
-      setMerchantLoading(false);
-    } else {
+    const validateShopCode = async () => {
+      const cleanId = merchantId?.toLowerCase().replace(/[^a-z0-9]/g, "") || "";
+      if (!cleanId || cleanId === "merchantid") {
+        toast.error("Invalid shop link", { description: "Please enter a valid shop code on the home page.", duration: 5000 });
+        navigate("/");
+        return;
+      }
+
+      // 1. Try Supabase by shop_code (uppercase, as stored)
+      try {
+        const { data, error } = await supabase
+          .from("merchants")
+          .select("*")
+          .eq("shop_code", cleanId.toUpperCase())
+          .maybeSingle();
+
+        if (!error && data) {
+          // Map Supabase row → merchantData shape used in this file
+          setMerchantData({
+            id: data.id, // ✅ UUID for tickets.merchant_id FK
+            businessName: data.business_name,
+            shopCode: data.shop_code,
+            category: data.business_category || "Standard",
+            businessCategory: data.business_category || "sulong",
+            ownerName: data.owner_name,
+            email: data.email,
+            servicePlan: data.service_plan,
+            // Defaults for fields not in Supabase schema
+            location: { lat: 14.5826, lng: 121.0527 },
+            address: "",
+            targetHandlingTime: 15,
+          });
+          setMerchantLoading(false);
+          console.log("✅ Merchant validated from Supabase:", data.shop_code, "→", data.id);
+          return;
+        }
+      } catch (err) {
+        console.error("Supabase merchant lookup failed:", err);
+      }
+
+      // 2. Fallback: locally stored merchant (own device)
+      const stored = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
+      const storedCode = stored.shopCode?.toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (storedCode === cleanId) {
+        setMerchantData(stored);
+        setMerchantLoading(false);
+        return;
+      }
+
+      // 3. Fallback: hardcoded demo merchants
+      if (DEMO_MERCHANTS[cleanId]) {
+        setMerchantData(DEMO_MERCHANTS[cleanId]);
+        setMerchantLoading(false);
+        return;
+      }
+
+      // 4. Not found
       setMerchantError(true);
       setMerchantLoading(false);
       toast.error("Shop not found", { description: `Could not find shop with code: ${merchantId}`, duration: 8000 });
-    }
+    };
+
+    validateShopCode();
   }, [merchantId]);
 
   const merchantName = merchantData?.businessName || "Pila-nihan Queue System";
@@ -210,7 +255,7 @@ const GuestEntry = () => {
         servicePace: selectedType === "social" ? "priority" : selectedType === "express" ? "express" : "regular",
         priorityPaid: selectedType === "express",
         priorityAmount: paidAmount,
-        merchantId: merchantData?.id || merchantId || undefined,
+        merchantId: merchantData?.id && !String(merchantData.id).startsWith("demo-") ? merchantData.id : undefined,
         estimatedLoss: selectedType === "express" ? 0 : 150,
       });
 
