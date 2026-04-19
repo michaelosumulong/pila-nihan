@@ -87,13 +87,13 @@ const GuestTicket = () => {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   const [ticketData] = useState({
-    ticketNumber: ticketNumber || "R-056",
-    customerName: "Maria Santos",
+    ticketNumber: ticketNumber || "",
+    customerName: "",
     category: "regular",
     position: 2,
     totalInQueue: 10,
     estimatedWaitMinutes: 15,
-    nowServing: "R-054",
+    nowServing: "",
   });
 
   const progressValue = ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100;
