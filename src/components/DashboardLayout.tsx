@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
+import { toast } from "sonner";
 import { useBranding } from "@/contexts/BrandingContext";
 import PilaLogo from "@/components/PilaLogo";
 import {
@@ -219,24 +220,21 @@ export default function DashboardLayout() {
           </button>
         </div>
 
-        {/* Logout */}
+        {/* Logout — preserves business data (queue, SURI brain) */}
         <button
           onClick={() => {
-            if (window.confirm("Are you sure you want to logout? This will clear all data.")) {
+            if (window.confirm("Log out? You can log back in anytime.")) {
+              // Clear merchant session only — keep queue, no-shows, SURI recommendations
               localStorage.removeItem("pila-merchant");
-              localStorage.removeItem("pila-queue");
-              localStorage.removeItem("pila-queue-actions");
-              localStorage.removeItem("pila-analytics");
-              localStorage.removeItem("pila-suri-recommendations");
-              localStorage.removeItem("pila-suri-last-generated");
               localStorage.removeItem("pila-active-ticket");
-              navigate("/");
+              toast.success("Logged out successfully");
+              navigate("/login");
             }
           }}
           className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-all border border-red-400/20"
         >
           <LogOut size={18} />
-          <span className="font-semibold text-sm">Logout</span>
+          <span className="font-semibold text-sm">Log Out</span>
         </button>
       </div>
     </div>
