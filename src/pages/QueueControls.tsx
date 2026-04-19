@@ -288,16 +288,10 @@ const QueueControls = () => {
   };
 
   const handleWalkInCreated = (ticket: any) => {
-    setQueueList((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        ticketNumber: ticket.ticketNumber,
-        name: ticket.customerName,
-        category: ticket.category,
-        waitTime: ticket.estimatedWaitMinutes,
-      },
-    ]);
+    // Walk-in is already saved to localStorage by WalkInModal — refresh from storage
+    const fresh = loadQueue();
+    setQueueData(fresh);
+    setQueueList(fresh.tickets.filter((t: Ticket) => t.status === "waiting" || !t.status).map(mapQueueTicket));
   };
 
   const cat = CATEGORY_STYLES[currentServing.category] || CATEGORY_STYLES.regular;
