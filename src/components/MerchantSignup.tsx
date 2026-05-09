@@ -138,7 +138,7 @@ const MerchantSignup = () => {
 
   const handleBack = () => setStep((s) => Math.max(s - 1, 1));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!agreed) {
       setErrors({ terms: "Kailangan mong sumang-ayon" });
       return;
@@ -164,42 +164,71 @@ const MerchantSignup = () => {
       defaultServicePace === "Technical" ? 45 :
       15;
 
-    const data = {
-      id: `MERCH-${Date.now()}`,
-      businessName: form.businessName,
-      ownerName: form.ownerName,
-      mobile: form.mobile,
-      email: form.email,
-      address: form.address,
-      location: location || { lat: 14.5995, lng: 120.9842 },
-      shopCode,
-      servicePlan: form.servicePlan,
-      businessCategory: form.businessCategory,
-      category: defaultServicePace,
-      targetHandlingTime: defaultTargetTime,
-      plan: form.servicePlan.toUpperCase(),
-      branding: BRAND_PRESETS[0],
-      customLogo: null,
-      prepaidCredits: 0,
-      foundingMerchantNumber: null,
-      wallet: { balance: 0, credits: 500 },
-      settings: {
+    try {
+      // Insert into Supabase first to get the UUID
+      const { data: inserted, error } = await supabase
+        .from("merchants")
+        .insert({
+          business_name: form.businessName,
+          owner_name: form.ownerName,
+          email: form.email || null,
+          shop_code: shopCode,
+          business_category: form.businessCategory,
+          service_plan: form.servicePlan,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        if ((error as { code?: string }).code === "23505") {
+          toast.error("Shop code or email already exists. Try a different business name.");
+        } else {
+          toast.error("Signup failed: " + error.message);
+        }
+        console.error("Supabase signup error:", error);
+        return;
+      }
+
+      const data = {
+        id: inserted.id, // UUID from Supabase
+        businessName: form.businessName,
+        ownerName: form.ownerName,
+        mobile: form.mobile,
+        email: form.email,
+        address: form.address,
+        location: location || { lat: 14.5995, lng: 120.9842 },
+        shopCode,
+        servicePlan: form.servicePlan,
+        businessCategory: form.businessCategory,
+        category: defaultServicePace,
         targetHandlingTime: defaultTargetTime,
-        isPriorityEnabled: form.businessCategory !== "lingkod",
-        prepaidCredits: 0,
-      },
-      joinedDate: new Date().toISOString(),
-    };
+        plan: form.servicePlan.toUpperCase(),
+        branding: BRAND_PRESETS[0],
+        customLogo: null,
+        prepaidCredits: 500,
+        foundingMerchantNumber: null,
+        wallet: { balance: 0, credits: 500 },
+        settings: {
+          targetHandlingTime: defaultTargetTime,
+          isPriorityEnabled: form.businessCategory !== "lingkod",
+          prepaidCredits: 500,
+        },
+        joinedDate: new Date().toISOString(),
+      };
 
-    localStorage.setItem("pila-merchant", JSON.stringify(data));
-    window.dispatchEvent(new CustomEvent("merchant-updated"));
-    console.log("Merchant saved:", data);
+      localStorage.setItem("pila-merchant", JSON.stringify(data));
+      window.dispatchEvent(new CustomEvent("merchant-updated"));
+      console.log("Merchant saved:", data);
 
-    toast.success("Account created!", {
-      description: `Welcome to Pila-nihan, ${form.businessName}!`,
-    });
+      toast.success("Account created!", {
+        description: `Welcome to Pila-nihan, ${form.businessName}! Shop code: ${shopCode}`,
+      });
 
-    setTimeout(() => navigate("/dashboard"), 500);
+      setTimeout(() => navigate("/dashboard"), 500);
+    } catch (err) {
+      console.error("Signup error:", err);
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   const selectedPlan = SERVICE_PLANS.find((p) => p.id === form.servicePlan);
