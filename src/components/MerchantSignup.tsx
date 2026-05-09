@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PilaLogo from "@/components/PilaLogo";
 import { BRAND_PRESETS } from "@/pages/Settings";
+import { supabase } from "@/lib/supabase";
 
 const SERVICE_PLANS = [
   {
