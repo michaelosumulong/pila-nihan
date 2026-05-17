@@ -206,55 +206,68 @@ const QueueControls = () => {
   };
 
   const markServed = async () => {
-    if (!currentServing.ticketNumber) {
+    if (!currentServing || !currentServing.ticketNumber) {
       toast.error("No customer currently being served");
       return;
     }
 
-    const queue = loadQueue();
-    const ticket = queue.tickets.find((t) => t.ticketNumber === currentServing.ticketNumber);
+    try {
+      const queue = loadQueue();
+      const ticket = queue.tickets.find((t) => t.ticketNumber === currentServing.ticketNumber);
 
-    if (ticket) {
+      if (!ticket) {
+        toast.error("Ticket not found in queue");
+        return;
+      }
+
       const calledAt = ticket.called_at || new Date(Date.now() - 60000).toISOString();
       const servedAt = new Date().toISOString();
 
+      console.log("🔄 Marking ticket as served:", ticket.id, ticket.ticketNumber);
+
+      // CRITICAL: snake_case keys to match PostgreSQL columns
       const ok = await updateTicketStatus(ticket.id, "served", {
         called_at: calledAt,
         served_at: servedAt,
       });
 
       if (!ok) {
-        toast.error("Failed to mark as served. Check your connection.");
+        console.error("❌ updateTicketStatus returned false for", ticket.id);
+        toast.error("Failed to update ticket. Check Supabase RLS policies for tickets table.");
         return;
       }
 
-      console.log("✅ Ticket completed:", ticket.ticketNumber);
-      console.log("   Called at:", calledAt, "| Served at:", servedAt);
+      console.log("✅ Ticket marked as served:", ticket.ticketNumber);
       const serviceTime = (new Date(servedAt).getTime() - new Date(calledAt).getTime()) / 1000;
       console.log("   Service time:", Math.round(serviceTime), "seconds");
-    }
 
-    updateAnalytics("completed");
-    logQueueAction({
-      action_type: "completed",
-      ticket_number: currentServing.ticketNumber,
-      customer_name: currentServing.customerName,
-      timestamp: new Date().toISOString(),
-    });
+      updateAnalytics("completed");
+      logQueueAction({
+        action_type: "completed",
+        ticket_number: currentServing.ticketNumber,
+        customer_name: currentServing.customerName,
+        timestamp: new Date().toISOString(),
+      });
 
-    // Clear active ticket if it matches
-    try {
-      const activeTicket = localStorage.getItem("pila-active-ticket");
-      if (activeTicket) {
-        const td = JSON.parse(activeTicket);
-        if (td.ticketNumber === currentServing.ticketNumber) {
-          localStorage.removeItem("pila-active-ticket");
+      // Clear active ticket if it matches
+      try {
+        const activeTicket = localStorage.getItem("pila-active-ticket");
+        if (activeTicket) {
+          const td = JSON.parse(activeTicket);
+          if (td.ticketNumber === currentServing.ticketNumber) {
+            localStorage.removeItem("pila-active-ticket");
+          }
         }
+      } catch (e) {
+        console.error("Error clearing active ticket:", e);
       }
-    } catch {}
 
-    toast.success(`${currentServing.ticketNumber} marked as served!`);
-    callNext();
+      toast.success(`${currentServing.ticketNumber} marked as served!`);
+      callNext();
+    } catch (err: any) {
+      console.error("❌ markServed error:", err);
+      toast.error("Failed to mark as served: " + (err?.message || "Unknown error"));
+    }
   };
 
   const markNoShow = () => {
