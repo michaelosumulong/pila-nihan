@@ -157,34 +157,63 @@ export const addTicketToQueue = async (
 
 /**
  * Update a ticket's status (and optional timestamp fields) in Supabase + cache.
+ * All timestamp fields use snake_case to match the PostgreSQL columns exactly.
  */
 export const updateTicketStatus = async (
   ticketId: string,
   status: Ticket["status"],
-  additionalData?: Partial<Ticket>
+  additionalData?: {
+    called_at?: string;
+    served_at?: string;
+    cancelled_at?: string;
+    servicePace?: string;
+  }
 ): Promise<boolean> => {
-  const update: Record<string, unknown> = { status };
-  if (additionalData?.called_at !== undefined) update.called_at = additionalData.called_at;
-  if (additionalData?.served_at !== undefined) update.served_at = additionalData.served_at;
-  if (additionalData?.cancelledAt !== undefined) update.cancelled_at = additionalData.cancelledAt;
-  if (additionalData?.servicePace !== undefined) update.service_pace = additionalData.servicePace;
+  try {
+    const update: Record<string, unknown> = { status };
+    if (additionalData?.called_at !== undefined) update.called_at = additionalData.called_at;
+    if (additionalData?.served_at !== undefined) update.served_at = additionalData.served_at;
+    if (additionalData?.cancelled_at !== undefined) update.cancelled_at = additionalData.cancelled_at;
+    if (additionalData?.servicePace !== undefined) update.service_pace = additionalData.servicePace;
 
-  const { error } = await supabase.from("tickets").update(update).eq("id", ticketId);
-  if (error) {
-    console.error("❌ updateTicketStatus failed:", error.message);
+    console.log("🔄 Updating ticket in Supabase:", ticketId, "→", status, update);
+
+    const { error, data } = await supabase
+      .from("tickets")
+      .update(update)
+      .eq("id", ticketId)
+      .select();
+
+    if (error) {
+      console.error("❌ Supabase update failed:", error.message, error.details, error.hint);
+      return false;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn("⚠️ Update returned no rows — likely an RLS policy is blocking it.", ticketId);
+      return false;
+    }
+
+    // Update cache
+    const queue = loadQueue();
+    const idx = queue.tickets.findIndex((t) => t.id === ticketId);
+    if (idx !== -1) {
+      queue.tickets[idx] = {
+        ...queue.tickets[idx],
+        status,
+        called_at: (update.called_at as string) ?? queue.tickets[idx].called_at,
+        served_at: (update.served_at as string) ?? queue.tickets[idx].served_at,
+        cancelledAt: (update.cancelled_at as string) ?? queue.tickets[idx].cancelledAt,
+      };
+      saveQueue(queue);
+    }
+
+    console.log("✅ Ticket updated:", ticketId, "→", status);
+    return true;
+  } catch (err) {
+    console.error("❌ updateTicketStatus exception:", err);
     return false;
   }
-
-  // Update cache
-  const queue = loadQueue();
-  const idx = queue.tickets.findIndex((t) => t.id === ticketId);
-  if (idx !== -1) {
-    queue.tickets[idx] = { ...queue.tickets[idx], status, ...additionalData };
-    saveQueue(queue);
-  }
-
-  console.log("☁️  Ticket updated:", ticketId, "→", status);
-  return true;
 };
 
 /**
