@@ -197,30 +197,49 @@ const MerchantSignup = () => {
     }
 
     try {
-      // Insert into Supabase first to get the UUID
+      console.log("🔄 Creating merchant with shop code:", shopCode);
+      console.log("📱 Sanitized mobile:", sanitizedMobile);
+
+      const payload = {
+        business_name: form.businessName.trim(),
+        owner_name: form.ownerName.trim(),
+        email: form.email ? form.email.toLowerCase().trim() : null,
+        mobile: sanitizedMobile,
+        shop_code: shopCode,
+        business_category: form.businessCategory,
+        service_plan: form.servicePlan,
+      };
+      console.log("📤 Insert payload:", payload);
+
       const { data: inserted, error } = await supabase
         .from("merchants")
-        .insert({
-          business_name: form.businessName,
-          owner_name: form.ownerName,
-          email: form.email || null,
-          mobile: sanitizedMobile,
-          shop_code: shopCode,
-          business_category: form.businessCategory,
-          service_plan: form.servicePlan,
-        })
+        .insert(payload)
         .select()
         .single();
 
       if (error) {
-        if ((error as { code?: string }).code === "23505") {
+        console.error("❌ Supabase insert error:", error);
+        console.error("Details:", error.message, (error as any).details, (error as any).hint);
+        const code = (error as { code?: string }).code;
+        if (code === "23505") {
           toast.error("Shop code or email already exists. Try a different business name.");
+        } else if (code === "23502") {
+          toast.error("Missing required field: " + error.message);
+        } else if (code === "42501" || /row-level security/i.test(error.message)) {
+          toast.error("Permission denied. Check RLS policies on merchants table.");
         } else {
           toast.error("Signup failed: " + error.message);
         }
-        console.error("Supabase signup error:", error);
         return;
       }
+
+      if (!inserted) {
+        console.error("❌ No data returned from insert");
+        toast.error("Signup failed - no merchant data returned");
+        return;
+      }
+
+      console.log("✅ Merchant created in Supabase:", inserted);
 
       const data = {
         id: inserted.id, // UUID from Supabase
@@ -251,16 +270,16 @@ const MerchantSignup = () => {
 
       localStorage.setItem("pila-merchant", JSON.stringify(data));
       window.dispatchEvent(new CustomEvent("merchant-updated"));
-      console.log("Merchant saved:", data);
+      console.log("✅ Merchant session saved, redirecting to dashboard");
 
       toast.success("Account created!", {
         description: `Welcome to Pila-nihan, ${form.businessName}! Shop code: ${shopCode}`,
       });
 
       setTimeout(() => navigate("/dashboard"), 500);
-    } catch (err) {
-      console.error("Signup error:", err);
-      toast.error("Something went wrong. Please try again.");
+    } catch (err: any) {
+      console.error("❌ Signup exception:", err);
+      toast.error("Something went wrong: " + (err?.message || "Unknown error"));
     }
   };
 
