@@ -190,6 +190,12 @@ const MerchantSignup = () => {
       defaultServicePace === "Technical" ? 45 :
       15;
 
+    const sanitizedMobile = sanitizeMobileNumber(form.mobile);
+    if (!sanitizedMobile) {
+      toast.error("Invalid mobile number format");
+      return;
+    }
+
     try {
       // Insert into Supabase first to get the UUID
       const { data: inserted, error } = await supabase
@@ -198,6 +204,7 @@ const MerchantSignup = () => {
           business_name: form.businessName,
           owner_name: form.ownerName,
           email: form.email || null,
+          mobile: sanitizedMobile,
           shop_code: shopCode,
           business_category: form.businessCategory,
           service_plan: form.servicePlan,
