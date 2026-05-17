@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Store } from "lucide-react";
+import { Store, Mail, Key } from "lucide-react";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
   const [shopCode, setShopCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -15,9 +16,11 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const code = shopCode.toUpperCase().trim();
-    if (!code) {
-      toast.error("Please enter your shop code");
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanCode = shopCode.toUpperCase().trim();
+
+    if (!cleanEmail || !cleanCode) {
+      toast.error("Please enter both email and shop code");
       return;
     }
 
@@ -27,11 +30,13 @@ export default function Login() {
       const { data, error } = await supabase
         .from("merchants")
         .select("*")
-        .eq("shop_code", code)
-        .single();
+        .eq("email", cleanEmail)
+        .eq("shop_code", cleanCode)
+        .maybeSingle();
 
       if (error || !data) {
-        toast.error("Shop code not found. Please check and try again.");
+        console.error("Login validation failed:", error);
+        toast.error("Invalid email or shop code. Please check and try again.");
         setIsLoading(false);
         return;
       }
@@ -51,6 +56,7 @@ export default function Login() {
       localStorage.setItem("pila-merchant", JSON.stringify(merchantSession));
       window.dispatchEvent(new Event("merchant-updated"));
 
+      console.log("✅ Merchant logged in:", data.shop_code, "→", data.id);
       toast.success(`Welcome back, ${data.business_name}!`);
       navigate("/dashboard");
     } catch (err) {
@@ -70,26 +76,42 @@ export default function Login() {
           </div>
           <h1 className="text-2xl font-black text-[#0A2569]">Merchant Login</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Enter your shop code to access your dashboard
+            Secure access to your queue dashboard
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <Label htmlFor="shopCode" className="text-sm font-semibold text-gray-700">
-              Shop Code
+            <Label htmlFor="email" className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+              <Mail size={14} /> Email Address
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="w-full mt-1"
+              autoComplete="email"
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="shopCode" className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+              <Key size={14} /> Shop Code
             </Label>
             <Input
               id="shopCode"
               value={shopCode}
               onChange={(e) => setShopCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
               placeholder="TESTSHOP"
-              className="w-full text-lg uppercase tracking-wider mt-1"
+              className="w-full text-lg font-mono uppercase tracking-wider mt-1"
               maxLength={12}
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              Enter the shop code you received during signup
+              8-character code from your signup confirmation
             </p>
           </div>
 
@@ -98,7 +120,7 @@ export default function Login() {
             disabled={isLoading}
             className="w-full bg-[#FFB703] hover:bg-[#FF8C00] text-[#0A2569] font-bold py-6 text-base"
           >
-            {isLoading ? "Logging in..." : "Access Dashboard"}
+            {isLoading ? "Verifying..." : "Access Dashboard"}
           </Button>
         </form>
 
@@ -117,7 +139,7 @@ export default function Login() {
 
         <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-3">
           <p className="text-xs text-amber-800 text-center">
-            🔒 Simple & secure: Shop code access for MVP. Password login can be added later.
+            🔒 Two-factor security: Email + Shop Code verification prevents unauthorized access
           </p>
         </div>
       </div>
