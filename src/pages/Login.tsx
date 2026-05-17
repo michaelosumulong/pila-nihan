@@ -1,92 +1,126 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import PilaLogo from "@/components/PilaLogo";
+import { Store } from "lucide-react";
 
-const Login = () => {
+export default function Login() {
+  const [shopCode, setShopCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const [mobile, setMobile] = useState("");
-  const [password, setPassword] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const savedMerchant = localStorage.getItem("pila-merchant");
-    if (savedMerchant) {
-      toast.success("Welcome back!");
+
+    const code = shopCode.toUpperCase().trim();
+    if (!code) {
+      toast.error("Please enter your shop code");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("merchants")
+        .select("*")
+        .eq("shop_code", code)
+        .single();
+
+      if (error || !data) {
+        toast.error("Shop code not found. Please check and try again.");
+        setIsLoading(false);
+        return;
+      }
+
+      const merchantSession = {
+        id: data.id,
+        businessName: data.business_name,
+        shopCode: data.shop_code,
+        ownerName: data.owner_name,
+        email: data.email,
+        mobile: data.mobile,
+        businessCategory: data.business_category,
+        servicePlan: data.service_plan,
+        prepaidCredits: data.prepaid_credits ?? 500,
+      };
+
+      localStorage.setItem("pila-merchant", JSON.stringify(merchantSession));
+      window.dispatchEvent(new Event("merchant-updated"));
+
+      toast.success(`Welcome back, ${data.business_name}!`);
       navigate("/dashboard");
-    } else {
-      toast.error("Account not found. Please sign up first.");
+    } catch (err) {
+      console.error("Login error:", err);
+      toast.error("Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const buntingCount = 24;
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#002366] to-[#1E5AA8]">
-      <div className="bunting pt-2 pb-1">
-        {Array.from({ length: buntingCount }).map((_, i) => (
-          <div key={i} className="bunting-triangle" />
-        ))}
-      </div>
-
-      <div className="max-w-md mx-auto px-5 pb-10">
-        <div className="flex flex-col items-center pt-8 pb-6">
-          <PilaLogo className="w-32 h-32 mb-4" />
-          <h1 className="text-3xl font-bold text-primary tracking-wide">Merchant Login</h1>
-          <p className="text-[#FFD700] italic text-lg mt-1">Ginhawa sa Bawat Pila</p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
-              <input
-                type="tel"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                placeholder="+63 917 123 4567"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-[#FFD700] hover:bg-[#F59E0B] text-white font-bold py-3 text-lg rounded-lg uppercase"
-            >
-              MAGPATULOY
-            </button>
-          </form>
-        </div>
-
-        <div className="bg-[#FEF3C7] border-l-4 border-[#EF4444] p-4 rounded shadow-md mt-6">
-          <div className="flex items-start gap-3">
-            <span className="text-3xl leading-none">⚠️</span>
-            <div>
-              <p className="font-extrabold text-gray-900 text-base uppercase tracking-wide">Bawal ang Fixer at Under-the-Table!</p>
-              <p className="text-gray-700 text-sm mt-1">Lahat ng bayad ay digital. Walang cash transaction sa pila.</p>
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#0A2569] p-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-[#0A2569] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Store className="text-[#FFB703]" size={32} />
           </div>
+          <h1 className="text-2xl font-black text-[#0A2569]">Merchant Login</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Enter your shop code to access your dashboard
+          </p>
         </div>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
-          Wala pang account?{" "}
-          <a href="/signup" className="text-[#3B82F6] underline hover:text-[#2563EB]">
-            Mag-sign up dito
-          </a>
-        </p>
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div>
+            <Label htmlFor="shopCode" className="text-sm font-semibold text-gray-700">
+              Shop Code
+            </Label>
+            <Input
+              id="shopCode"
+              value={shopCode}
+              onChange={(e) => setShopCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+              placeholder="TESTSHOP"
+              className="w-full text-lg uppercase tracking-wider mt-1"
+              maxLength={12}
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Enter the shop code you received during signup
+            </p>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-[#FFB703] hover:bg-[#FF8C00] text-[#0A2569] font-bold py-6 text-base"
+          >
+            {isLoading ? "Logging in..." : "Access Dashboard"}
+          </Button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/signup")}
+              className="text-[#0A2569] font-semibold hover:underline"
+            >
+              Sign up here
+            </button>
+          </p>
+        </div>
+
+        <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-3">
+          <p className="text-xs text-amber-800 text-center">
+            🔒 Simple & secure: Shop code access for MVP. Password login can be added later.
+          </p>
+        </div>
       </div>
     </div>
   );
-};
-
-export default Login;
+}
