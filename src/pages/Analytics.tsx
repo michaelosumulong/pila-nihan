@@ -161,19 +161,15 @@ const Analytics = () => {
         {/* Key Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <MetricCard
-            icon="👥" value={String(noShowStats.totalServed)} label="Clients Served Today"
+            icon="👥" value={String(totalServedToday)} label="Clients Served Today"
             valueColor="text-[#1E3A8A]"
-            extra={<p className="text-xs text-green-600 font-semibold mt-1">↗️ +12% vs yesterday</p>}
             delay={0} loaded={loaded}
           />
           <MetricCard
-            icon="⏱️" value="8.5 min" label="Avg Handling Time"
+            icon="⏱️" value={avgHandlingMin > 0 ? `${avgHandlingMin.toFixed(1)} min` : "—"} label="Avg Handling Time"
             valueColor="text-[#10B981]"
             extra={
-              <div className="mt-1 space-y-1">
-                <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-bold">OPTIMIZED</span>
-                <p className="text-xs text-gray-500">Target: &lt;10 min ✓</p>
-              </div>
+              <p className="text-xs text-gray-500 mt-1">Target: &lt;10 min</p>
             }
             delay={1} loaded={loaded}
           />
@@ -189,13 +185,10 @@ const Analytics = () => {
             delay={2} loaded={loaded}
           />
           <MetricCard
-            icon="💰" value="₱4,200" label="Express Revenue Today"
+            icon="💰" value={`₱${expressRevenueToday.toLocaleString()}`} label="Express Revenue Today"
             valueColor="text-[#3B82F6]"
             extra={
-              <div className="mt-1 space-y-1">
-                <p className="text-xs text-gray-500">Merchant: ₱1,680 | Platform: ₱2,520</p>
-                <p className="text-xs text-blue-600 font-semibold">↗️ +8% vs last week</p>
-              </div>
+              <p className="text-xs text-gray-500 mt-1">Merchant: ₱{merchantRevenue.toLocaleString()} | Platform: ₱{platformRevenue.toLocaleString()}</p>
             }
             delay={3} loaded={loaded}
           />
@@ -218,7 +211,9 @@ const Analytics = () => {
                 <Bar dataKey="customers" fill="#FFD700" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-            <p className="text-sm font-semibold text-[#FFB703] mt-3">🔥 Peak: 10 AM (45) &amp; 2 PM (42)</p>
+            {hourlyData.every((h) => h.customers === 0) && (
+              <p className="text-sm text-gray-400 mt-3 text-center">No customer activity yet today</p>
+            )}
           </div>
 
           <div
@@ -236,7 +231,9 @@ const Analytics = () => {
                 <Line type="monotone" dataKey="waitTime" stroke="#10B981" strokeWidth={3} dot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
-            <p className="text-sm font-semibold text-green-600 mt-3">↘️ 44% reduction this week</p>
+            {trendData.every((d) => d.waitTime === 0) && (
+              <p className="text-sm text-gray-400 mt-3 text-center">No wait time data yet</p>
+            )}
           </div>
         </div>
 
