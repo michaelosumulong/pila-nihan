@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { printTicket } from "@/lib/print-ticket";
+import { addTicketToQueue, loadQueue } from "@/utils/queueEngine";
 
 interface WalkInModalProps {
   open: boolean;
@@ -20,54 +21,57 @@ const WalkInModal = ({ open, onClose, onTicketCreated }: WalkInModalProps) => {
     onClose();
   };
 
-  const handleManualEntry = () => {
+  const handleManualEntry = async () => {
     const trimmedName = manualName.trim();
     if (!trimmedName) {
       toast.error("Please enter customer name");
       return;
     }
 
-    const tickets = JSON.parse(localStorage.getItem("tickets") || "[]");
-    const merchantData = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
+    try {
+      const merchant = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
+      if (!merchant.id || !/^[0-9a-f-]{36}$/i.test(merchant.id)) {
+        toast.error("No merchant session found. Please log in again.");
+        return;
+      }
 
-    const prefix = manualCategory === "priority" ? "P" : "R";
-    const sameTypeTickets = tickets.filter((t: any) => t.ticketNumber?.startsWith(prefix));
-    const nextNumber = String(sameTypeTickets.length + 1).padStart(3, "0");
-    const ticketNumber = `${prefix}-${nextNumber}`;
+      const queue = loadQueue();
+      const prefix = manualCategory === "priority" ? "P" : "R";
+      const sameTypeTickets = queue.tickets.filter((t) => t.ticketNumber?.startsWith(prefix));
+      const nextNumber = String(sameTypeTickets.length + 1).padStart(3, "0");
+      const ticketNumber = `${prefix}-${nextNumber}`;
 
-    const waitingTickets = tickets.filter((t: any) => t.status === "waiting");
-    const position = waitingTickets.length + 1;
+      console.log("🚶 Creating walk-in ticket:", ticketNumber);
 
-    const newTicket = {
-      id: `ticket-${Date.now()}`,
-      merchant_id: merchantData.id || "default",
-      ticketNumber,
-      customerName: trimmedName,
-      mobile: "Walk-in (No phone)",
-      category: manualCategory,
-      status: "waiting",
-      joined_at: new Date().toISOString(),
-      is_manual_entry: true,
-      is_social_priority: manualCategory === "priority",
-      position,
-      estimatedWaitMinutes: position * 8,
-      totalInQueue: position,
-    };
+      const newTicket = await addTicketToQueue({
+        ticketNumber,
+        customerName: trimmedName,
+        customerPhone: "",
+        servicePace: manualCategory === "priority" ? "priority" : "regular",
+        priorityPaid: false,
+        priorityAmount: 0,
+        merchantId: merchant.id,
+        status: "waiting",
+      });
 
-    tickets.push(newTicket);
-    localStorage.setItem("tickets", JSON.stringify(tickets));
+      const position = queue.tickets.filter((t) => t.status === "waiting" || !t.status).length + 1;
 
-    toast.success(`✓ Ticket ${ticketNumber} created for ${trimmedName}`, {
-      description: `Position: ${position} • Est. wait: ${position * 8} min`,
-      duration: 8000,
-      action: {
-        label: "🖨️ Print",
-        onClick: () => printTicket(newTicket),
-      },
-    });
+      console.log("✅ Walk-in ticket created:", ticketNumber);
+      toast.success(`✓ Ticket ${ticketNumber} created for ${trimmedName}`, {
+        description: `Position: ${position} • Est. wait: ${position * 8} min`,
+        duration: 8000,
+        action: {
+          label: "🖨️ Print",
+          onClick: () => printTicket({ ...newTicket, mobile: "Walk-in (No phone)", category: manualCategory }),
+        },
+      });
 
-    onTicketCreated(newTicket);
-    handleClose();
+      onTicketCreated(newTicket);
+      handleClose();
+    } catch (err: any) {
+      console.error("❌ Walk-in creation failed:", err);
+      toast.error("Failed to create walk-in ticket: " + (err?.message || "Unknown error"));
+    }
   };
 
   return (
