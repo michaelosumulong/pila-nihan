@@ -101,24 +101,46 @@ const QueueControls = () => {
 
   // Real-time sync via Supabase: initial fetch + realtime subscription
   useEffect(() => {
-    const cachedMerchantId = loadQueue().merchantId;
-    const merchantId = cachedMerchantId && cachedMerchantId !== "default" ? cachedMerchantId : undefined;
+    // Resolve merchantId from active merchant session (UUID), fall back to undefined.
+    let merchantId: string | undefined;
+    try {
+      const raw = localStorage.getItem("pila-merchant");
+      if (raw) {
+        const m = JSON.parse(raw);
+        if (m?.id && /^[0-9a-f-]{36}$/i.test(m.id)) merchantId = m.id;
+      }
+    } catch {}
 
     const applyQueue = (fresh: Queue) => {
+      console.log("📊 Queue received:", fresh.tickets.length, "tickets");
+      console.table(
+        fresh.tickets.map((t) => ({
+          ticket: t.ticketNumber,
+          customer: t.customerName,
+          status: t.status || "waiting",
+        }))
+      );
       setQueueData(fresh);
       const waiting = fresh.tickets.filter((t: Ticket) => t.status === "waiting" || !t.status);
+      console.log("⏳ Waiting:", waiting.length);
       setQueueList(waiting.map(mapQueueTicket));
       const active = fresh.tickets.find((t: Ticket) => t.status === "called" || t.status === "serving");
       if (active) setCurrentServing(mapServingTicket(active));
     };
 
-    // Initial cloud fetch
-    fetchQueue(merchantId).then(applyQueue).catch((err) => {
-      console.error("Initial fetchQueue failed:", err);
-    });
+    console.log("🔄 Fetching queue from Supabase (merchantId:", merchantId || "ALL", ")");
+    fetchQueue(merchantId)
+      .then((queue) => {
+        console.log("✅ Initial fetchQueue complete:", queue.tickets.length);
+        applyQueue(queue);
+      })
+      .catch((err) => {
+        console.error("❌ fetchQueue failed:", err);
+        toast.error("Failed to load queue. Check your connection.");
+      });
 
-    // Realtime subscription (skipped in low-battery mode to conserve resources)
     if (!lowBatteryMode) {
+      console.log("📡 Setting up realtime subscription...");
       const unsubscribe = subscribeToQueue(merchantId, applyQueue);
       return unsubscribe;
     }
