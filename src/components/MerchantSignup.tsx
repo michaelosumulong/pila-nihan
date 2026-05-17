@@ -81,6 +81,28 @@ const BUSINESS_CATEGORIES = [
   },
 ];
 
+const sanitizeMobileNumber = (input: string): string => {
+  let digits = input.replace(/\D/g, "");
+  if (digits.startsWith("63") && digits.length === 12) {
+    digits = "0" + digits.substring(2);
+  }
+  if (digits.length === 11 && digits.startsWith("09")) {
+    return digits;
+  }
+  return "";
+};
+
+const formatMobileDisplay = (value: string): string => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  return `${digits.slice(0, 4)}-${digits.slice(4, 7)}-${digits.slice(7, 11)}`;
+};
+
+const isMobileValid = (input: string): boolean => {
+  return sanitizeMobileNumber(input).length === 11;
+};
+
 const MerchantSignup = () => {
   const navigate = useNavigate();
 
