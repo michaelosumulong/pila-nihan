@@ -226,7 +226,7 @@ const MerchantSignup = () => {
         id: inserted.id, // UUID from Supabase
         businessName: form.businessName,
         ownerName: form.ownerName,
-        mobile: form.mobile,
+        mobile: sanitizedMobile,
         email: form.email,
         address: form.address,
         location: location || { lat: 14.5995, lng: 120.9842 },
