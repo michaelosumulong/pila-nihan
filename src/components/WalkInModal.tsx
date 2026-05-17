@@ -62,7 +62,7 @@ const WalkInModal = ({ open, onClose, onTicketCreated }: WalkInModalProps) => {
         duration: 8000,
         action: {
           label: "🖨️ Print",
-          onClick: () => printTicket({ ...newTicket, mobile: "Walk-in (No phone)", category: manualCategory }),
+          onClick: () => printTicket(newTicket as any),
         },
       });
 
