@@ -10,28 +10,8 @@ import FiveWhysModal from "@/components/FiveWhysModal";
 import PendingAudits from "@/components/PendingAudits";
 import VersionFooter from "@/components/VersionFooter";
 import { getNoShowMetrics, getNoShowAnalysis, type NoShowRecord } from "@/utils/noShowEngine";
-const hourlyData = [
-  { hour: "8 AM", customers: 12 },
-  { hour: "9 AM", customers: 28 },
-  { hour: "10 AM", customers: 45 },
-  { hour: "11 AM", customers: 38 },
-  { hour: "12 PM", customers: 32 },
-  { hour: "1 PM", customers: 25 },
-  { hour: "2 PM", customers: 42 },
-  { hour: "3 PM", customers: 35 },
-  { hour: "4 PM", customers: 28 },
-  { hour: "5 PM", customers: 18 },
-];
-
-const trendData = [
-  { day: "Mon", waitTime: 18 },
-  { day: "Tue", waitTime: 16 },
-  { day: "Wed", waitTime: 14 },
-  { day: "Thu", waitTime: 13 },
-  { day: "Fri", waitTime: 12 },
-  { day: "Sat", waitTime: 11 },
-  { day: "Sun", waitTime: 10 },
-];
+const HOURS = ["8 AM","9 AM","10 AM","11 AM","12 PM","1 PM","2 PM","3 PM","4 PM","5 PM"];
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
 const Analytics = () => {
   const navigate = useNavigate();
