@@ -339,8 +339,8 @@ const MerchantSignup = () => {
                 <Field
                   label="Mobile Number"
                   value={form.mobile}
-                  onChange={(v) => update("mobile", v)}
-                  placeholder="+63 917 123 4567"
+                  onChange={(v) => update("mobile", formatMobileDisplay(v))}
+                  placeholder="0917-123-4567"
                   error={errors.mobile}
                   required
                 />
