@@ -81,6 +81,28 @@ const BUSINESS_CATEGORIES = [
   },
 ];
 
+const sanitizeMobileNumber = (input: string): string => {
+  let digits = input.replace(/\D/g, "");
+  if (digits.startsWith("63") && digits.length === 12) {
+    digits = "0" + digits.substring(2);
+  }
+  if (digits.length === 11 && digits.startsWith("09")) {
+    return digits;
+  }
+  return "";
+};
+
+const formatMobileDisplay = (value: string): string => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  return `${digits.slice(0, 4)}-${digits.slice(4, 7)}-${digits.slice(7, 11)}`;
+};
+
+const isMobileValid = (input: string): boolean => {
+  return sanitizeMobileNumber(input).length === 11;
+};
+
 const MerchantSignup = () => {
   const navigate = useNavigate();
 
@@ -125,7 +147,11 @@ const MerchantSignup = () => {
     const e: Record<string, string> = {};
     if (!form.businessName.trim()) e.businessName = "Kinakailangan";
     if (!form.ownerName.trim()) e.ownerName = "Kinakailangan";
-    if (!form.mobile.trim()) e.mobile = "Kinakailangan";
+    if (!form.mobile.trim()) {
+      e.mobile = "Kinakailangan";
+    } else if (!isMobileValid(form.mobile)) {
+      e.mobile = "Invalid PH mobile (09XX-XXX-XXXX)";
+    }
     if (!form.address.trim()) e.address = "Kinakailangan";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -164,6 +190,12 @@ const MerchantSignup = () => {
       defaultServicePace === "Technical" ? 45 :
       15;
 
+    const sanitizedMobile = sanitizeMobileNumber(form.mobile);
+    if (!sanitizedMobile) {
+      toast.error("Invalid mobile number format");
+      return;
+    }
+
     try {
       // Insert into Supabase first to get the UUID
       const { data: inserted, error } = await supabase
@@ -172,6 +204,7 @@ const MerchantSignup = () => {
           business_name: form.businessName,
           owner_name: form.ownerName,
           email: form.email || null,
+          mobile: sanitizedMobile,
           shop_code: shopCode,
           business_category: form.businessCategory,
           service_plan: form.servicePlan,
@@ -193,7 +226,7 @@ const MerchantSignup = () => {
         id: inserted.id, // UUID from Supabase
         businessName: form.businessName,
         ownerName: form.ownerName,
-        mobile: form.mobile,
+        mobile: sanitizedMobile,
         email: form.email,
         address: form.address,
         location: location || { lat: 14.5995, lng: 120.9842 },
@@ -306,8 +339,8 @@ const MerchantSignup = () => {
                 <Field
                   label="Mobile Number"
                   value={form.mobile}
-                  onChange={(v) => update("mobile", v)}
-                  placeholder="+63 917 123 4567"
+                  onChange={(v) => update("mobile", formatMobileDisplay(v))}
+                  placeholder="0917-123-4567"
                   error={errors.mobile}
                   required
                 />
