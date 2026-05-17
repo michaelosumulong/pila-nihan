@@ -248,41 +248,24 @@ const Analytics = () => {
             <p className="text-sm text-gray-600 italic">Lean Six Sigma Recommendations</p>
           </div>
 
-          {/* Insight 1 */}
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">⚠️</span>
-              <h4 className="font-bold text-[#EF4444]">Muda (Waste) Identified</h4>
-            </div>
-            <p className="text-sm text-gray-700 mb-2">Your wait times are 15% higher on Tuesdays between 10-11 AM. Root cause: Single counter handling peak demand.</p>
-            <p className="text-sm text-gray-700 mb-1"><strong>Action:</strong> Open Counter 2 during Tuesday 10 AM peak. <strong>Expected Impact:</strong> Reduce wait time by 6 minutes, serve 12 more customers/hour.</p>
-            <p className="text-sm text-green-700 font-semibold"><strong>Value:</strong> ₱2,400 additional revenue/week from faster throughput.</p>
-          </div>
-
-          <div className="border-t border-gray-300 my-4" />
-
-          {/* Insight 2 */}
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">📈</span>
-              <h4 className="font-bold text-[#3B82F6]">Takt Time Optimization</h4>
-            </div>
-            <p className="text-sm text-gray-700 mb-2">Your current handling time (8.5 min) is below target. You have capacity for 7 more customers/hour without degrading service quality.</p>
-            <p className="text-sm text-gray-700 mb-1"><strong>Action:</strong> Market Express upgrades more aggressively during 2 PM peak when you have excess capacity.</p>
-            <p className="text-sm text-green-700 font-semibold"><strong>Value:</strong> ₱1,200 additional Express revenue/day.</p>
-          </div>
-
-          <div className="border-t border-gray-300 my-4" />
-
-          {/* Insight 3 */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">✅</span>
-              <h4 className="font-bold text-[#10B981]">Performance Benchmark</h4>
-            </div>
-            <p className="text-sm text-gray-700 mb-2">96% of customers served within 15 minutes (industry average: 78%). Your Sigma Level: <strong>4.2σ</strong> (World-class performance).</p>
-            <p className="text-sm text-[#FFB703] font-semibold"><strong>Achievement:</strong> You qualify for 'Suri Certified' badge - display this to attract quality-conscious customers.</p>
-          </div>
+          {totalServedToday === 0 ? (
+            <p className="text-sm text-gray-500 italic">
+              Insights will appear once you start serving customers. Process at least a few tickets to unlock Lean Six Sigma recommendations.
+            </p>
+          ) : (
+            <>
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">📈</span>
+                  <h4 className="font-bold text-[#3B82F6]">Takt Time Observation</h4>
+                </div>
+                <p className="text-sm text-gray-700">
+                  Average handling time today: <strong>{avgHandlingMin.toFixed(1)} min</strong> across {totalServedToday} served customer(s).
+                  {avgHandlingMin > 0 && avgHandlingMin < 10 && " You have capacity to serve more customers without degrading quality."}
+                </p>
+              </div>
+            </>
+          )}
 
           {/* Dynamic No-Show Insight */}
           {noShowStats.rate > 5 && (
@@ -440,11 +423,22 @@ const Analytics = () => {
         })()}
 
         {/* Performance Scorecard */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <ScoreCard icon="🎯" metric="96%" label="Within 15-min Target" status="EXCELLENT" statusColor="bg-green-100 text-green-800" loaded={loaded} delay={700} />
-          <ScoreCard icon="⚡" metric="18%" label="Express Upgrade Rate" status="ABOVE AVERAGE" statusColor="bg-blue-100 text-blue-800" loaded={loaded} delay={800} />
-          <ScoreCard icon="📊" metric="4.2σ" label="Six Sigma Rating" status="WORLD CLASS" statusColor="bg-[#FFF9E6] text-[#B8860B]" loaded={loaded} delay={900} />
-        </div>
+        {(() => {
+          const within15 = servedToday.filter((t) => {
+            if (!t.called_at || !t.served_at) return false;
+            return (new Date(t.served_at).getTime() - new Date(t.called_at).getTime()) / 60000 <= 15;
+          }).length;
+          const within15Pct = totalServedToday > 0 ? Math.round((within15 / totalServedToday) * 100) : 0;
+          const expressTickets = servedToday.filter((t) => t.priorityPaid).length;
+          const expressPct = totalServedToday > 0 ? Math.round((expressTickets / totalServedToday) * 100) : 0;
+          return (
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <ScoreCard icon="🎯" metric={`${within15Pct}%`} label="Within 15-min Target" status={within15Pct >= 90 ? "EXCELLENT" : within15Pct >= 70 ? "GOOD" : "NEEDS WORK"} statusColor={within15Pct >= 90 ? "bg-green-100 text-green-800" : within15Pct >= 70 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"} loaded={loaded} delay={700} />
+              <ScoreCard icon="⚡" metric={`${expressPct}%`} label="Express Upgrade Rate" status={expressPct > 0 ? "TRACKED" : "NONE YET"} statusColor="bg-blue-100 text-blue-800" loaded={loaded} delay={800} />
+              <ScoreCard icon="📊" metric={String(totalServedToday)} label="Served Today" status={totalServedToday > 0 ? "ACTIVE" : "NO DATA"} statusColor="bg-[#FFF9E6] text-[#B8860B]" loaded={loaded} delay={900} />
+            </div>
+          );
+        })()}
 
         <VersionFooter />
       </div>

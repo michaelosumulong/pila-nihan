@@ -439,7 +439,12 @@ const QueueControls = () => {
             <p className="text-xs text-gray-500">No-Shows</p>
           </div>
           <div className="bg-white rounded-xl shadow p-4 text-center">
-            <p className="text-2xl font-bold text-[#FFB703]">8 min</p>
+            <p className="text-2xl font-bold text-[#FFB703]">{(() => {
+              const served = queueData.tickets.filter((t) => t.status === "served" && t.called_at && t.served_at);
+              if (served.length === 0) return "—";
+              const avg = served.reduce((s, t) => s + (new Date(t.served_at!).getTime() - new Date(t.called_at!).getTime()) / 60000, 0) / served.length;
+              return `${avg.toFixed(1)} min`;
+            })()}</p>
             <p className="text-xs text-gray-500">Avg Wait</p>
           </div>
           <div className="bg-white rounded-xl shadow p-4 text-center">
