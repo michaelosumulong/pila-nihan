@@ -10,34 +10,15 @@ import FiveWhysModal from "@/components/FiveWhysModal";
 import PendingAudits from "@/components/PendingAudits";
 import VersionFooter from "@/components/VersionFooter";
 import { getNoShowMetrics, getNoShowAnalysis, type NoShowRecord } from "@/utils/noShowEngine";
-const hourlyData = [
-  { hour: "8 AM", customers: 12 },
-  { hour: "9 AM", customers: 28 },
-  { hour: "10 AM", customers: 45 },
-  { hour: "11 AM", customers: 38 },
-  { hour: "12 PM", customers: 32 },
-  { hour: "1 PM", customers: 25 },
-  { hour: "2 PM", customers: 42 },
-  { hour: "3 PM", customers: 35 },
-  { hour: "4 PM", customers: 28 },
-  { hour: "5 PM", customers: 18 },
-];
-
-const trendData = [
-  { day: "Mon", waitTime: 18 },
-  { day: "Tue", waitTime: 16 },
-  { day: "Wed", waitTime: 14 },
-  { day: "Thu", waitTime: 13 },
-  { day: "Fri", waitTime: 12 },
-  { day: "Sat", waitTime: 11 },
-  { day: "Sun", waitTime: 10 },
-];
+const HOURS = ["8 AM","9 AM","10 AM","11 AM","12 PM","1 PM","2 PM","3 PM","4 PM","5 PM"];
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
 const Analytics = () => {
   const navigate = useNavigate();
   
   const [loaded, setLoaded] = useState(false);
-  const [noShowStats, setNoShowStats] = useState({ count: 0, rate: 0, totalServed: 158 });
+  const [noShowStats, setNoShowStats] = useState({ count: 0, rate: 0, totalServed: 0 });
+  const [tickets, setTickets] = useState<any[]>([]);
   const [showFiveWhys, setShowFiveWhys] = useState(false);
   const [fiveWhysIssue, setFiveWhysIssue] = useState("");
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
@@ -59,22 +40,74 @@ const Analytics = () => {
       return;
     }
 
-    // Load analytics from localStorage
+    let merchantId: string | undefined;
+    try {
+      const m = JSON.parse(raw);
+      if (m?.id && /^[0-9a-f-]{36}$/i.test(m.id)) merchantId = m.id;
+    } catch {}
+
+    import("@/utils/queueEngine").then(({ fetchQueue }) =>
+      fetchQueue(merchantId).then((q) => setTickets(q.tickets)).catch(() => {})
+    );
+
     const today = new Date().toISOString().split("T")[0];
     const analyticsData = JSON.parse(localStorage.getItem("pila-analytics") || "{}");
     const todayData = analyticsData[today];
-
     if (todayData) {
       const total = todayData.completed + todayData.no_shows;
       setNoShowStats({
         count: todayData.no_shows,
         rate: total > 0 ? parseFloat(((todayData.no_shows / total) * 100).toFixed(1)) : 0,
-        totalServed: 158 + todayData.completed,
+        totalServed: todayData.completed,
       });
     }
 
     setTimeout(() => setLoaded(true), 100);
   }, [navigate]);
+
+  const today = new Date().toISOString().split("T")[0];
+  const servedToday = tickets.filter((t) => t.status === "served" && t.served_at?.startsWith(today));
+  const totalServedToday = servedToday.length;
+  const expressRevenueToday = tickets
+    .filter((t) => t.priorityPaid && t.served_at?.startsWith(today))
+    .reduce((s, t) => s + (t.priorityAmount || 0), 0);
+  const merchantRevenue = Math.round(expressRevenueToday * 0.4);
+  const platformRevenue = expressRevenueToday - merchantRevenue;
+  const avgHandlingMin =
+    servedToday.length > 0
+      ? servedToday.reduce((s, t) => {
+          if (t.called_at && t.served_at) {
+            return s + (new Date(t.served_at).getTime() - new Date(t.called_at).getTime()) / 60000;
+          }
+          return s;
+        }, 0) / servedToday.length
+      : 0;
+
+  const hourlyData = HOURS.map((label, i) => {
+    const hour = 8 + i;
+    const count = tickets.filter((t) => {
+      if (!t.created_at?.startsWith(today)) return false;
+      return new Date(t.created_at).getHours() === hour;
+    }).length;
+    return { hour: label, customers: count };
+  });
+
+  const trendData = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const key = d.toISOString().split("T")[0];
+    const dayServed = tickets.filter((t) => t.status === "served" && t.served_at?.startsWith(key));
+    const avg =
+      dayServed.length > 0
+        ? dayServed.reduce((s, t) => {
+            if (t.called_at && t.served_at) {
+              return s + (new Date(t.served_at).getTime() - new Date(t.called_at).getTime()) / 60000;
+            }
+            return s;
+          }, 0) / dayServed.length
+        : 0;
+    return { day: DAYS[i], waitTime: parseFloat(avg.toFixed(1)) };
+  });
 
   const noShowBadge = noShowStats.rate < 5
     ? { label: "EXCELLENT", cls: "bg-green-100 text-green-800" }
@@ -128,19 +161,15 @@ const Analytics = () => {
         {/* Key Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <MetricCard
-            icon="👥" value={String(noShowStats.totalServed)} label="Clients Served Today"
+            icon="👥" value={String(totalServedToday)} label="Clients Served Today"
             valueColor="text-[#1E3A8A]"
-            extra={<p className="text-xs text-green-600 font-semibold mt-1">↗️ +12% vs yesterday</p>}
             delay={0} loaded={loaded}
           />
           <MetricCard
-            icon="⏱️" value="8.5 min" label="Avg Handling Time"
+            icon="⏱️" value={avgHandlingMin > 0 ? `${avgHandlingMin.toFixed(1)} min` : "—"} label="Avg Handling Time"
             valueColor="text-[#10B981]"
             extra={
-              <div className="mt-1 space-y-1">
-                <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-bold">OPTIMIZED</span>
-                <p className="text-xs text-gray-500">Target: &lt;10 min ✓</p>
-              </div>
+              <p className="text-xs text-gray-500 mt-1">Target: &lt;10 min</p>
             }
             delay={1} loaded={loaded}
           />
@@ -156,13 +185,10 @@ const Analytics = () => {
             delay={2} loaded={loaded}
           />
           <MetricCard
-            icon="💰" value="₱4,200" label="Express Revenue Today"
+            icon="💰" value={`₱${expressRevenueToday.toLocaleString()}`} label="Express Revenue Today"
             valueColor="text-[#3B82F6]"
             extra={
-              <div className="mt-1 space-y-1">
-                <p className="text-xs text-gray-500">Merchant: ₱1,680 | Platform: ₱2,520</p>
-                <p className="text-xs text-blue-600 font-semibold">↗️ +8% vs last week</p>
-              </div>
+              <p className="text-xs text-gray-500 mt-1">Merchant: ₱{merchantRevenue.toLocaleString()} | Platform: ₱{platformRevenue.toLocaleString()}</p>
             }
             delay={3} loaded={loaded}
           />
@@ -185,7 +211,9 @@ const Analytics = () => {
                 <Bar dataKey="customers" fill="#FFD700" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-            <p className="text-sm font-semibold text-[#FFB703] mt-3">🔥 Peak: 10 AM (45) &amp; 2 PM (42)</p>
+            {hourlyData.every((h) => h.customers === 0) && (
+              <p className="text-sm text-gray-400 mt-3 text-center">No customer activity yet today</p>
+            )}
           </div>
 
           <div
@@ -203,7 +231,9 @@ const Analytics = () => {
                 <Line type="monotone" dataKey="waitTime" stroke="#10B981" strokeWidth={3} dot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
-            <p className="text-sm font-semibold text-green-600 mt-3">↘️ 44% reduction this week</p>
+            {trendData.every((d) => d.waitTime === 0) && (
+              <p className="text-sm text-gray-400 mt-3 text-center">No wait time data yet</p>
+            )}
           </div>
         </div>
 
@@ -218,41 +248,24 @@ const Analytics = () => {
             <p className="text-sm text-gray-600 italic">Lean Six Sigma Recommendations</p>
           </div>
 
-          {/* Insight 1 */}
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">⚠️</span>
-              <h4 className="font-bold text-[#EF4444]">Muda (Waste) Identified</h4>
-            </div>
-            <p className="text-sm text-gray-700 mb-2">Your wait times are 15% higher on Tuesdays between 10-11 AM. Root cause: Single counter handling peak demand.</p>
-            <p className="text-sm text-gray-700 mb-1"><strong>Action:</strong> Open Counter 2 during Tuesday 10 AM peak. <strong>Expected Impact:</strong> Reduce wait time by 6 minutes, serve 12 more customers/hour.</p>
-            <p className="text-sm text-green-700 font-semibold"><strong>Value:</strong> ₱2,400 additional revenue/week from faster throughput.</p>
-          </div>
-
-          <div className="border-t border-gray-300 my-4" />
-
-          {/* Insight 2 */}
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">📈</span>
-              <h4 className="font-bold text-[#3B82F6]">Takt Time Optimization</h4>
-            </div>
-            <p className="text-sm text-gray-700 mb-2">Your current handling time (8.5 min) is below target. You have capacity for 7 more customers/hour without degrading service quality.</p>
-            <p className="text-sm text-gray-700 mb-1"><strong>Action:</strong> Market Express upgrades more aggressively during 2 PM peak when you have excess capacity.</p>
-            <p className="text-sm text-green-700 font-semibold"><strong>Value:</strong> ₱1,200 additional Express revenue/day.</p>
-          </div>
-
-          <div className="border-t border-gray-300 my-4" />
-
-          {/* Insight 3 */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-2xl">✅</span>
-              <h4 className="font-bold text-[#10B981]">Performance Benchmark</h4>
-            </div>
-            <p className="text-sm text-gray-700 mb-2">96% of customers served within 15 minutes (industry average: 78%). Your Sigma Level: <strong>4.2σ</strong> (World-class performance).</p>
-            <p className="text-sm text-[#FFB703] font-semibold"><strong>Achievement:</strong> You qualify for 'Suri Certified' badge - display this to attract quality-conscious customers.</p>
-          </div>
+          {totalServedToday === 0 ? (
+            <p className="text-sm text-gray-500 italic">
+              Insights will appear once you start serving customers. Process at least a few tickets to unlock Lean Six Sigma recommendations.
+            </p>
+          ) : (
+            <>
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">📈</span>
+                  <h4 className="font-bold text-[#3B82F6]">Takt Time Observation</h4>
+                </div>
+                <p className="text-sm text-gray-700">
+                  Average handling time today: <strong>{avgHandlingMin.toFixed(1)} min</strong> across {totalServedToday} served customer(s).
+                  {avgHandlingMin > 0 && avgHandlingMin < 10 && " You have capacity to serve more customers without degrading quality."}
+                </p>
+              </div>
+            </>
+          )}
 
           {/* Dynamic No-Show Insight */}
           {noShowStats.rate > 5 && (
@@ -410,11 +423,22 @@ const Analytics = () => {
         })()}
 
         {/* Performance Scorecard */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <ScoreCard icon="🎯" metric="96%" label="Within 15-min Target" status="EXCELLENT" statusColor="bg-green-100 text-green-800" loaded={loaded} delay={700} />
-          <ScoreCard icon="⚡" metric="18%" label="Express Upgrade Rate" status="ABOVE AVERAGE" statusColor="bg-blue-100 text-blue-800" loaded={loaded} delay={800} />
-          <ScoreCard icon="📊" metric="4.2σ" label="Six Sigma Rating" status="WORLD CLASS" statusColor="bg-[#FFF9E6] text-[#B8860B]" loaded={loaded} delay={900} />
-        </div>
+        {(() => {
+          const within15 = servedToday.filter((t) => {
+            if (!t.called_at || !t.served_at) return false;
+            return (new Date(t.served_at).getTime() - new Date(t.called_at).getTime()) / 60000 <= 15;
+          }).length;
+          const within15Pct = totalServedToday > 0 ? Math.round((within15 / totalServedToday) * 100) : 0;
+          const expressTickets = servedToday.filter((t) => t.priorityPaid).length;
+          const expressPct = totalServedToday > 0 ? Math.round((expressTickets / totalServedToday) * 100) : 0;
+          return (
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <ScoreCard icon="🎯" metric={`${within15Pct}%`} label="Within 15-min Target" status={within15Pct >= 90 ? "EXCELLENT" : within15Pct >= 70 ? "GOOD" : "NEEDS WORK"} statusColor={within15Pct >= 90 ? "bg-green-100 text-green-800" : within15Pct >= 70 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"} loaded={loaded} delay={700} />
+              <ScoreCard icon="⚡" metric={`${expressPct}%`} label="Express Upgrade Rate" status={expressPct > 0 ? "TRACKED" : "NONE YET"} statusColor="bg-blue-100 text-blue-800" loaded={loaded} delay={800} />
+              <ScoreCard icon="📊" metric={String(totalServedToday)} label="Served Today" status={totalServedToday > 0 ? "ACTIVE" : "NO DATA"} statusColor="bg-[#FFF9E6] text-[#B8860B]" loaded={loaded} delay={900} />
+            </div>
+          );
+        })()}
 
         <VersionFooter />
       </div>

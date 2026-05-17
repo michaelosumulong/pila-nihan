@@ -16,7 +16,7 @@ import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
 import { getNoShowMetrics } from "@/utils/noShowEngine";
 import { generateDMAICRecommendations } from "@/utils/suriEngine";
-import { loadQueue, saveQueue } from "@/utils/queueEngine";
+import { loadQueue, saveQueue, fetchQueue, subscribeToQueue, type Ticket } from "@/utils/queueEngine";
 import { AlertCircle, TrendingDown, Crown } from "lucide-react";
 // Lucide icons now in DashboardLayout
 interface MerchantData {
@@ -131,10 +131,27 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  // Initialize queue on dashboard load
+  // Live queue stats from Supabase
+  const [queueTickets, setQueueTickets] = useState<Ticket[]>([]);
   useEffect(() => {
-    loadQueue();
+    let merchantId: string | undefined;
+    try {
+      const raw = localStorage.getItem("pila-merchant");
+      if (raw) {
+        const m = JSON.parse(raw);
+        if (m?.id && /^[0-9a-f-]{36}$/i.test(m.id)) merchantId = m.id;
+      }
+    } catch {}
+    fetchQueue(merchantId).then((q) => setQueueTickets(q.tickets)).catch(() => {});
+    const unsub = subscribeToQueue(merchantId, (q) => setQueueTickets(q.tickets));
+    return unsub;
   }, []);
+
+  const today = new Date().toISOString().split("T")[0];
+  const inQueueCount = queueTickets.filter((t) => t.status === "waiting" || !t.status).length;
+  const servedTodayCount = queueTickets.filter(
+    (t) => t.status === "served" && t.served_at?.startsWith(today)
+  ).length;
 
   // Initialize SURI AI recommendations
   useEffect(() => {
@@ -233,8 +250,8 @@ const Dashboard = () => {
         )}
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <StatCard icon="👥" value="24" label="Sa Pila Ngayon" valueColor="text-[#1E3A8A]" />
-          <StatCard icon="✅" value="158" label="Naserve Today" valueColor="text-[#10B981]" />
+          <StatCard icon="👥" value={String(inQueueCount)} label="Sa Pila Ngayon" valueColor="text-[#1E3A8A]" />
+          <StatCard icon="✅" value={String(servedTodayCount)} label="Naserve Today" valueColor="text-[#10B981]" />
           <StatCard icon="💰" value={`₱${(merchant.wallet?.balance ?? 0).toLocaleString()}`} label="Wallet Balance" valueColor="text-[#FFB703]" smaller />
           <StatCard icon="🎟️" value={`₱${(merchant.wallet?.credits ?? 0).toLocaleString()}`} label="Prepaid Credits" valueColor="text-[#3B82F6]" smaller />
         </div>
@@ -250,25 +267,39 @@ const Dashboard = () => {
         </div>
 
         {/* Revenue Chart */}
-        <div className="bg-white rounded-2xl shadow-lg p-5 mb-6 border border-primary/20">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">7-Day Revenue</h3>
-          <div className="flex items-end justify-between gap-2 h-32">
-            {[
-              { day: "Mon", h: 55 },
-              { day: "Tue", h: 72 },
-              { day: "Wed", h: 75 },
-              { day: "Thu", h: 69 },
-              { day: "Fri", h: 87 },
-              { day: "Sat", h: 100 },
-              { day: "Sun", h: 21 },
-            ].map((d) => (
-              <div key={d.day} className="flex flex-col items-center flex-1 h-full justify-end">
-                <div className="w-full max-w-[28px] rounded-t-md bg-[#FFD700]" style={{ height: `${d.h}%` }} />
-                <span className="text-[10px] text-gray-500 mt-1">{d.day}</span>
+        {(() => {
+          const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+          const now = new Date();
+          const week = Array.from({ length: 7 }).map((_, i) => {
+            const d = new Date(now);
+            d.setDate(now.getDate() - (6 - i));
+            const key = d.toISOString().split("T")[0];
+            const total = queueTickets
+              .filter((t) => t.priorityPaid && t.served_at?.startsWith(key))
+              .reduce((s, t) => s + (t.priorityAmount || 0), 0);
+            return { day: dayNames[d.getDay()], total };
+          });
+          const max = Math.max(...week.map((w) => w.total), 1);
+          return (
+            <div className="bg-white rounded-2xl shadow-lg p-5 mb-6 border border-primary/20">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">7-Day Revenue</h3>
+              <div className="flex items-end justify-between gap-2 h-32">
+                {week.map((d, i) => (
+                  <div key={i} className="flex flex-col items-center flex-1 h-full justify-end">
+                    <div
+                      className="w-full max-w-[28px] rounded-t-md bg-[#FFD700]"
+                      style={{ height: `${(d.total / max) * 100}%`, minHeight: d.total > 0 ? "4px" : "0" }}
+                    />
+                    <span className="text-[10px] text-gray-500 mt-1">{d.day}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+              {week.every((w) => w.total === 0) && (
+                <p className="text-xs text-gray-400 text-center mt-2">No revenue recorded yet</p>
+              )}
+            </div>
+          );
+        })()}
 
         {/* REVENUE LEAKAGE ALERT */}
         {noShowMetrics.count > 0 && (
