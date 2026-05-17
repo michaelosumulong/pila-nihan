@@ -17,7 +17,8 @@ const Analytics = () => {
   const navigate = useNavigate();
   
   const [loaded, setLoaded] = useState(false);
-  const [noShowStats, setNoShowStats] = useState({ count: 0, rate: 0, totalServed: 158 });
+  const [noShowStats, setNoShowStats] = useState({ count: 0, rate: 0, totalServed: 0 });
+  const [tickets, setTickets] = useState<any[]>([]);
   const [showFiveWhys, setShowFiveWhys] = useState(false);
   const [fiveWhysIssue, setFiveWhysIssue] = useState("");
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
@@ -39,22 +40,74 @@ const Analytics = () => {
       return;
     }
 
-    // Load analytics from localStorage
+    let merchantId: string | undefined;
+    try {
+      const m = JSON.parse(raw);
+      if (m?.id && /^[0-9a-f-]{36}$/i.test(m.id)) merchantId = m.id;
+    } catch {}
+
+    import("@/utils/queueEngine").then(({ fetchQueue }) =>
+      fetchQueue(merchantId).then((q) => setTickets(q.tickets)).catch(() => {})
+    );
+
     const today = new Date().toISOString().split("T")[0];
     const analyticsData = JSON.parse(localStorage.getItem("pila-analytics") || "{}");
     const todayData = analyticsData[today];
-
     if (todayData) {
       const total = todayData.completed + todayData.no_shows;
       setNoShowStats({
         count: todayData.no_shows,
         rate: total > 0 ? parseFloat(((todayData.no_shows / total) * 100).toFixed(1)) : 0,
-        totalServed: 158 + todayData.completed,
+        totalServed: todayData.completed,
       });
     }
 
     setTimeout(() => setLoaded(true), 100);
   }, [navigate]);
+
+  const today = new Date().toISOString().split("T")[0];
+  const servedToday = tickets.filter((t) => t.status === "served" && t.served_at?.startsWith(today));
+  const totalServedToday = servedToday.length;
+  const expressRevenueToday = tickets
+    .filter((t) => t.priorityPaid && t.served_at?.startsWith(today))
+    .reduce((s, t) => s + (t.priorityAmount || 0), 0);
+  const merchantRevenue = Math.round(expressRevenueToday * 0.4);
+  const platformRevenue = expressRevenueToday - merchantRevenue;
+  const avgHandlingMin =
+    servedToday.length > 0
+      ? servedToday.reduce((s, t) => {
+          if (t.called_at && t.served_at) {
+            return s + (new Date(t.served_at).getTime() - new Date(t.called_at).getTime()) / 60000;
+          }
+          return s;
+        }, 0) / servedToday.length
+      : 0;
+
+  const hourlyData = HOURS.map((label, i) => {
+    const hour = 8 + i;
+    const count = tickets.filter((t) => {
+      if (!t.created_at?.startsWith(today)) return false;
+      return new Date(t.created_at).getHours() === hour;
+    }).length;
+    return { hour: label, customers: count };
+  });
+
+  const trendData = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const key = d.toISOString().split("T")[0];
+    const dayServed = tickets.filter((t) => t.status === "served" && t.served_at?.startsWith(key));
+    const avg =
+      dayServed.length > 0
+        ? dayServed.reduce((s, t) => {
+            if (t.called_at && t.served_at) {
+              return s + (new Date(t.served_at).getTime() - new Date(t.called_at).getTime()) / 60000;
+            }
+            return s;
+          }, 0) / dayServed.length
+        : 0;
+    return { day: DAYS[i], waitTime: parseFloat(avg.toFixed(1)) };
+  });
 
   const noShowBadge = noShowStats.rate < 5
     ? { label: "EXCELLENT", cls: "bg-green-100 text-green-800" }
