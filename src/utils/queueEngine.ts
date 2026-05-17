@@ -97,9 +97,11 @@ const replaceCache = (tickets: Ticket[], merchantId?: string): Queue => {
  * Fetch all tickets for the active merchant from Supabase and refresh the cache.
  * Pass merchantId to scope; omit to fetch all (useful in single-tenant demo).
  */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const fetchQueue = async (merchantId?: string): Promise<Queue> => {
   let query = supabase.from("tickets").select("*").order("created_at", { ascending: true });
-  if (merchantId) query = query.eq("merchant_id", merchantId);
+  if (merchantId && UUID_RE.test(merchantId)) query = query.eq("merchant_id", merchantId);
 
   const { data, error } = await query;
   if (error) {
