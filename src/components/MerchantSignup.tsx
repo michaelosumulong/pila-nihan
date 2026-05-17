@@ -147,7 +147,11 @@ const MerchantSignup = () => {
     const e: Record<string, string> = {};
     if (!form.businessName.trim()) e.businessName = "Kinakailangan";
     if (!form.ownerName.trim()) e.ownerName = "Kinakailangan";
-    if (!form.mobile.trim()) e.mobile = "Kinakailangan";
+    if (!form.mobile.trim()) {
+      e.mobile = "Kinakailangan";
+    } else if (!isMobileValid(form.mobile)) {
+      e.mobile = "Invalid PH mobile (09XX-XXX-XXXX)";
+    }
     if (!form.address.trim()) e.address = "Kinakailangan";
     setErrors(e);
     return Object.keys(e).length === 0;
