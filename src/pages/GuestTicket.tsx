@@ -87,7 +87,7 @@ const GuestTicket = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
-  const [ticketData] = useState({
+  const [ticketData, setTicketData] = useState({
     ticketNumber: ticketNumber || "",
     customerName: "",
     category: "regular",
@@ -95,7 +95,88 @@ const GuestTicket = () => {
     totalInQueue: 10,
     estimatedWaitMinutes: 15,
     nowServing: "",
+    status: "waiting",
+    called_at: null as string | null,
   });
+
+  // Real-time subscription + initial load from Supabase
+  useEffect(() => {
+    if (!ticketNumber) return;
+    let prevCalledAt: string | null = null;
+
+    const applyRow = (row: any) => {
+      const category = row.priority_paid
+        ? "express"
+        : row.ticket_number?.startsWith("P")
+        ? "priority"
+        : "regular";
+      setTicketData((prev) => ({
+        ...prev,
+        ticketNumber: row.ticket_number,
+        customerName: row.customer_name || "",
+        category,
+        status: row.status || "waiting",
+        called_at: row.called_at,
+      }));
+
+      // Detect transition to "called"
+      if (row.status === "called" && row.called_at && row.called_at !== prevCalledAt) {
+        prevCalledAt = row.called_at;
+        try {
+          if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("YOUR TURN!", {
+              body: `Ticket ${row.ticket_number} - Please proceed to the counter now.`,
+              icon: "/logo.svg",
+            });
+          }
+          if ("vibrate" in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
+          const audio = new Audio("/notification.mp3");
+          audio.play().catch(() => {});
+        } catch (e) {
+          console.warn("Notification failed", e);
+        }
+        toast.success("YOUR TURN! Please proceed to the counter.", {
+          duration: 10000,
+          className: "text-xl font-bold",
+        });
+      }
+    };
+
+    // Initial fetch
+    (async () => {
+      const { data, error } = await supabase
+        .from("tickets")
+        .select("*")
+        .eq("ticket_number", ticketNumber)
+        .maybeSingle();
+      if (error) console.warn("Initial ticket fetch failed:", error.message);
+      if (data) {
+        prevCalledAt = data.called_at;
+        applyRow(data);
+      }
+    })();
+
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
+
+    const channel = supabase
+      .channel(`ticket-${ticketNumber}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "tickets", filter: `ticket_number=eq.${ticketNumber}` },
+        (payload) => {
+          console.log("📡 Ticket updated:", payload.new);
+          applyRow(payload.new);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [ticketNumber]);
 
   const progressValue = ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100;
   const cat = CATEGORY_STYLES[ticketData.category] || CATEGORY_STYLES.regular;
