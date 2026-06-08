@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { XCircle } from "lucide-react";
+import { XCircle, Volume2, VolumeX } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLowBattery } from "@/hooks/use-low-battery";
@@ -99,50 +99,39 @@ const GuestTicket = () => {
     called_at: null as string | null,
   });
 
-  // Real-time subscription + initial load from Supabase
+  const [alertsMuted, setAlertsMuted] = useState(false);
+  const [audioReady, setAudioReady] = useState(false);
+  const [ticketId, setTicketId] = useState<string | null>(null);
+
+  // Initialize audio context on first user interaction (required by mobile browsers)
+  const initializeAudio = async () => {
+    try {
+      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        if (ctx.state === "suspended") await ctx.resume();
+      }
+      if ("Notification" in window && Notification.permission === "default") {
+        await Notification.requestPermission();
+      }
+      setAudioReady(true);
+      toast.success("🔔 Sound alerts enabled!");
+      console.log("✅ Audio context initialized");
+    } catch (err) {
+      console.error("Audio init failed:", err);
+    }
+  };
+
+  const toggleAlerts = () => {
+    setAlertsMuted((m) => {
+      toast.info(!m ? "🔕 Alerts muted" : "🔔 Alerts enabled");
+      return !m;
+    });
+  };
+
+  // Initial load — fetch ticket UUID for safe multi-tenant real-time filtering
   useEffect(() => {
     if (!ticketNumber) return;
-    let prevCalledAt: string | null = null;
-
-    const applyRow = (row: any) => {
-      const category = row.priority_paid
-        ? "express"
-        : row.ticket_number?.startsWith("P")
-        ? "priority"
-        : "regular";
-      setTicketData((prev) => ({
-        ...prev,
-        ticketNumber: row.ticket_number,
-        customerName: row.customer_name || "",
-        category,
-        status: row.status || "waiting",
-        called_at: row.called_at,
-      }));
-
-      // Detect transition to "called"
-      if (row.status === "called" && row.called_at && row.called_at !== prevCalledAt) {
-        prevCalledAt = row.called_at;
-        try {
-          if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("YOUR TURN!", {
-              body: `Ticket ${row.ticket_number} - Please proceed to the counter now.`,
-              icon: "/logo.svg",
-            });
-          }
-          if ("vibrate" in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
-          const audio = new Audio("/notification.mp3");
-          audio.play().catch(() => {});
-        } catch (e) {
-          console.warn("Notification failed", e);
-        }
-        toast.success("YOUR TURN! Please proceed to the counter.", {
-          duration: 10000,
-          className: "text-xl font-bold",
-        });
-      }
-    };
-
-    // Initial fetch
     (async () => {
       const { data, error } = await supabase
         .from("tickets")
@@ -151,32 +140,108 @@ const GuestTicket = () => {
         .maybeSingle();
       if (error) console.warn("Initial ticket fetch failed:", error.message);
       if (data) {
-        prevCalledAt = data.called_at;
-        applyRow(data);
+        setTicketId(data.id);
+        const category = data.priority_paid
+          ? "express"
+          : data.ticket_number?.startsWith("P")
+          ? "priority"
+          : "regular";
+        setTicketData((prev) => ({
+          ...prev,
+          ticketNumber: data.ticket_number,
+          customerName: data.customer_name || "",
+          category,
+          status: data.status || "waiting",
+          called_at: data.called_at,
+        }));
       }
     })();
 
-    // Request notification permission
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch(() => {});
     }
+  }, [ticketNumber]);
+
+  // Real-time subscription — filter by UUID (id), NOT ticket_number, for multi-tenant safety
+  useEffect(() => {
+    if (!ticketId) return;
+    let prevCalledAt: string | null = ticketData.called_at;
+    let prevStatus: string = ticketData.status;
+
+    console.log("📡 Subscribing to ticket id:", ticketId);
 
     const channel = supabase
-      .channel(`ticket-${ticketNumber}`)
+      .channel(`ticket-${ticketId}`)
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "tickets", filter: `ticket_number=eq.${ticketNumber}` },
+        { event: "UPDATE", schema: "public", table: "tickets", filter: `id=eq.${ticketId}` },
         (payload) => {
-          console.log("📡 Ticket updated:", payload.new);
-          applyRow(payload.new);
+          const row: any = payload.new;
+          console.log("📡 Real-time update - status:", row.status);
+
+          const category = row.priority_paid
+            ? "express"
+            : row.ticket_number?.startsWith("P")
+            ? "priority"
+            : "regular";
+          setTicketData((prev) => ({
+            ...prev,
+            ticketNumber: row.ticket_number,
+            customerName: row.customer_name || "",
+            category,
+            status: row.status || "waiting",
+            called_at: row.called_at,
+          }));
+
+          // Transition to "called" → fire alerts
+          if (
+            row.status === "called" &&
+            row.called_at &&
+            row.called_at !== prevCalledAt &&
+            !alertsMuted
+          ) {
+            prevCalledAt = row.called_at;
+            try {
+              if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("🎉 YOUR TURN!", {
+                  body: `Ticket ${row.ticket_number} - Please proceed to the counter NOW!`,
+                  icon: "/logo.svg",
+                  tag: "ticket-called",
+                  requireInteraction: true,
+                } as any);
+              }
+              if ("vibrate" in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
+              const audio = new Audio("/notification.mp3");
+              audio.volume = 0.8;
+              audio.play().catch((e) =>
+                console.warn("Audio failed (tap 'Enable Sound' to allow):", e?.message)
+              );
+            } catch (e) {
+              console.warn("Notification failed", e);
+            }
+            toast.success("YOUR TURN! 🎉", {
+              description: `Ticket ${row.ticket_number} - Please proceed to the counter NOW!`,
+              duration: 10000,
+              className: "text-xl font-bold",
+            });
+          }
+
+          if (row.status === "completed" && prevStatus !== "completed") {
+            toast.success("Your service is complete. Thank you!", { duration: 5000 });
+          }
+          prevStatus = row.status;
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") console.log("✅ Real-time active for", ticketId);
+        else if (status === "CLOSED") console.warn("⚠️ Real-time closed");
+      });
 
     return () => {
       supabase.removeChannel(channel);
+      console.log("📡 Unsubscribed from ticket", ticketId);
     };
-  }, [ticketNumber]);
+  }, [ticketId, alertsMuted]);
 
   const progressValue = ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100;
   const cat = CATEGORY_STYLES[ticketData.category] || CATEGORY_STYLES.regular;
@@ -291,8 +356,28 @@ const GuestTicket = () => {
           🔋
           <span>{lowBatteryMode ? "Saving" : "Save Battery"}</span>
         </button>
+        <button
+          onClick={toggleAlerts}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 text-white hover:bg-white/30 transition-colors"
+          title={alertsMuted ? "Unmute alerts" : "Mute alerts"}
+        >
+          {alertsMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          <span>{alertsMuted ? "Muted" : "Alerts"}</span>
+        </button>
         </div>
       </div>
+
+      {/* Enable Sound prompt (mobile audio unlock) */}
+      {!audioReady && (
+        <div className="max-w-md mx-auto mb-3">
+          <button
+            onClick={initializeAudio}
+            className="w-full bg-yellow-400 text-gray-900 py-2.5 rounded-xl font-bold text-sm shadow-lg active:scale-95"
+          >
+            🎵 Tap once to enable sound alerts
+          </button>
+        </div>
+      )}
 
       {/* Low Battery Banner */}
       {lowBatteryMode && (
