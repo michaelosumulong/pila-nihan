@@ -66,7 +66,7 @@ const Analytics = () => {
   }, [navigate]);
 
   const today = new Date().toISOString().split("T")[0];
-  const servedToday = tickets.filter((t) => t.status === "served" && t.served_at?.startsWith(today));
+  const servedToday = tickets.filter((t) => t.status === "completed" && t.served_at?.startsWith(today));
   const totalServedToday = servedToday.length;
   const expressRevenueToday = tickets
     .filter((t) => t.priorityPaid && t.served_at?.startsWith(today))
@@ -96,7 +96,7 @@ const Analytics = () => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
     const key = d.toISOString().split("T")[0];
-    const dayServed = tickets.filter((t) => t.status === "served" && t.served_at?.startsWith(key));
+    const dayServed = tickets.filter((t) => t.status === "completed" && t.served_at?.startsWith(key));
     const avg =
       dayServed.length > 0
         ? dayServed.reduce((s, t) => {

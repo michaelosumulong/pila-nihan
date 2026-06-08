@@ -15,7 +15,7 @@ export interface Ticket {
   ticketNumber: string;
   customerName: string;
   customerPhone?: string;
-  status: "waiting" | "called" | "serving" | "served" | "no_show" | "cancelled";
+  status: "waiting" | "called" | "serving" | "completed" | "no_show" | "cancelled";
   servicePace?: "regular" | "express" | "priority" | "standard" | "technical";
   priorityPaid?: boolean;
   priorityAmount?: number;

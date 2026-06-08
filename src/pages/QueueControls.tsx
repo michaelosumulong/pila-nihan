@@ -150,7 +150,7 @@ const QueueControls = () => {
   const [noShowCount, setNoShowCount] = useState(0);
 
   // Today's stats from real queue data
-  const servedToday = queueData.tickets.filter((t: Ticket) => t.status === "served").length;
+  const servedToday = queueData.tickets.filter((t: Ticket) => t.status === "completed").length;
   const cancelledToday = queueData.tickets.filter((t: Ticket) => t.status === "cancelled").length;
 
   const callNext = async () => {
@@ -226,7 +226,7 @@ const QueueControls = () => {
       console.log("🔄 Marking ticket as served:", ticket.id, ticket.ticketNumber);
 
       // CRITICAL: snake_case keys to match PostgreSQL columns
-      const ok = await updateTicketStatus(ticket.id, "served", {
+      const ok = await updateTicketStatus(ticket.id, "completed", {
         called_at: calledAt,
         served_at: servedAt,
       });
@@ -453,7 +453,7 @@ const QueueControls = () => {
           </div>
           <div className="bg-white rounded-xl shadow p-4 text-center">
             <p className="text-2xl font-bold text-[#FFB703]">{(() => {
-              const served = queueData.tickets.filter((t) => t.status === "served" && t.called_at && t.served_at);
+              const served = queueData.tickets.filter((t) => t.status === "completed" && t.called_at && t.served_at);
               if (served.length === 0) return "—";
               const avg = served.reduce((s, t) => s + (new Date(t.served_at!).getTime() - new Date(t.called_at!).getTime()) / 60000, 0) / served.length;
               return `${avg.toFixed(1)} min`;

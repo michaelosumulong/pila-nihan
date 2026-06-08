@@ -89,7 +89,7 @@ const Dashboard = () => {
       const backlog: any[] = [];
 
       tickets
-        .filter((t: any) => t.status === "served" && t.served_at?.startsWith(today))
+        .filter((t: any) => t.status === "completed" && t.served_at?.startsWith(today))
         .forEach((ticket: any) => {
           if (ticket.served_at && ticket.called_at) {
             const handlingTime = (new Date(ticket.served_at).getTime() - new Date(ticket.called_at).getTime()) / 1000 / 60;
@@ -109,7 +109,7 @@ const Dashboard = () => {
         });
 
       const served = tickets
-        .filter((t: any) => t.status === "served" && t.served_at?.startsWith(today))
+        .filter((t: any) => t.status === "completed" && t.served_at?.startsWith(today))
         .sort((a: any, b: any) => new Date(a.served_at).getTime() - new Date(b.served_at).getTime());
 
       for (let i = 1; i < served.length; i++) {
@@ -150,7 +150,7 @@ const Dashboard = () => {
   const today = new Date().toISOString().split("T")[0];
   const inQueueCount = queueTickets.filter((t) => t.status === "waiting" || !t.status).length;
   const servedTodayCount = queueTickets.filter(
-    (t) => t.status === "served" && t.served_at?.startsWith(today)
+    (t) => t.status === "completed" && t.served_at?.startsWith(today)
   ).length;
 
   // Initialize SURI AI recommendations
