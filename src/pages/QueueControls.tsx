@@ -150,7 +150,7 @@ const QueueControls = () => {
   const [noShowCount, setNoShowCount] = useState(0);
 
   // Today's stats from real queue data
-  const servedToday = queueData.tickets.filter((t: Ticket) => t.status === "served").length;
+  const servedToday = queueData.tickets.filter((t: Ticket) => t.status === "completed").length;
   const cancelledToday = queueData.tickets.filter((t: Ticket) => t.status === "cancelled").length;
 
   const callNext = async () => {
