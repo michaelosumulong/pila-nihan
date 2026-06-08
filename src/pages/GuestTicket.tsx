@@ -238,7 +238,7 @@ const GuestTicket = () => {
       // Check if ticket has been served for feedback trigger
       const tickets = JSON.parse(localStorage.getItem("tickets") || "[]");
       const current = tickets.find((t: any) => t.ticketNumber === ticketNumber);
-      if (current && current.status === "served" && !feedbackSubmitted) {
+      if (current && current.status === "completed" && !feedbackSubmitted) {
         setShowFeedback(true);
       }
     }, lowBatteryMode ? 60000 : 10000);

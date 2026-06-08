@@ -31,7 +31,7 @@ const PendingAudits = ({ onAnalyze }: PendingAuditsProps) => {
 
     // Excessive handling times
     tickets
-      .filter((t: any) => t.status === "served" && t.served_at?.startsWith(today))
+      .filter((t: any) => t.status === "completed" && t.served_at?.startsWith(today))
       .forEach((ticket: any) => {
         if (ticket.served_at && ticket.called_at) {
           const handlingTime =
@@ -54,7 +54,7 @@ const PendingAudits = ({ onAnalyze }: PendingAuditsProps) => {
 
     // Idle gaps (15+ min)
     const served = tickets
-      .filter((t: any) => t.status === "served" && t.served_at?.startsWith(today))
+      .filter((t: any) => t.status === "completed" && t.served_at?.startsWith(today))
       .sort((a: any, b: any) => new Date(a.served_at).getTime() - new Date(b.served_at).getTime());
 
     for (let i = 1; i < served.length; i++) {
