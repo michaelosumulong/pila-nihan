@@ -356,8 +356,28 @@ const GuestTicket = () => {
           🔋
           <span>{lowBatteryMode ? "Saving" : "Save Battery"}</span>
         </button>
+        <button
+          onClick={toggleAlerts}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 text-white hover:bg-white/30 transition-colors"
+          title={alertsMuted ? "Unmute alerts" : "Mute alerts"}
+        >
+          {alertsMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          <span>{alertsMuted ? "Muted" : "Alerts"}</span>
+        </button>
         </div>
       </div>
+
+      {/* Enable Sound prompt (mobile audio unlock) */}
+      {!audioReady && (
+        <div className="max-w-md mx-auto mb-3">
+          <button
+            onClick={initializeAudio}
+            className="w-full bg-yellow-400 text-gray-900 py-2.5 rounded-xl font-bold text-sm shadow-lg active:scale-95"
+          >
+            🎵 Tap once to enable sound alerts
+          </button>
+        </div>
+      )}
 
       {/* Low Battery Banner */}
       {lowBatteryMode && (
