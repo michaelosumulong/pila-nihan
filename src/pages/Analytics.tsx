@@ -15,7 +15,19 @@ const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
 const Analytics = () => {
   const navigate = useNavigate();
-  
+
+  // GUARD: Check for merchant session on mount
+  useEffect(() => {
+    const merchant = JSON.parse(localStorage.getItem('pila-merchant') || '{}');
+    if (!merchant.id) {
+      console.error('❌ No merchant session found - redirecting to login');
+      toast.error('Session expired. Please log in again.');
+      navigate('/login');
+      return;
+    }
+    console.log('✅ Merchant session verified:', merchant.businessName);
+  }, [navigate]);
+
   const [loaded, setLoaded] = useState(false);
   const [noShowStats, setNoShowStats] = useState({ count: 0, rate: 0, totalServed: 0 });
   const [tickets, setTickets] = useState<any[]>([]);
