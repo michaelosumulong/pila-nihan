@@ -25,21 +25,39 @@ export default function Login() {
     }
 
     setIsLoading(true);
+    console.log("════════════════════════════════════════");
+    console.log("🔄 LOGIN INITIATED");
+    console.log("════════════════════════════════════════");
 
     try {
+      console.log("📧 Email:", cleanEmail);
+      console.log("🏪 Shop Code:", cleanCode);
+
+      console.log("🔍 Querying Supabase for merchant...");
       const { data, error } = await supabase
         .from("merchants")
         .select("*")
         .eq("email", cleanEmail)
         .eq("shop_code", cleanCode)
-        .maybeSingle();
+        .single();
 
-      if (error || !data) {
-        console.error("Login validation failed:", error);
+      if (error) {
+        console.error("❌ Supabase query error:", error);
         toast.error("Invalid email or shop code. Please check and try again.");
         setIsLoading(false);
         return;
       }
+
+      if (!data) {
+        console.error("❌ No merchant found");
+        toast.error("Merchant not found. Please check and try again.");
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("✅ Merchant found in database");
+      console.log("   ID:", data.id);
+      console.log("   Business:", data.business_name);
 
       const merchantSession = {
         id: data.id,
@@ -50,19 +68,55 @@ export default function Login() {
         mobile: data.mobile,
         businessCategory: data.business_category,
         servicePlan: data.service_plan,
-        prepaidCredits: data.prepaid_credits ?? 500,
+        prepaidCredits: data.prepaid_credits || 500,
       };
 
+      console.log("");
+      console.log("════════════════════════════════════════");
+      console.log("💾 SAVING MERCHANT SESSION");
+      console.log("════════════════════════════════════════");
+
       localStorage.setItem("pila-merchant", JSON.stringify(merchantSession));
+      console.log("✅ localStorage.setItem() executed");
+
+      const verify = localStorage.getItem("pila-merchant");
+
+      if (!verify) {
+        console.error("❌ CRITICAL: localStorage returned null after setItem!");
+        console.error("   This usually means localStorage is disabled or quota exceeded");
+        toast.error("Session storage failed. Check browser settings.");
+        setIsLoading(false);
+        return;
+      }
+
+      const verifyParsed = JSON.parse(verify);
+      console.log("✅ Verified in localStorage: " + verifyParsed.businessName);
+      console.log("   Merchant UUID:", verifyParsed.id);
+      console.log("   Shop Code:", verifyParsed.shopCode);
+
+      if (verifyParsed.id !== data.id) {
+        console.error("❌ Data mismatch! Stored ID does not match database ID");
+        toast.error("Session data mismatch. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+
       window.dispatchEvent(new Event("merchant-updated"));
 
-      console.log("✅ Merchant logged in:", data.shop_code, "→", data.id);
+      console.log("");
+      console.log("════════════════════════════════════════");
+      console.log("✅ SESSION LOCK COMPLETE");
+      console.log("════════════════════════════════════════");
+      console.log("Proceeding to dashboard...");
+      console.log("════════════════════════════════════════");
+
+      setIsLoading(false);
       toast.success(`Welcome back, ${data.business_name}!`);
       navigate("/dashboard");
-    } catch (err) {
-      console.error("Login error:", err);
-      toast.error("Login failed. Please try again.");
-    } finally {
+    } catch (err: any) {
+      console.error("❌ Login exception:", err);
+      console.error("Stack:", err?.stack);
+      toast.error("Login failed: " + (err?.message || "Unknown error"));
       setIsLoading(false);
     }
   };
