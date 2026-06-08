@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PilaLogo from "@/components/PilaLogo";
@@ -74,6 +74,18 @@ const LEGACY_CATEGORY_MAP: Record<string, string> = {
 
 const Settings = () => {
   const navigate = useNavigate();
+
+  // GUARD: Check for merchant session on mount
+  useEffect(() => {
+    const merchant = JSON.parse(localStorage.getItem('pila-merchant') || '{}');
+    if (!merchant.id) {
+      console.error('❌ No merchant session found - redirecting to login');
+      toast.error('Session expired. Please log in again.');
+      navigate('/login');
+      return;
+    }
+    console.log('✅ Merchant session verified:', merchant.businessName);
+  }, [navigate]);
 
   // Saved merchant state (from localStorage)
   const [savedMerchant, setSavedMerchant] = useState(() => {

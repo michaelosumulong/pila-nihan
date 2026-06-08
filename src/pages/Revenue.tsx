@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useBranding } from "@/contexts/BrandingContext";
 import PilaLogo from "@/components/PilaLogo";
 import VersionFooter from "@/components/VersionFooter";
@@ -30,6 +31,19 @@ interface PaidTicket {
 
 const Revenue = () => {
   const navigate = useNavigate();
+
+  // GUARD: Check for merchant session on mount
+  useEffect(() => {
+    const merchant = JSON.parse(localStorage.getItem('pila-merchant') || '{}');
+    if (!merchant.id) {
+      console.error('❌ No merchant session found - redirecting to login');
+      toast.error('Session expired. Please log in again.');
+      navigate('/login');
+      return;
+    }
+    console.log('✅ Merchant session verified:', merchant.businessName);
+  }, [navigate]);
+
   const { branding, customLogo } = useBranding();
   const [merchant, setMerchant] = useState<any>(null);
   const [revenueStats, setRevenueStats] = useState({

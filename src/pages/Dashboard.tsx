@@ -58,9 +58,18 @@ const Dashboard = () => {
   const [noShowMetrics, setNoShowMetrics] = useState(getNoShowMetrics());
 
   useEffect(() => {
+    const merchant = JSON.parse(localStorage.getItem('pila-merchant') || '{}');
+    if (!merchant.id) {
+      console.error('❌ No merchant session found - redirecting to login');
+      toast.error('Session expired. Please log in again.');
+      navigate('/login');
+      return;
+    }
+    console.log('✅ Merchant session verified:', merchant.businessName);
+
     const raw = localStorage.getItem("pila-merchant");
     if (!raw) {
-      navigate("/");
+      navigate("/login");
       return;
     }
     try {
