@@ -55,12 +55,14 @@ const mapQueueTicket = (ticket: any) => ({
 });
 
 const mapServingTicket = (ticket: any) => ({
+  id: ticket.id,
   ticketNumber: ticket.ticketNumber,
   customerName: ticket.customerName,
   category: ticket.category || ticket.servicePace || "regular",
   waitTime: ticket.estimatedWaitMinutes || 0,
   calledAt: ticket.called_at || new Date().toISOString(),
   servicePace: ticket.servicePace || "standard",
+  status: ticket.status || "waiting",
 });
 
 const QueueControls = () => {
@@ -94,19 +96,23 @@ const QueueControls = () => {
   };
 
   const [currentServing, setCurrentServing] = useState<{
+    id: string;
     ticketNumber: string;
     customerName: string;
     category: string;
     waitTime: number;
     calledAt: string;
     servicePace: string;
+    status: string;
   }>({
+    id: "",
     ticketNumber: "",
     customerName: "",
     category: "regular",
     waitTime: 0,
     calledAt: new Date().toISOString(),
     servicePace: "regular",
+    status: "",
   });
 
   const [queueList, setQueueList] = useState<Array<{ id: string; ticketNumber: string; name: string; category: string; waitTime: number }>>([]);
@@ -167,29 +173,80 @@ const QueueControls = () => {
   const cancelledToday = queueData.tickets.filter((t: Ticket) => t.status === "cancelled").length;
 
   const callNext = async () => {
+    // GUARD: Check if someone is already being served
     const queue = loadQueue();
-    const waitingTickets = queue.tickets.filter((t: Ticket) => t.status === "waiting" || !t.status);
+    const activeTicket = queue.tickets.find((t: Ticket) => t.status === 'called' || t.status === 'serving');
+    
+    if (activeTicket) {
+      console.log('⚠️ Previous ticket still active:', activeTicket.ticketNumber);
+      
+      const confirmed = window.confirm(
+        `${activeTicket.ticketNumber} is still being served.\n\n` +
+        `Click OK to mark as served and call next customer.\n` +
+        `Click Cancel to continue with ${activeTicket.ticketNumber}.`
+      );
+      
+      if (!confirmed) {
+        console.log('User chose to continue serving:', activeTicket.ticketNumber);
+        toast.info(`Continuing with ${activeTicket.ticketNumber}`);
+        return;
+      }
+      
+      // Auto-mark previous ticket as completed
+      console.log('🔄 Auto-completing:', activeTicket.ticketNumber);
+      
+      try {
+        const ok = await updateTicketStatus(activeTicket.id, 'completed', {
+          served_at: new Date().toISOString(),
+        });
+        if (!ok) {
+          console.error('❌ Failed to auto-complete');
+          toast.error('Failed to mark as served. Please try again.');
+          return;
+        }
+        console.log('✅ Auto-completed:', activeTicket.ticketNumber);
+        
+        updateAnalytics('completed');
+        logQueueAction({
+          action_type: 'completed',
+          ticket_number: activeTicket.ticketNumber,
+          customer_name: activeTicket.customerName || '',
+          timestamp: new Date().toISOString(),
+        });
+        
+      } catch (err: any) {
+        console.error('Auto-complete error:', err);
+        toast.error('Error: ' + (err.message || 'Unknown'));
+        return;
+      }
+    }
+
+    // NOW call the next customer
+    console.log('📢 Calling next customer...');
+    
+    const freshQueue = loadQueue();
+    const waitingTickets = freshQueue.tickets.filter((t: Ticket) => t.status === 'waiting' || !t.status);
 
     if (waitingTickets.length === 0) {
-      toast.info("Queue is empty!");
+      toast.info('Queue is empty! No more customers.');
       return;
     }
 
-    let nextTicket = waitingTickets.find((t: Ticket) => t.servicePace === "priority");
+    let nextTicket = waitingTickets.find((t: Ticket) => t.servicePace === 'priority');
     if (!nextTicket) {
       nextTicket = servedCount.regular >= 2
-        ? waitingTickets.find((t: Ticket) => t.servicePace === "express") || waitingTickets.find((t: Ticket) => t.servicePace === "regular")
-        : waitingTickets.find((t: Ticket) => t.servicePace === "regular") || waitingTickets[0];
+        ? waitingTickets.find((t: Ticket) => t.servicePace === 'express') || waitingTickets.find((t: Ticket) => t.servicePace === 'regular')
+        : waitingTickets.find((t: Ticket) => t.servicePace === 'regular') || waitingTickets[0];
     }
 
     if (nextTicket) {
-      const ok = await updateTicketStatus(nextTicket.id, "called", {
+      const ok = await updateTicketStatus(nextTicket.id, 'called', {
         called_at: new Date().toISOString(),
-        servicePace: nextTicket.servicePace || "regular",
+        servicePace: nextTicket.servicePace || 'regular',
       });
 
       if (!ok) {
-        toast.error("Failed to call next ticket. Check your connection.");
+        toast.error('Failed to call next ticket. Check your connection.');
         return;
       }
 
@@ -198,21 +255,21 @@ const QueueControls = () => {
       setQueueData(updated);
       const updatedTicket = updated.tickets.find((t) => t.id === nextTicket!.id);
       if (updatedTicket) setCurrentServing(mapServingTicket(updatedTicket));
-      setQueueList(updated.tickets.filter((t) => t.status === "waiting" || !t.status).map(mapQueueTicket));
+      setQueueList(updated.tickets.filter((t) => t.status === 'waiting' || !t.status).map(mapQueueTicket));
 
-      if (nextTicket.servicePace === "regular") {
+      if (nextTicket.servicePace === 'regular') {
         setServedCount((prev) => ({ ...prev, regular: prev.regular + 1 }));
-      } else if (nextTicket.servicePace === "express") {
+      } else if (nextTicket.servicePace === 'express') {
         setServedCount({ regular: 0, express: servedCount.express + 1 });
       }
 
       toast.success(`Now serving ${nextTicket.ticketNumber} - ${nextTicket.customerName}`);
-      console.log("📢 Called ticket:", nextTicket.ticketNumber, "| Service:", nextTicket.servicePace);
+      console.log('📢 Called ticket:', nextTicket.ticketNumber, '| Service:', nextTicket.servicePace);
 
       addNotification({
-        title: "YOUR TURN!",
+        title: 'YOUR TURN!',
         message: `Ticket ${nextTicket.ticketNumber} — please proceed to the counter now.`,
-        type: "alert",
+        type: 'alert',
         ticketNumber: nextTicket.ticketNumber,
       });
     }
