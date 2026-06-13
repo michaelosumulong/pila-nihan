@@ -27,7 +27,7 @@ const getMessage = (position: number) => {
   return "Thank you for waiting! ⏳";
 };
 
-const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
+
 
 const GuestTicket = () => {
   const { ticketNumber } = useParams();
