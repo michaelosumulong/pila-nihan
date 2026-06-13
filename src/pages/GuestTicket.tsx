@@ -675,7 +675,7 @@ const GuestTicket = () => {
         </div>
       )}
 
-      {/* Report Issue + Leave Queue */}
+      {/* Report Issue + Leave Queue / Done */}
       <div className="max-w-md mx-auto text-center mb-4 space-y-3">
         <button
           onClick={() => toast.info("Contact support: +63 917 PILA-HELP")}
@@ -683,13 +683,22 @@ const GuestTicket = () => {
         >
           ⚠️ Report an Issue
         </button>
-        <button
-          onClick={handleLeaveQueue}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all shadow-lg active:scale-95"
-        >
-          <XCircle className="w-5 h-5" />
-          Leave Queue
-        </button>
+        {ticketData.status === "completed" ? (
+          <button
+            onClick={() => navigate("/")}
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition-all shadow-lg active:scale-95"
+          >
+            ✓ Done — Return Home
+          </button>
+        ) : (
+          <button
+            onClick={handleLeaveQueue}
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all shadow-lg active:scale-95"
+          >
+            <XCircle className="w-5 h-5" />
+            Leave Queue
+          </button>
+        )}
         <p className="text-xs text-white/60 italic">You can join again anytime via the merchant's QR code.</p>
       </div>
 
