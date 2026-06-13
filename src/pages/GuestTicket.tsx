@@ -186,6 +186,7 @@ const GuestTicket = () => {
           category,
           status: data.status || "waiting",
           called_at: data.called_at,
+          served_at: data.served_at,
           merchantId: data.merchant_id,
           createdAt: data.created_at,
         }));
