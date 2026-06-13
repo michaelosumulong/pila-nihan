@@ -227,6 +227,8 @@ const QueueControls = () => {
         toast.error('Error: ' + (err.message || 'Unknown'));
         return;
       }
+    } else {
+      console.log('✅ No guard needed - no active ticket, can call next');
     }
 
     // NOW call the next customer
