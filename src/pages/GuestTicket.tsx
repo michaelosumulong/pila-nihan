@@ -97,6 +97,7 @@ const GuestTicket = () => {
     nowServing: "",
     status: "waiting",
     called_at: null as string | null,
+    served_at: null as string | null,
     merchantId: null as string | null,
     createdAt: null as string | null,
   });
