@@ -284,6 +284,15 @@ const GuestTicket = () => {
     };
   }, [ticketId, alertsMuted]);
 
+  // Recalculate position periodically (other guests may join/leave)
+  useEffect(() => {
+    if (!ticketData.merchantId || !ticketData.createdAt) return;
+    const interval = setInterval(() => {
+      calculatePosition(ticketData.merchantId, ticketData.createdAt);
+    }, lowBatteryMode ? 30000 : 10000);
+    return () => clearInterval(interval);
+  }, [ticketData.merchantId, ticketData.createdAt, lowBatteryMode]);
+
   const progressValue = ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100;
   const cat = CATEGORY_STYLES[ticketData.category] || CATEGORY_STYLES.regular;
 
