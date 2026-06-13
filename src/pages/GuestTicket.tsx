@@ -556,12 +556,14 @@ const GuestTicket = () => {
         </div>
       )}
 
-      {/* Now Serving */}
-      <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5 text-center">
-        <p className="text-sm text-gray-600 uppercase mb-1">Now Serving:</p>
-        <p className="text-2xl font-bold text-[#1E3A8A]">{ticketData.nowServing}</p>
-        <p className="text-lg mt-2">{getMessage(ticketData.position)}</p>
-      </div>
+      {/* Now Serving — hidden when completed */}
+      {ticketData.status !== "completed" && (
+        <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5 text-center">
+          <p className="text-sm text-gray-600 uppercase mb-1">Now Serving:</p>
+          <p className="text-2xl font-bold text-[#1E3A8A]">{ticketData.nowServing}</p>
+          <p className="text-lg mt-2">{getMessage(ticketData.position)}</p>
+        </div>
+      )}
 
       {/* Pro Tips & Share */}
       <div className="max-w-md mx-auto mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4">
