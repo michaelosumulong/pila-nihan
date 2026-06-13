@@ -526,23 +526,23 @@ const GuestTicket = () => {
         </div>
       )}
 
-      {/* Progress Bar */}
-      <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5">
-        <p className="text-sm text-gray-600 mb-2">Queue Progress</p>
-        <Progress
-          value={ticketData.totalInQueue > 0 ? ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100 : 0}
-          className="h-4 bg-gray-200 [&>div]:bg-[#10B981]"
-        />
-        <p className="text-xs text-gray-500 mt-2">
-          {ticketData.status === "waiting" && ticketData.position > 0
-            ? `${ticketData.position} of ${ticketData.totalInQueue} in queue`
-            : ticketData.status === "called" || ticketData.status === "serving"
-            ? "You are now being served"
-            : ticketData.status === "completed"
-            ? "Service completed"
-            : "--"}
-        </p>
-      </div>
+      {/* Progress Bar — hidden when completed */}
+      {ticketData.status !== "completed" && (
+        <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5">
+          <p className="text-sm text-gray-600 mb-2">Queue Progress</p>
+          <Progress
+            value={ticketData.totalInQueue > 0 ? ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100 : 0}
+            className="h-4 bg-gray-200 [&>div]:bg-[#10B981]"
+          />
+          <p className="text-xs text-gray-500 mt-2">
+            {ticketData.status === "waiting" && ticketData.position > 0
+              ? `${ticketData.position} of ${ticketData.totalInQueue} in queue`
+              : ticketData.status === "called" || ticketData.status === "serving"
+              ? "You are now being served"
+              : "--"}
+          </p>
+        </div>
+      )}
 
       {/* Recovery confirmation */}
       {isRecovered && (
