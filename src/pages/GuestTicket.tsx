@@ -91,12 +91,14 @@ const GuestTicket = () => {
     ticketNumber: ticketNumber || "",
     customerName: "",
     category: "regular",
-    position: 2,
-    totalInQueue: 10,
+    position: 0,
+    totalInQueue: 0,
     estimatedWaitMinutes: 15,
     nowServing: "",
     status: "waiting",
     called_at: null as string | null,
+    merchantId: null as string | null,
+    createdAt: null as string | null,
   });
 
   const [alertsMuted, setAlertsMuted] = useState(false);
