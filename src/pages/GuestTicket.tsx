@@ -473,31 +473,58 @@ const GuestTicket = () => {
         </span>
       </div>
 
-      {/* Position & Wait Time */}
-      <div className="grid grid-cols-2 gap-4 max-w-md mx-auto mb-6">
-        <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
-          <p className="text-gray-600 text-sm uppercase mb-2">Your Position</p>
-          <span className="text-2xl">👥</span>
-          {ticketData.status === "waiting" ? (
-            ticketData.position > 0 ? (
-              <p className="text-4xl font-bold text-[#3B82F6]">#{ticketData.position} in line</p>
+      {/* Thank You / Completion Card */}
+      {ticketData.status === "completed" && (
+        <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md mx-auto mb-6 text-center space-y-4">
+          <p className="text-6xl">✅</p>
+          <p className="text-3xl font-bold text-green-700">Service Complete!</p>
+          <p className="text-lg text-green-600">Salamat po! Thank you for your patience.</p>
+          <div className="pt-4 border-t border-gray-100">
+            <p className="text-sm text-gray-600">
+              Service time:{" "}
+              {ticketData.served_at && ticketData.called_at
+                ? `${Math.round(
+                    (new Date(ticketData.served_at).getTime() -
+                      new Date(ticketData.called_at).getTime()) /
+                      1000
+                  )} seconds`
+                : "N/A"}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Called at:{" "}
+              {ticketData.called_at
+                ? new Date(ticketData.called_at).toLocaleTimeString()
+                : "N/A"}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Position & Wait Time — hidden when completed */}
+      {ticketData.status !== "completed" && (
+        <div className="grid grid-cols-2 gap-4 max-w-md mx-auto mb-6">
+          <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
+            <p className="text-gray-600 text-sm uppercase mb-2">Your Position</p>
+            <span className="text-2xl">👥</span>
+            {ticketData.status === "waiting" ? (
+              ticketData.position > 0 ? (
+                <p className="text-4xl font-bold text-[#3B82F6]">#{ticketData.position} in line</p>
+              ) : (
+                <p className="text-lg font-medium text-gray-400">Calculating...</p>
+              )
+            ) : ticketData.status === "called" || ticketData.status === "serving" ? (
+              <p className="text-2xl font-bold text-[#10B981]">🎯 Your Turn!</p>
             ) : (
-              <p className="text-lg font-medium text-gray-400">Calculating...</p>
-            )
-          ) : ticketData.status === "called" || ticketData.status === "serving" ? (
-            <p className="text-2xl font-bold text-[#10B981]">🎯 Your Turn!</p>
-          ) : ticketData.status === "completed" ? (
-            <p className="text-2xl font-bold text-[#6B7280]">✓ Served</p>
-          ) : (
-            <p className="text-lg font-medium text-gray-400">--</p>
-          )}
+              <p className="text-lg font-medium text-gray-400">--</p>
+            )}
+          </div>
+          <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
+            <p className="text-gray-600 text-sm uppercase mb-2">Estimated Wait</p>
+            <p className="text-3xl font-bold text-[#FFD700]">⏱️ {ticketData.estimatedWaitMinutes} min</p>
+            <p className="text-xs text-gray-500 mt-1">Based on average service time</p>
+          </div>
         </div>
-        <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
-          <p className="text-gray-600 text-sm uppercase mb-2">Estimated Wait</p>
-          <p className="text-3xl font-bold text-[#FFD700]">⏱️ {ticketData.estimatedWaitMinutes} min</p>
-          <p className="text-xs text-gray-500 mt-1">Based on average service time</p>
-        </div>
-      </div>
+      )}
 
       {/* Progress Bar */}
       <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5">
