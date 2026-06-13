@@ -173,12 +173,20 @@ const QueueControls = () => {
   const cancelledToday = queueData.tickets.filter((t: Ticket) => t.status === "cancelled").length;
 
   const callNext = async () => {
+    console.log('═══════════════════════════════════════');
+    console.log('📢 CALL NEXT INITIATED');
+    console.log('═══════════════════════════════════════');
+    console.log('currentServing:', currentServing);
+    console.log('currentServing?.id:', currentServing?.id);
+    console.log('currentServing?.status:', currentServing?.status);
+
     // GUARD: Check if someone is already being served
     const queue = loadQueue();
     const activeTicket = queue.tickets.find((t: Ticket) => t.status === 'called' || t.status === 'serving');
-    
+    console.log('activeTicket from queue:', activeTicket?.ticketNumber, activeTicket?.status);
+
     if (activeTicket) {
-      console.log('⚠️ Previous ticket still active:', activeTicket.ticketNumber);
+      console.log('⚠️ GUARD TRIGGERED - Previous ticket still active:', activeTicket.ticketNumber);
       
       const confirmed = window.confirm(
         `${activeTicket.ticketNumber} is still being served.\n\n` +
