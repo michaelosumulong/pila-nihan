@@ -97,6 +97,7 @@ const GuestTicket = () => {
     nowServing: "",
     status: "waiting",
     called_at: null as string | null,
+    served_at: null as string | null,
     merchantId: null as string | null,
     createdAt: null as string | null,
   });
@@ -185,6 +186,7 @@ const GuestTicket = () => {
           category,
           status: data.status || "waiting",
           called_at: data.called_at,
+          served_at: data.served_at,
           merchantId: data.merchant_id,
           createdAt: data.created_at,
         }));
@@ -227,6 +229,7 @@ const GuestTicket = () => {
             category,
             status: row.status || "waiting",
             called_at: row.called_at,
+            served_at: row.served_at,
             merchantId: row.merchant_id || prev.merchantId,
             createdAt: row.created_at || prev.createdAt,
           }));
@@ -470,49 +473,76 @@ const GuestTicket = () => {
         </span>
       </div>
 
-      {/* Position & Wait Time */}
-      <div className="grid grid-cols-2 gap-4 max-w-md mx-auto mb-6">
-        <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
-          <p className="text-gray-600 text-sm uppercase mb-2">Your Position</p>
-          <span className="text-2xl">👥</span>
-          {ticketData.status === "waiting" ? (
-            ticketData.position > 0 ? (
-              <p className="text-4xl font-bold text-[#3B82F6]">#{ticketData.position} in line</p>
-            ) : (
-              <p className="text-lg font-medium text-gray-400">Calculating...</p>
-            )
-          ) : ticketData.status === "called" || ticketData.status === "serving" ? (
-            <p className="text-2xl font-bold text-[#10B981]">🎯 Your Turn!</p>
-          ) : ticketData.status === "completed" ? (
-            <p className="text-2xl font-bold text-[#6B7280]">✓ Served</p>
-          ) : (
-            <p className="text-lg font-medium text-gray-400">--</p>
-          )}
+      {/* Thank You / Completion Card */}
+      {ticketData.status === "completed" && (
+        <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md mx-auto mb-6 text-center space-y-4">
+          <p className="text-6xl">✅</p>
+          <p className="text-3xl font-bold text-green-700">Service Complete!</p>
+          <p className="text-lg text-green-600">Salamat po! Thank you for your patience.</p>
+          <div className="pt-4 border-t border-gray-100">
+            <p className="text-sm text-gray-600">
+              Service time:{" "}
+              {ticketData.served_at && ticketData.called_at
+                ? `${Math.round(
+                    (new Date(ticketData.served_at).getTime() -
+                      new Date(ticketData.called_at).getTime()) /
+                      1000
+                  )} seconds`
+                : "N/A"}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Called at:{" "}
+              {ticketData.called_at
+                ? new Date(ticketData.called_at).toLocaleTimeString()
+                : "N/A"}
+            </p>
+          </div>
         </div>
-        <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
-          <p className="text-gray-600 text-sm uppercase mb-2">Estimated Wait</p>
-          <p className="text-3xl font-bold text-[#FFD700]">⏱️ {ticketData.estimatedWaitMinutes} min</p>
-          <p className="text-xs text-gray-500 mt-1">Based on average service time</p>
-        </div>
-      </div>
+      )}
 
-      {/* Progress Bar */}
-      <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5">
-        <p className="text-sm text-gray-600 mb-2">Queue Progress</p>
-        <Progress
-          value={ticketData.totalInQueue > 0 ? ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100 : 0}
-          className="h-4 bg-gray-200 [&>div]:bg-[#10B981]"
-        />
-        <p className="text-xs text-gray-500 mt-2">
-          {ticketData.status === "waiting" && ticketData.position > 0
-            ? `${ticketData.position} of ${ticketData.totalInQueue} in queue`
-            : ticketData.status === "called" || ticketData.status === "serving"
-            ? "You are now being served"
-            : ticketData.status === "completed"
-            ? "Service completed"
-            : "--"}
-        </p>
-      </div>
+      {/* Position & Wait Time — hidden when completed */}
+      {ticketData.status !== "completed" && (
+        <div className="grid grid-cols-2 gap-4 max-w-md mx-auto mb-6">
+          <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
+            <p className="text-gray-600 text-sm uppercase mb-2">Your Position</p>
+            <span className="text-2xl">👥</span>
+            {ticketData.status === "waiting" ? (
+              ticketData.position > 0 ? (
+                <p className="text-4xl font-bold text-[#3B82F6]">#{ticketData.position} in line</p>
+              ) : (
+                <p className="text-lg font-medium text-gray-400">Calculating...</p>
+              )
+            ) : ticketData.status === "called" || ticketData.status === "serving" ? (
+              <p className="text-2xl font-bold text-[#10B981]">🎯 Your Turn!</p>
+            ) : (
+              <p className="text-lg font-medium text-gray-400">--</p>
+            )}
+          </div>
+          <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
+            <p className="text-gray-600 text-sm uppercase mb-2">Estimated Wait</p>
+            <p className="text-3xl font-bold text-[#FFD700]">⏱️ {ticketData.estimatedWaitMinutes} min</p>
+            <p className="text-xs text-gray-500 mt-1">Based on average service time</p>
+          </div>
+        </div>
+      )}
+
+      {/* Progress Bar — hidden when completed */}
+      {ticketData.status !== "completed" && (
+        <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5">
+          <p className="text-sm text-gray-600 mb-2">Queue Progress</p>
+          <Progress
+            value={ticketData.totalInQueue > 0 ? ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100 : 0}
+            className="h-4 bg-gray-200 [&>div]:bg-[#10B981]"
+          />
+          <p className="text-xs text-gray-500 mt-2">
+            {ticketData.status === "waiting" && ticketData.position > 0
+              ? `${ticketData.position} of ${ticketData.totalInQueue} in queue`
+              : ticketData.status === "called" || ticketData.status === "serving"
+              ? "You are now being served"
+              : "--"}
+          </p>
+        </div>
+      )}
 
       {/* Recovery confirmation */}
       {isRecovered && (
@@ -526,12 +556,14 @@ const GuestTicket = () => {
         </div>
       )}
 
-      {/* Now Serving */}
-      <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5 text-center">
-        <p className="text-sm text-gray-600 uppercase mb-1">Now Serving:</p>
-        <p className="text-2xl font-bold text-[#1E3A8A]">{ticketData.nowServing}</p>
-        <p className="text-lg mt-2">{getMessage(ticketData.position)}</p>
-      </div>
+      {/* Now Serving — hidden when completed */}
+      {ticketData.status !== "completed" && (
+        <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5 text-center">
+          <p className="text-sm text-gray-600 uppercase mb-1">Now Serving:</p>
+          <p className="text-2xl font-bold text-[#1E3A8A]">{ticketData.nowServing}</p>
+          <p className="text-lg mt-2">{getMessage(ticketData.position)}</p>
+        </div>
+      )}
 
       {/* Pro Tips & Share */}
       <div className="max-w-md mx-auto mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4">
@@ -574,74 +606,76 @@ const GuestTicket = () => {
         </div>
       )}
 
-      {/* Upgrade Options */}
-      <div className="max-w-md mx-auto mb-6">
-        <h3 className="text-white font-bold text-lg mb-3 text-center">Upgrade Your Spot</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {/* Express */}
-          <div className="bg-white rounded-2xl border-2 border-[#10B981] p-4 text-center">
-            <span className="text-3xl">⚡</span>
-            <p className="font-bold text-lg mt-1">Express Service</p>
-            <p className="text-2xl font-bold text-[#10B981]">₱{expressPrice}</p>
-            <p className="text-xs text-gray-600">+ ₱{vatAmount} VAT (12%)</p>
-            <p className="text-sm font-bold text-gray-800 mb-2">Total: ₱{totalExpressPrice}</p>
-            <ul className="text-xs text-gray-600 my-2 space-y-1 text-left px-1">
-              <li>• Faster service (1:2 fairness ratio)</li>
-              <li>• Digital payment via GCash/Maya</li>
-              <li>• Target wait: ~10 minutes</li>
-            </ul>
-            <button
-              onClick={() => handleUpgrade("express")}
-              className="bg-[#10B981] text-white w-full py-3 rounded-lg font-bold"
-            >
-              Pay ₱{totalExpressPrice} to Upgrade
-            </button>
-            <p className="text-xs text-gray-500 italic mt-1">Revenue: Merchant 40% | Platform 60%</p>
-          </div>
-
-          {/* Social Priority */}
-          <div className="bg-white rounded-2xl border-2 border-[#10B981] p-4 text-center">
-            <span className="text-3xl">🤝</span>
-            <p className="font-bold text-lg mt-1">Social Priority</p>
-            <span className="inline-block bg-[#10B981] text-white text-xs px-2 py-1 rounded mb-2">
-              LIBRE - SOCIAL SERVICE
-            </span>
-            <p className="text-3xl font-bold text-[#10B981]">FREE</p>
-            <p className="text-sm text-gray-600 italic mb-2">Para sa Seniors, PWD, Buntis</p>
-            <ul className="text-xs text-gray-600 my-2 space-y-1 text-left px-1">
-              <li>• Always served first</li>
-              <li>• No payment required</li>
-              <li>• Valid ID for verification</li>
-            </ul>
-            <div className="flex items-center gap-2 mb-2 justify-center">
-              <Checkbox
-                id="social-qualify"
-                checked={qualifiesForSocial}
-                onCheckedChange={(checked) => setQualifiesForSocial(checked === true)}
-              />
-              <label htmlFor="social-qualify" className="text-sm text-gray-700 cursor-pointer">
-                I qualify (Senior/PWD/Pregnant)
-              </label>
+      {/* Upgrade Options — hidden when completed */}
+      {ticketData.status !== "completed" && (
+        <div className="max-w-md mx-auto mb-6">
+          <h3 className="text-white font-bold text-lg mb-3 text-center">Upgrade Your Spot</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Express */}
+            <div className="bg-white rounded-2xl border-2 border-[#10B981] p-4 text-center">
+              <span className="text-3xl">⚡</span>
+              <p className="font-bold text-lg mt-1">Express Service</p>
+              <p className="text-2xl font-bold text-[#10B981]">₱{expressPrice}</p>
+              <p className="text-xs text-gray-600">+ ₱{vatAmount} VAT (12%)</p>
+              <p className="text-sm font-bold text-gray-800 mb-2">Total: ₱{totalExpressPrice}</p>
+              <ul className="text-xs text-gray-600 my-2 space-y-1 text-left px-1">
+                <li>• Faster service (1:2 fairness ratio)</li>
+                <li>• Digital payment via GCash/Maya</li>
+                <li>• Target wait: ~10 minutes</li>
+              </ul>
+              <button
+                onClick={() => handleUpgrade("express")}
+                className="bg-[#10B981] text-white w-full py-3 rounded-lg font-bold"
+              >
+                Pay ₱{totalExpressPrice} to Upgrade
+              </button>
+              <p className="text-xs text-gray-500 italic mt-1">Revenue: Merchant 40% | Platform 60%</p>
             </div>
-            <button
-              onClick={() => handleUpgrade("social_priority")}
-              disabled={!qualifiesForSocial}
-              className="bg-[#10B981] text-white w-full py-3 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Request Priority
-            </button>
+
+            {/* Social Priority */}
+            <div className="bg-white rounded-2xl border-2 border-[#10B981] p-4 text-center">
+              <span className="text-3xl">🤝</span>
+              <p className="font-bold text-lg mt-1">Social Priority</p>
+              <span className="inline-block bg-[#10B981] text-white text-xs px-2 py-1 rounded mb-2">
+                LIBRE - SOCIAL SERVICE
+              </span>
+              <p className="text-3xl font-bold text-[#10B981]">FREE</p>
+              <p className="text-sm text-gray-600 italic mb-2">Para sa Seniors, PWD, Buntis</p>
+              <ul className="text-xs text-gray-600 my-2 space-y-1 text-left px-1">
+                <li>• Always served first</li>
+                <li>• No payment required</li>
+                <li>• Valid ID for verification</li>
+              </ul>
+              <div className="flex items-center gap-2 mb-2 justify-center">
+                <Checkbox
+                  id="social-qualify"
+                  checked={qualifiesForSocial}
+                  onCheckedChange={(checked) => setQualifiesForSocial(checked === true)}
+                />
+                <label htmlFor="social-qualify" className="text-sm text-gray-700 cursor-pointer">
+                  I qualify (Senior/PWD/Pregnant)
+                </label>
+              </div>
+              <button
+                onClick={() => handleUpgrade("social_priority")}
+                disabled={!qualifiesForSocial}
+                className="bg-[#10B981] text-white w-full py-3 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Request Priority
+              </button>
+            </div>
+          </div>
+
+          {/* Anti-Corruption Disclaimer */}
+          <div className="bg-[#FEF3C7] border-l-4 border-[#EF4444] p-3 rounded mt-4">
+            <p className="text-xs font-bold text-gray-800">
+              ⚠️ Bawal ang Fixer! Express payment via GCash/Maya only. Social Priority is FREE with valid ID.
+            </p>
           </div>
         </div>
+      )}
 
-        {/* Anti-Corruption Disclaimer */}
-        <div className="bg-[#FEF3C7] border-l-4 border-[#EF4444] p-3 rounded mt-4">
-          <p className="text-xs font-bold text-gray-800">
-            ⚠️ Bawal ang Fixer! Express payment via GCash/Maya only. Social Priority is FREE with valid ID.
-          </p>
-        </div>
-      </div>
-
-      {/* Report Issue + Leave Queue */}
+      {/* Report Issue + Leave Queue / Done */}
       <div className="max-w-md mx-auto text-center mb-4 space-y-3">
         <button
           onClick={() => toast.info("Contact support: +63 917 PILA-HELP")}
@@ -649,13 +683,22 @@ const GuestTicket = () => {
         >
           ⚠️ Report an Issue
         </button>
-        <button
-          onClick={handleLeaveQueue}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all shadow-lg active:scale-95"
-        >
-          <XCircle className="w-5 h-5" />
-          Leave Queue
-        </button>
+        {ticketData.status === "completed" ? (
+          <button
+            onClick={() => navigate("/")}
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition-all shadow-lg active:scale-95"
+          >
+            ✓ Done — Return Home
+          </button>
+        ) : (
+          <button
+            onClick={handleLeaveQueue}
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all shadow-lg active:scale-95"
+          >
+            <XCircle className="w-5 h-5" />
+            Leave Queue
+          </button>
+        )}
         <p className="text-xs text-white/60 italic">You can join again anytime via the merchant's QR code.</p>
       </div>
 
