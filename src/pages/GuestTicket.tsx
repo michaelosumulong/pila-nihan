@@ -476,7 +476,19 @@ const GuestTicket = () => {
         <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
           <p className="text-gray-600 text-sm uppercase mb-2">Your Position</p>
           <span className="text-2xl">👥</span>
-          <p className="text-4xl font-bold text-[#3B82F6]">{ordinal(ticketData.position)} in line</p>
+          {ticketData.status === "waiting" ? (
+            ticketData.position > 0 ? (
+              <p className="text-4xl font-bold text-[#3B82F6]">#{ticketData.position} in line</p>
+            ) : (
+              <p className="text-lg font-medium text-gray-400">Calculating...</p>
+            )
+          ) : ticketData.status === "called" || ticketData.status === "serving" ? (
+            <p className="text-2xl font-bold text-[#10B981]">🎯 Your Turn!</p>
+          ) : ticketData.status === "completed" ? (
+            <p className="text-2xl font-bold text-[#6B7280]">✓ Served</p>
+          ) : (
+            <p className="text-lg font-medium text-gray-400">--</p>
+          )}
         </div>
         <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
           <p className="text-gray-600 text-sm uppercase mb-2">Estimated Wait</p>
