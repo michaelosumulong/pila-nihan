@@ -185,7 +185,11 @@ const GuestTicket = () => {
           category,
           status: data.status || "waiting",
           called_at: data.called_at,
+          merchantId: data.merchant_id,
+          createdAt: data.created_at,
         }));
+        // Calculate real position after fetching ticket data
+        calculatePosition(data.merchant_id, data.created_at);
       }
     })();
 
