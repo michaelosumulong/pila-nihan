@@ -131,6 +131,36 @@ const GuestTicket = () => {
     });
   };
 
+  // Calculate position in line by counting waiting tickets ahead
+  const calculatePosition = async (merchantId: string | null, createdAt: string | null) => {
+    if (!merchantId || !createdAt) return;
+    try {
+      const { data: waitingTickets, error } = await supabase
+        .from("tickets")
+        .select("id, created_at")
+        .eq("merchant_id", merchantId)
+        .eq("status", "waiting")
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.warn("Position calculation failed:", error.message);
+        return;
+      }
+
+      const total = waitingTickets?.length || 0;
+      const position = (waitingTickets?.findIndex((t) => t.created_at === createdAt) ?? -1) + 1;
+
+      setTicketData((prev) => ({
+        ...prev,
+        position: position > 0 ? position : 0,
+        totalInQueue: total,
+      }));
+      console.log("📍 Position in line:", position, "of", total);
+    } catch (err) {
+      console.error("❌ calculatePosition error:", err);
+    }
+  };
+
   // Initial load — fetch ticket UUID for safe multi-tenant real-time filtering
   useEffect(() => {
     if (!ticketNumber) return;
