@@ -229,6 +229,7 @@ const GuestTicket = () => {
             category,
             status: row.status || "waiting",
             called_at: row.called_at,
+            served_at: row.served_at,
             merchantId: row.merchant_id || prev.merchantId,
             createdAt: row.created_at || prev.createdAt,
           }));
