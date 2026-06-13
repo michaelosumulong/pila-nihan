@@ -227,7 +227,12 @@ const GuestTicket = () => {
             category,
             status: row.status || "waiting",
             called_at: row.called_at,
+            merchantId: row.merchant_id || prev.merchantId,
+            createdAt: row.created_at || prev.createdAt,
           }));
+
+          // Recalculate position on every status update
+          calculatePosition(row.merchant_id || ticketData.merchantId, row.created_at || ticketData.createdAt);
 
           // Transition to "called" → fire alerts
           if (
