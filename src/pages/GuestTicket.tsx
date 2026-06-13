@@ -27,7 +27,7 @@ const getMessage = (position: number) => {
   return "Thank you for waiting! ⏳";
 };
 
-const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
+
 
 const GuestTicket = () => {
   const { ticketNumber } = useParams();
@@ -91,12 +91,14 @@ const GuestTicket = () => {
     ticketNumber: ticketNumber || "",
     customerName: "",
     category: "regular",
-    position: 2,
-    totalInQueue: 10,
+    position: 0,
+    totalInQueue: 0,
     estimatedWaitMinutes: 15,
     nowServing: "",
     status: "waiting",
     called_at: null as string | null,
+    merchantId: null as string | null,
+    createdAt: null as string | null,
   });
 
   const [alertsMuted, setAlertsMuted] = useState(false);
@@ -129,6 +131,36 @@ const GuestTicket = () => {
     });
   };
 
+  // Calculate position in line by counting waiting tickets ahead
+  const calculatePosition = async (merchantId: string | null, createdAt: string | null) => {
+    if (!merchantId || !createdAt) return;
+    try {
+      const { data: waitingTickets, error } = await supabase
+        .from("tickets")
+        .select("id, created_at")
+        .eq("merchant_id", merchantId)
+        .eq("status", "waiting")
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.warn("Position calculation failed:", error.message);
+        return;
+      }
+
+      const total = waitingTickets?.length || 0;
+      const position = (waitingTickets?.findIndex((t) => t.created_at === createdAt) ?? -1) + 1;
+
+      setTicketData((prev) => ({
+        ...prev,
+        position: position > 0 ? position : 0,
+        totalInQueue: total,
+      }));
+      console.log("📍 Position in line:", position, "of", total);
+    } catch (err) {
+      console.error("❌ calculatePosition error:", err);
+    }
+  };
+
   // Initial load — fetch ticket UUID for safe multi-tenant real-time filtering
   useEffect(() => {
     if (!ticketNumber) return;
@@ -153,7 +185,11 @@ const GuestTicket = () => {
           category,
           status: data.status || "waiting",
           called_at: data.called_at,
+          merchantId: data.merchant_id,
+          createdAt: data.created_at,
         }));
+        // Calculate real position after fetching ticket data
+        calculatePosition(data.merchant_id, data.created_at);
       }
     })();
 
@@ -191,7 +227,12 @@ const GuestTicket = () => {
             category,
             status: row.status || "waiting",
             called_at: row.called_at,
+            merchantId: row.merchant_id || prev.merchantId,
+            createdAt: row.created_at || prev.createdAt,
           }));
+
+          // Recalculate position on every status update
+          calculatePosition(row.merchant_id || ticketData.merchantId, row.created_at || ticketData.createdAt);
 
           // Transition to "called" → fire alerts
           if (
@@ -243,7 +284,15 @@ const GuestTicket = () => {
     };
   }, [ticketId, alertsMuted]);
 
-  const progressValue = ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100;
+  // Recalculate position periodically (other guests may join/leave)
+  useEffect(() => {
+    if (!ticketData.merchantId || !ticketData.createdAt) return;
+    const interval = setInterval(() => {
+      calculatePosition(ticketData.merchantId, ticketData.createdAt);
+    }, lowBatteryMode ? 30000 : 10000);
+    return () => clearInterval(interval);
+  }, [ticketData.merchantId, ticketData.createdAt, lowBatteryMode]);
+
   const cat = CATEGORY_STYLES[ticketData.category] || CATEGORY_STYLES.regular;
 
   const handleUpgrade = (type: "express" | "social_priority") => {
@@ -426,7 +475,19 @@ const GuestTicket = () => {
         <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
           <p className="text-gray-600 text-sm uppercase mb-2">Your Position</p>
           <span className="text-2xl">👥</span>
-          <p className="text-4xl font-bold text-[#3B82F6]">{ordinal(ticketData.position)} in line</p>
+          {ticketData.status === "waiting" ? (
+            ticketData.position > 0 ? (
+              <p className="text-4xl font-bold text-[#3B82F6]">#{ticketData.position} in line</p>
+            ) : (
+              <p className="text-lg font-medium text-gray-400">Calculating...</p>
+            )
+          ) : ticketData.status === "called" || ticketData.status === "serving" ? (
+            <p className="text-2xl font-bold text-[#10B981]">🎯 Your Turn!</p>
+          ) : ticketData.status === "completed" ? (
+            <p className="text-2xl font-bold text-[#6B7280]">✓ Served</p>
+          ) : (
+            <p className="text-lg font-medium text-gray-400">--</p>
+          )}
         </div>
         <div className="bg-white rounded-2xl shadow-lg p-5 text-center">
           <p className="text-gray-600 text-sm uppercase mb-2">Estimated Wait</p>
@@ -438,9 +499,18 @@ const GuestTicket = () => {
       {/* Progress Bar */}
       <div className="max-w-md mx-auto mb-6 bg-white rounded-2xl shadow-lg p-5">
         <p className="text-sm text-gray-600 mb-2">Queue Progress</p>
-        <Progress value={progressValue} className="h-4 bg-gray-200 [&>div]:bg-[#10B981]" />
+        <Progress
+          value={ticketData.totalInQueue > 0 ? ((ticketData.totalInQueue - ticketData.position) / ticketData.totalInQueue) * 100 : 0}
+          className="h-4 bg-gray-200 [&>div]:bg-[#10B981]"
+        />
         <p className="text-xs text-gray-500 mt-2">
-          {ticketData.position} of {ticketData.totalInQueue} in queue
+          {ticketData.status === "waiting" && ticketData.position > 0
+            ? `${ticketData.position} of ${ticketData.totalInQueue} in queue`
+            : ticketData.status === "called" || ticketData.status === "serving"
+            ? "You are now being served"
+            : ticketData.status === "completed"
+            ? "Service completed"
+            : "--"}
         </p>
       </div>
 
