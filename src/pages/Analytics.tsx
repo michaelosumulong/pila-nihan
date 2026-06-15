@@ -48,18 +48,28 @@ const Analytics = () => {
   useEffect(() => {
     const raw = localStorage.getItem("pila-merchant");
     if (!raw) {
-      navigate("/");
+      navigate("/login");
       return;
     }
 
     let merchantId: string | undefined;
     try {
       const m = JSON.parse(raw);
-      if (m?.id && /^[0-9a-f-]{36}$/i.test(m.id)) merchantId = m.id;
-    } catch {}
+      if (!m?.id) {
+        navigate("/login");
+        return;
+      }
+      merchantId = m.id;
+    } catch {
+      navigate("/login");
+      return;
+    }
+
+    // Multi-tenant guard: never let other merchants' tickets reach state.
+    const isolate = (arr: any[]) => arr.filter((t) => t.merchantId === merchantId);
 
     import("@/utils/queueEngine").then(({ fetchQueue }) =>
-      fetchQueue(merchantId).then((q) => setTickets(q.tickets)).catch(() => {})
+      fetchQueue(merchantId).then((q) => setTickets(isolate(q.tickets))).catch(() => {})
     );
 
     const today = new Date().toISOString().split("T")[0];
