@@ -217,10 +217,6 @@ const Dashboard = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => setNoShowMetrics(getNoShowMetrics()), 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   if (!merchant) return null;
 
