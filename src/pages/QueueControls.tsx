@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Users } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useLowBattery } from "@/hooks/use-low-battery";
 import WalkInModal from "@/components/WalkInModal";
