@@ -10,7 +10,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import FiveWhysModal from "@/components/FiveWhysModal";
 import PendingAudits from "@/components/PendingAudits";
 import VersionFooter from "@/components/VersionFooter";
-import { getNoShowMetrics, getNoShowAnalysis, type NoShowRecord } from "@/utils/noShowEngine";
+import { getCOPQ, type NoShowRecord } from "@/utils/noShowEngine";
 const HOURS = ["8 AM","9 AM","10 AM","11 AM","12 PM","1 PM","2 PM","3 PM","4 PM","5 PM"];
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
@@ -30,7 +30,6 @@ const Analytics = () => {
   }, [navigate]);
 
   const [loaded, setLoaded] = useState(false);
-  const [noShowStats, setNoShowStats] = useState({ count: 0, rate: 0, totalServed: 0 });
   const [tickets, setTickets] = useState<any[]>([]);
   const [showFiveWhys, setShowFiveWhys] = useState(false);
   const [fiveWhysIssue, setFiveWhysIssue] = useState("");
@@ -73,24 +72,22 @@ const Analytics = () => {
       fetchQueue(merchantId).then((q) => setTickets(isolate(q.tickets))).catch(() => {})
     );
 
-    const today = new Date().toISOString().split("T")[0];
-    const analyticsData = JSON.parse(localStorage.getItem("pila-analytics") || "{}");
-    const todayData = analyticsData[today];
-    if (todayData) {
-      const total = todayData.completed + todayData.no_shows;
-      setNoShowStats({
-        count: todayData.no_shows,
-        rate: total > 0 ? parseFloat(((todayData.no_shows / total) * 100).toFixed(1)) : 0,
-        totalServed: todayData.completed,
-      });
-    }
-
     setTimeout(() => setLoaded(true), 100);
   }, [navigate]);
 
   const today = new Date().toISOString().split("T")[0];
   const servedToday = tickets.filter((t) => t.status === "completed" && t.served_at?.startsWith(today));
   const totalServedToday = servedToday.length;
+
+  // Explicit No-Show Data Isolation: derive from the merchant-filtered tickets array only
+  const noShowToday = tickets.filter((t) => t.status === 'no_show' && t.created_at?.startsWith(today));
+  const totalHandledToday = totalServedToday + noShowToday.length;
+  const noShowStats = {
+    count: noShowToday.length,
+    rate: totalHandledToday > 0 ? parseFloat(((noShowToday.length / totalHandledToday) * 100).toFixed(1)) : 0,
+    totalServed: totalServedToday,
+  };
+
   const expressRevenueToday = tickets
     .filter((t) => t.priorityPaid && t.served_at?.startsWith(today))
     .reduce((s, t) => s + (t.priorityAmount || 0), 0);
@@ -326,7 +323,6 @@ const Analytics = () => {
 
           {/* Distance-to-No-Show Correlation Insight */}
           {(() => {
-            const tickets = JSON.parse(localStorage.getItem("tickets") || "[]");
             const distantTickets = tickets.filter((t: any) => t.distance_from_merchant && t.distance_from_merchant > 3);
             const distantNoShows = distantTickets.filter((t: any) => t.status === "no_show").length;
             const distantNoShowRate = distantTickets.length > 0
@@ -391,8 +387,46 @@ const Analytics = () => {
 
         {/* No-Show Intelligence */}
         {(() => {
-          const nsMetrics = getNoShowMetrics();
-          const nsAnalysis = getNoShowAnalysis();
+          // Explicit No-Show Data Isolation: compute exclusively from the merchant-filtered tickets array
+          const nsMetrics = {
+            count: noShowToday.length,
+            rate: totalHandledToday > 0 ? parseFloat(((noShowToday.length / totalHandledToday) * 100).toFixed(1)) : 0,
+            totalLost: noShowToday.reduce((sum, t) => sum + (t.estimatedLoss || getCOPQ(t.servicePace || 'standard')), 0),
+            projectedMonthly: 0,
+            projectedYearly: 0,
+            history: noShowToday.slice(0, 10).map((t): NoShowRecord => ({
+              ticketId: t.id,
+              ticketNumber: t.ticketNumber,
+              customerName: t.customerName,
+              servicePace: t.servicePace || 'standard',
+              timeCalled: t.called_at || t.created_at,
+              timeMarkedNoShow: t.created_at,
+              estimatedLoss: t.estimatedLoss || getCOPQ(t.servicePace || 'standard'),
+              forced: false,
+            })),
+            forcedCount: 0,
+            forcedPercentage: 0,
+          };
+
+          const hours = noShowToday.map((t) => new Date(t.called_at || t.created_at).getHours());
+          const hourCounts: Record<number, number> = {};
+          hours.forEach((h) => (hourCounts[h] = (hourCounts[h] || 0) + 1));
+          const peakHour = Object.keys(hourCounts).length > 0
+            ? Object.keys(hourCounts).reduce((a, b) => hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b)
+            : '0';
+          const noShowsByPace: Record<string, number> = {};
+          noShowToday.forEach((t) => {
+            noShowsByPace[t.servicePace || 'standard'] = (noShowsByPace[t.servicePace || 'standard'] || 0) + 1;
+          });
+          const worstPace = Object.keys(noShowsByPace).length > 0
+            ? Object.keys(noShowsByPace).reduce((a, b) => noShowsByPace[a] > noShowsByPace[b] ? a : b)
+            : 'standard';
+          const nsAnalysis = {
+            peakHour: parseInt(peakHour),
+            worstPace,
+            totalForced: 0,
+            forcedRate: 0,
+          };
           const merchantRaw = localStorage.getItem("pila-merchant");
           const merchantData = merchantRaw ? JSON.parse(merchantRaw) : null;
           return (

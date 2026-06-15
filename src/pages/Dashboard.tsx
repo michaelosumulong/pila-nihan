@@ -14,7 +14,7 @@ import VersionFooter from "@/components/VersionFooter";
 import FoundingMerchantBadge from "@/components/FoundingMerchantBadge";
 import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
-import { getNoShowMetrics } from "@/utils/noShowEngine";
+import { getCOPQ, type NoShowRecord } from "@/utils/noShowEngine";
 import { generateDMAICRecommendations } from "@/utils/suriEngine";
 import { loadQueue, saveQueue, fetchQueue, subscribeToQueue, type Ticket } from "@/utils/queueEngine";
 import { AlertCircle, TrendingDown, Crown } from "lucide-react";
@@ -55,7 +55,6 @@ const Dashboard = () => {
   const [showFiveWhys, setShowFiveWhys] = useState(false);
   const [fiveWhysIssue, setFiveWhysIssue] = useState("");
   const [backlogItems, setBacklogItems] = useState<any[]>([]);
-  const [noShowMetrics, setNoShowMetrics] = useState(getNoShowMetrics());
 
   useEffect(() => {
     const merchant = JSON.parse(localStorage.getItem('pila-merchant') || '{}');
@@ -178,6 +177,33 @@ const Dashboard = () => {
     (t) => t.status === "completed" && t.served_at?.startsWith(today)
   ).length;
 
+  // Explicit No-Show Data Isolation: compute metrics ONLY from merchant-filtered queueTickets
+  const noShowToday = queueTickets.filter((t) => t.status === 'no_show' && t.created_at?.startsWith(today));
+  const completedToday = queueTickets.filter((t) => t.status === 'completed' && t.served_at?.startsWith(today));
+  const totalHandledToday = completedToday.length + noShowToday.length;
+  const noShowRate = totalHandledToday > 0 ? parseFloat(((noShowToday.length / totalHandledToday) * 100).toFixed(1)) : 0;
+  const noShowTotalLost = noShowToday.reduce((sum, t) => sum + (t.estimatedLoss || getCOPQ(t.servicePace || 'standard')), 0);
+
+  const noShowMetrics = {
+    count: noShowToday.length,
+    rate: noShowRate,
+    totalLost: noShowTotalLost,
+    projectedMonthly: noShowTotalLost * 30,
+    projectedYearly: noShowTotalLost * 365,
+    history: noShowToday.slice(0, 10).map((t): NoShowRecord => ({
+      ticketId: t.id,
+      ticketNumber: t.ticketNumber,
+      customerName: t.customerName,
+      servicePace: t.servicePace || 'standard',
+      timeCalled: t.called_at || t.created_at,
+      timeMarkedNoShow: t.created_at,
+      estimatedLoss: t.estimatedLoss || getCOPQ(t.servicePace || 'standard'),
+      forced: false,
+    })),
+    forcedCount: 0,
+    forcedPercentage: 0,
+  };
+
   // Initialize SURI AI recommendations
   useEffect(() => {
     const lastGenerated = localStorage.getItem('pila-suri-last-generated');
@@ -191,10 +217,6 @@ const Dashboard = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => setNoShowMetrics(getNoShowMetrics()), 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   if (!merchant) return null;
 
