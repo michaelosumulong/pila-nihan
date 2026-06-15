@@ -18,6 +18,7 @@ import {
   Lock,
   Menu,
   X,
+  Users,
 } from "lucide-react";
 
 interface NavItem {
