@@ -18,6 +18,7 @@ import {
   Lock,
   Menu,
   X,
+  Users,
 } from "lucide-react";
 
 interface NavItem {
@@ -164,6 +165,15 @@ export default function DashboardLayout() {
             </button>
           );
         })}
+
+        {/* Guest Portal Quick-Switch */}
+        <button
+          onClick={() => { navigate("/"); setMenuOpen(false); }}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors mt-2 bg-[#FFB703]/10 text-[#FFB703] hover:bg-[#FFB703]/20 border border-[#FFB703]/30"
+        >
+          <Users size={18} />
+          <span className="font-semibold">Guest Portal</span>
+        </button>
 
         {/* Subscription Link */}
         <button

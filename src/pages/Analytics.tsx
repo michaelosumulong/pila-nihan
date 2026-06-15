@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Users } from "lucide-react";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -166,6 +167,14 @@ const Analytics = () => {
 
         {/* Action buttons */}
         <div className="flex justify-end gap-2 mb-4">
+          <button
+            onClick={() => navigate('/')}
+            className="bg-[#FFB703] text-[#0A2569] text-sm font-bold px-4 py-2 rounded-lg shadow hover:shadow-md flex items-center gap-2 transition-colors"
+            title="Go to Guest Portal"
+          >
+            <Users size={16} />
+            Guest Portal
+          </button>
           <button
             onClick={() => setShowFiveWhys(true)}
             className="bg-white text-gray-700 text-sm font-medium px-4 py-2 rounded-lg shadow hover:shadow-md flex items-center gap-2"
