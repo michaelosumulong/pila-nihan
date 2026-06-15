@@ -73,25 +73,33 @@ const GuestEntry = () => {
 
   useEffect(() => {
     const validateShopCode = async () => {
-      const cleanId = merchantId?.toLowerCase().replace(/[^a-z0-9]/g, "") || "";
-      if (!cleanId || cleanId === "merchantid") {
-        toast.error("Invalid shop link", { description: "Please enter a valid shop code on the home page.", duration: 5000 });
+      // 1. Normalize slug → uppercase, alphanumeric-only (case-insensitive match)
+      const raw = (merchantId || "").trim();
+      const normalized = raw.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      const lowerKey = normalized.toLowerCase();
+
+      if (!normalized || normalized === "MERCHANTID") {
+        toast.error("Invalid shop link", {
+          description: "Please enter a valid shop code on the home page.",
+          duration: 5000,
+        });
         navigate("/");
         return;
       }
 
-      // 1. Try Supabase by shop_code (uppercase, as stored)
+      // 2. Primary: Supabase merchants table via .maybeSingle()
       try {
         const { data, error } = await supabase
           .from("merchants")
           .select("*")
-          .eq("shop_code", cleanId.toUpperCase())
+          .eq("shop_code", normalized)
           .maybeSingle();
 
-        if (!error && data) {
-          // Map Supabase row → merchantData shape used in this file
+        if (error) throw error;
+
+        if (data) {
           setMerchantData({
-            id: data.id, // ✅ UUID for tickets.merchant_id FK
+            id: data.id,
             businessName: data.business_name,
             shopCode: data.shop_code,
             category: data.business_category || "Standard",
@@ -99,43 +107,66 @@ const GuestEntry = () => {
             ownerName: data.owner_name,
             email: data.email,
             servicePlan: data.service_plan,
-            // Defaults for fields not in Supabase schema
             location: { lat: 14.5826, lng: 121.0527 },
             address: "",
             targetHandlingTime: 15,
           });
           setMerchantLoading(false);
-          console.log("✅ Merchant validated from Supabase:", data.shop_code, "→", data.id);
+          console.log("✅ Merchant validated from Supabase:", normalized, "→", data.id);
           return;
         }
       } catch (err) {
-        console.error("Supabase merchant lookup failed:", err);
+        // 3. Network/data exception → graceful local fallback
+        console.warn("Supabase merchant lookup failed, falling back to local session:", err);
+        try {
+          const stored = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
+          const storedCode = (stored?.shopCode || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+          if (storedCode && storedCode === normalized) {
+            setMerchantData(stored);
+            setMerchantLoading(false);
+            console.log("✅ Merchant matched from local session (offline fallback):", normalized);
+            return;
+          }
+        } catch {}
       }
 
-      // 2. Fallback: locally stored merchant (own device)
-      const stored = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
-      const storedCode = stored.shopCode?.toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (storedCode === cleanId) {
-        setMerchantData(stored);
+      // 3b. Even on successful (but empty) Supabase response, still check local session
+      try {
+        const stored = JSON.parse(localStorage.getItem("pila-merchant") || "{}");
+        const storedCode = (stored?.shopCode || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+        if (storedCode && storedCode === normalized) {
+          setMerchantData(stored);
+          setMerchantLoading(false);
+          console.log("✅ Merchant matched from local session:", normalized);
+          return;
+        }
+      } catch {}
+
+      // 4. Final constraint fallback: DEMO_MERCHANTS mock index
+      const demoMatch =
+        DEMO_MERCHANTS[lowerKey] ||
+        Object.values(DEMO_MERCHANTS).find(
+          (m: any) => (m.shopCode || "").toUpperCase() === normalized
+        );
+      if (demoMatch) {
+        setMerchantData(demoMatch);
         setMerchantLoading(false);
+        console.log("✅ Merchant matched from DEMO_MERCHANTS:", normalized);
         return;
       }
 
-      // 3. Fallback: hardcoded demo merchants
-      if (DEMO_MERCHANTS[cleanId]) {
-        setMerchantData(DEMO_MERCHANTS[cleanId]);
-        setMerchantLoading(false);
-        return;
-      }
-
-      // 4. Not found
+      // 5. Not found anywhere → explicit warning
       setMerchantError(true);
       setMerchantLoading(false);
-      toast.error("Shop not found", { description: `Could not find shop with code: ${merchantId}`, duration: 8000 });
+      console.warn("⚠️ Shop code not found:", normalized);
+      toast.warning("Shop code not found", {
+        description: `No shop matches code "${raw}". Please double-check with the merchant.`,
+        duration: 8000,
+      });
     };
 
     validateShopCode();
-  }, [merchantId]);
+  }, [merchantId, navigate]);
 
   const merchantName = merchantData?.businessName || "Pila-nihan Queue System";
   const merchantLocation = merchantData?.location || { lat: 14.5995, lng: 120.9842 };
