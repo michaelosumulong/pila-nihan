@@ -146,15 +146,31 @@ const Dashboard = () => {
     let merchantId: string | undefined;
     try {
       const raw = localStorage.getItem("pila-merchant");
-      if (raw) {
-        const m = JSON.parse(raw);
-        if (m?.id && /^[0-9a-f-]{36}$/i.test(m.id)) merchantId = m.id;
+      const m = raw ? JSON.parse(raw) : null;
+      if (!m?.id) {
+        console.error('❌ No merchant session in queue loader - redirecting');
+        navigate('/login');
+        return;
       }
-    } catch {}
-    fetchQueue(merchantId).then((q) => setQueueTickets(q.tickets)).catch(() => {});
-    const unsub = subscribeToQueue(merchantId, (q) => setQueueTickets(q.tickets));
+      if (/^[0-9a-f-]{36}$/i.test(m.id)) merchantId = m.id;
+      else merchantId = m.id; // still use id for tenant filter even if not UUID
+    } catch {
+      navigate('/login');
+      return;
+    }
+
+    // Multi-tenant guard: filter tickets to current merchant only before state.
+    const isolate = (tickets: Ticket[]) =>
+      tickets.filter((t) => t.merchantId === merchantId);
+
+    fetchQueue(merchantId)
+      .then((q) => setQueueTickets(isolate(q.tickets)))
+      .catch(() => {});
+    const unsub = subscribeToQueue(merchantId, (q) =>
+      setQueueTickets(isolate(q.tickets))
+    );
     return unsub;
-  }, []);
+  }, [navigate]);
 
   const today = new Date().toISOString().split("T")[0];
   const inQueueCount = queueTickets.filter((t) => t.status === "waiting" || !t.status).length;
