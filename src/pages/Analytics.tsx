@@ -387,8 +387,46 @@ const Analytics = () => {
 
         {/* No-Show Intelligence */}
         {(() => {
-          const nsMetrics = getNoShowMetrics();
-          const nsAnalysis = getNoShowAnalysis();
+          // Explicit No-Show Data Isolation: compute exclusively from the merchant-filtered tickets array
+          const nsMetrics = {
+            count: noShowToday.length,
+            rate: totalHandledToday > 0 ? parseFloat(((noShowToday.length / totalHandledToday) * 100).toFixed(1)) : 0,
+            totalLost: noShowToday.reduce((sum, t) => sum + (t.estimatedLoss || getCOPQ(t.servicePace || 'standard')), 0),
+            projectedMonthly: 0,
+            projectedYearly: 0,
+            history: noShowToday.slice(0, 10).map((t): NoShowRecord => ({
+              ticketId: t.id,
+              ticketNumber: t.ticketNumber,
+              customerName: t.customerName,
+              servicePace: t.servicePace || 'standard',
+              timeCalled: t.called_at || t.created_at,
+              timeMarkedNoShow: t.created_at,
+              estimatedLoss: t.estimatedLoss || getCOPQ(t.servicePace || 'standard'),
+              forced: false,
+            })),
+            forcedCount: 0,
+            forcedPercentage: 0,
+          };
+
+          const hours = noShowToday.map((t) => new Date(t.called_at || t.created_at).getHours());
+          const hourCounts: Record<number, number> = {};
+          hours.forEach((h) => (hourCounts[h] = (hourCounts[h] || 0) + 1));
+          const peakHour = Object.keys(hourCounts).length > 0
+            ? Object.keys(hourCounts).reduce((a, b) => hourCounts[parseInt(a)] > hourCounts[parseInt(b)] ? a : b)
+            : '0';
+          const noShowsByPace: Record<string, number> = {};
+          noShowToday.forEach((t) => {
+            noShowsByPace[t.servicePace || 'standard'] = (noShowsByPace[t.servicePace || 'standard'] || 0) + 1;
+          });
+          const worstPace = Object.keys(noShowsByPace).length > 0
+            ? Object.keys(noShowsByPace).reduce((a, b) => noShowsByPace[a] > noShowsByPace[b] ? a : b)
+            : 'standard';
+          const nsAnalysis = {
+            peakHour: parseInt(peakHour),
+            worstPace,
+            totalForced: 0,
+            forcedRate: 0,
+          };
           const merchantRaw = localStorage.getItem("pila-merchant");
           const merchantData = merchantRaw ? JSON.parse(merchantRaw) : null;
           return (
