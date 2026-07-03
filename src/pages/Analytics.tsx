@@ -66,11 +66,34 @@ const Analytics = () => {
     }
 
     // Multi-tenant guard: never let other merchants' tickets reach state.
-    const isolate = (arr: any[]) => arr.filter((t) => t.merchantId === merchantId);
+    const isolate = (arr: any[]) => {
+      console.log('🔍 TOTAL TICKETS IN QUEUE:', arr.length);
+      console.log('📊 Current merchant ID:', merchantId);
+      const myTickets = arr.filter((t) => {
+        const match = t.merchantId === merchantId;
+        if (!match) {
+          console.warn('❌ TICKET BELONGS TO OTHER MERCHANT:', t.ticketNumber, 'merchantId:', t.merchantId);
+        }
+        return match;
+      });
+      console.log('✅ FILTERED TICKETS FOR THIS MERCHANT:', myTickets.length);
+      const noShowList = myTickets.filter((t) => t.status === 'no_show');
+      console.log('🚫 NO-SHOWS (from filtered data):', noShowList.length);
+      console.table(noShowList.map((t) => ({
+        ticket: t.ticketNumber,
+        status: t.status,
+        merchantId: t.merchantId,
+      })));
+      return myTickets;
+    };
 
-    import("@/utils/queueEngine").then(({ fetchQueue }) =>
-      fetchQueue(merchantId).then((q) => setTickets(isolate(q.tickets))).catch(() => {})
-    );
+    import("@/utils/queueEngine").then(({ fetchQueue, loadQueue }) => {
+      const cached = loadQueue();
+      console.log('🗃️  Sync cache snapshot — tickets:', cached.tickets.length);
+      isolate(cached.tickets);
+      fetchQueue(merchantId).then((q) => setTickets(isolate(q.tickets))).catch(() => {});
+    });
+
 
     setTimeout(() => setLoaded(true), 100);
   }, [navigate]);

@@ -159,8 +159,31 @@ const Dashboard = () => {
     }
 
     // Multi-tenant guard: filter tickets to current merchant only before state.
-    const isolate = (tickets: Ticket[]) =>
-      tickets.filter((t) => t.merchantId === merchantId);
+    const isolate = (tickets: Ticket[]) => {
+      console.log('🔍 TOTAL TICKETS IN QUEUE:', tickets.length);
+      console.log('📊 Current merchant ID:', merchantId);
+      const myTickets = tickets.filter((t) => {
+        const match = t.merchantId === merchantId;
+        if (!match) {
+          console.warn('❌ TICKET BELONGS TO OTHER MERCHANT:', t.ticketNumber, 'merchantId:', t.merchantId);
+        }
+        return match;
+      });
+      console.log('✅ FILTERED TICKETS FOR THIS MERCHANT:', myTickets.length);
+      const noShowList = myTickets.filter((t) => t.status === 'no_show');
+      console.log('🚫 NO-SHOWS (from filtered data):', noShowList.length);
+      console.table(noShowList.map((t) => ({
+        ticket: t.ticketNumber,
+        status: t.status,
+        merchantId: t.merchantId,
+      })));
+      return myTickets;
+    };
+
+    // Sync cache snapshot for immediate diagnostic visibility
+    const cached = loadQueue();
+    console.log('🗃️  Sync cache snapshot — tickets:', cached.tickets.length);
+    isolate(cached.tickets);
 
     fetchQueue(merchantId)
       .then((q) => setQueueTickets(isolate(q.tickets)))
@@ -170,6 +193,7 @@ const Dashboard = () => {
     );
     return unsub;
   }, [navigate]);
+
 
   const today = new Date().toISOString().split("T")[0];
   const inQueueCount = queueTickets.filter((t) => t.status === "waiting" || !t.status).length;
