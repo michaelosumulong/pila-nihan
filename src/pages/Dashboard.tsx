@@ -141,58 +141,55 @@ const Dashboard = () => {
 
   // Live queue stats from Supabase
   const [queueTickets, setQueueTickets] = useState<Ticket[]>([]);
+  const [stats, setStats] = useState({ inQueue: 0, servedToday: 0, noShows: 0, revenue: 0 });
   useEffect(() => {
-    let merchantId: string | undefined;
-    try {
-      const raw = localStorage.getItem("pila-merchant");
-      const m = raw ? JSON.parse(raw) : null;
-      if (!m?.id) {
-        console.error('❌ No merchant session in queue loader - redirecting');
-        navigate('/login');
-        return;
-      }
-      if (/^[0-9a-f-]{36}$/i.test(m.id)) merchantId = m.id;
-      else merchantId = m.id; // still use id for tenant filter even if not UUID
-    } catch {
+    const queue = loadQueue();
+    // CRITICAL: Get merchant ID from localStorage
+    const storedMerchant = JSON.parse(localStorage.getItem('pila-merchant') || '{}');
+    const merchantUUID = storedMerchant.id;
+    console.log('DASHBOARD: Merchant UUID =', merchantUUID);
+    console.log('DASHBOARD: Total tickets in queue =', queue.tickets.length);
+
+    if (!merchantUUID) {
       navigate('/login');
       return;
     }
 
-    // Multi-tenant guard: filter tickets to current merchant only before state.
-    const isolate = (tickets: Ticket[]) => {
-      console.log('🔍 TOTAL TICKETS IN QUEUE:', tickets.length);
-      console.log('📊 Current merchant ID:', merchantId);
-      const myTickets = tickets.filter((t) => {
-        const match = t.merchantId === merchantId;
-        if (!match) {
-          console.warn('❌ TICKET BELONGS TO OTHER MERCHANT:', t.ticketNumber, 'merchantId:', t.merchantId);
+    // CRITICAL: Build filtered array with manual loop
+    const applyFilter = (tickets: Ticket[]) => {
+      const merchantTickets: Ticket[] = [];
+      for (let i = 0; i < tickets.length; i++) {
+        if (tickets[i].merchantId === merchantUUID) {
+          merchantTickets.push(tickets[i]);
         }
-        return match;
+      }
+      console.log('DASHBOARD: Filtered to merchant only =', merchantTickets.length);
+
+      // Calculate metrics ONLY from merchantTickets
+      const waiting = merchantTickets.filter(t => t.status === 'waiting' || !t.status);
+      const completed = merchantTickets.filter(t => t.status === 'completed');
+      const noshow = merchantTickets.filter(t => t.status === 'no_show');
+      console.log('DASHBOARD: No-shows =', noshow.length);
+
+      // Set state with filtered counts
+      setStats({
+        inQueue: waiting.length,
+        servedToday: completed.length,
+        noShows: noshow.length,
+        revenue: 0,
       });
-      console.log('✅ FILTERED TICKETS FOR THIS MERCHANT:', myTickets.length);
-      const noShowList = myTickets.filter((t) => t.status === 'no_show');
-      console.log('🚫 NO-SHOWS (from filtered data):', noShowList.length);
-      console.table(noShowList.map((t) => ({
-        ticket: t.ticketNumber,
-        status: t.status,
-        merchantId: t.merchantId,
-      })));
-      return myTickets;
+      setQueueTickets(merchantTickets);
     };
 
-    // Sync cache snapshot for immediate diagnostic visibility
-    const cached = loadQueue();
-    console.log('🗃️  Sync cache snapshot — tickets:', cached.tickets.length);
-    isolate(cached.tickets);
+    applyFilter(queue.tickets);
 
-    fetchQueue(merchantId)
-      .then((q) => setQueueTickets(isolate(q.tickets)))
+    fetchQueue(merchantUUID)
+      .then((q) => applyFilter(q.tickets))
       .catch(() => {});
-    const unsub = subscribeToQueue(merchantId, (q) =>
-      setQueueTickets(isolate(q.tickets))
-    );
+    const unsub = subscribeToQueue(merchantUUID, (q) => applyFilter(q.tickets));
     return unsub;
   }, [navigate]);
+
 
 
   const today = new Date().toISOString().split("T")[0];
