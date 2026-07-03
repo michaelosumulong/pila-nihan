@@ -568,6 +568,12 @@ const QueueControls = () => {
                         {tc.label}
                       </span>
                       <span className="text-xs text-gray-400">{ticket.waitTime} min</span>
+                      <button
+                        onClick={() => markNoShow(ticket)}
+                        className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                      >
+                        ❌ No-Show
+                      </button>
                     </div>
                   </div>
                 );
