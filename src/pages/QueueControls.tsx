@@ -484,14 +484,6 @@ const QueueControls = () => {
               Manage your queue and call customers
             </p>
           </div>
-          <button
-            onClick={() => navigate('/')}
-            className="flex-shrink-0 flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-lg transition-colors"
-            title="Go to Guest Portal"
-          >
-            <Users size={18} />
-            <span className="hidden sm:inline font-medium text-sm">Guest Portal</span>
-          </button>
         </div>
         {lowBatteryMode && (
           <LowBatteryBanner lastRefresh={lastRefresh} onRefresh={() => { manualRefresh(); toast.success("Queue refreshed!"); }} />
