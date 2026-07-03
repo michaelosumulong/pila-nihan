@@ -16,7 +16,7 @@ import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
 import { getCOPQ, type NoShowRecord } from "@/utils/noShowEngine";
 import { generateDMAICRecommendations } from "@/utils/suriEngine";
-import { loadQueue, saveQueue, fetchQueue, subscribeToQueue, type Ticket } from "@/utils/queueEngine";
+import { loadQueue, type Ticket } from "@/utils/queueEngine";
 import { AlertCircle, TrendingDown, Crown } from "lucide-react";
 // Lucide icons now in DashboardLayout
 interface MerchantData {
@@ -139,64 +139,56 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  // Live queue stats from Supabase
+  // Current merchant queue stats
   const [queueTickets, setQueueTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState({ inQueue: 0, servedToday: 0, noShows: 0, revenue: 0 });
   useEffect(() => {
-    const queue = loadQueue();
-    // CRITICAL: Get merchant ID from localStorage
-    const storedMerchant = JSON.parse(localStorage.getItem('pila-merchant') || '{}');
-    const merchantUUID = storedMerchant.id;
-    console.log('DASHBOARD: Merchant UUID =', merchantUUID);
-    console.log('DASHBOARD: Total tickets in queue =', queue.tickets.length);
-
-    if (!merchantUUID) {
+    // Get current merchant
+    const stored = localStorage.getItem('pila-merchant');
+    if (!stored) {
       navigate('/login');
       return;
     }
 
-    // CRITICAL: Build filtered array with manual loop
-    const applyFilter = (tickets: Ticket[]) => {
-      const merchantTickets: Ticket[] = [];
-      for (let i = 0; i < tickets.length; i++) {
-        if (tickets[i].merchantId === merchantUUID) {
-          merchantTickets.push(tickets[i]);
-        }
+    const merchant = JSON.parse(stored);
+    const currentMerchantId = merchant.id;
+    if (!currentMerchantId) {
+      navigate('/login');
+      return;
+    }
+
+    // Load queue
+    const queue = loadQueue();
+
+    // STEP 1: Manual filter - build array of ONLY this merchant's tickets
+    const myTickets: Ticket[] = [];
+    for (let i = 0; i < queue.tickets.length; i++) {
+      const ticket = queue.tickets[i];
+      if (ticket.merchantId === currentMerchantId) {
+        myTickets.push(ticket);
       }
-      console.log('DASHBOARD: Filtered to merchant only =', merchantTickets.length);
+    }
 
-      // Calculate metrics ONLY from merchantTickets
-      const waiting = merchantTickets.filter(t => t.status === 'waiting' || !t.status);
-      const completed = merchantTickets.filter(t => t.status === 'completed');
-      const noshow = merchantTickets.filter(t => t.status === 'no_show');
-      console.log('DASHBOARD: No-shows =', noshow.length);
+    // STEP 2: Calculate metrics from myTickets ONLY
+    const waiting = myTickets.filter(t => t.status === 'waiting' || !t.status);
+    const completed = myTickets.filter(t => t.status === 'completed');
+    const noShows = myTickets.filter(t => t.status === 'no_show');
 
-      // Set state with filtered counts
-      setStats({
-        inQueue: waiting.length,
-        servedToday: completed.length,
-        noShows: noshow.length,
-        revenue: 0,
-      });
-      setQueueTickets(merchantTickets);
-    };
-
-    applyFilter(queue.tickets);
-
-    fetchQueue(merchantUUID)
-      .then((q) => applyFilter(q.tickets))
-      .catch(() => {});
-    const unsub = subscribeToQueue(merchantUUID, (q) => applyFilter(q.tickets));
-    return unsub;
+    // STEP 3: Update state with filtered tickets and counts
+    setQueueTickets(myTickets);
+    setStats({
+      inQueue: waiting.length,
+      servedToday: completed.length,
+      noShows: noShows.length,
+      revenue: 0,
+    });
   }, [navigate]);
 
 
 
   const today = new Date().toISOString().split("T")[0];
-  const inQueueCount = queueTickets.filter((t) => t.status === "waiting" || !t.status).length;
-  const servedTodayCount = queueTickets.filter(
-    (t) => t.status === "completed" && t.served_at?.startsWith(today)
-  ).length;
+  const inQueueCount = stats.inQueue;
+  const servedTodayCount = stats.servedToday;
 
   // Explicit No-Show Data Isolation: compute metrics ONLY from merchant-filtered queueTickets
   const noShowToday = queueTickets.filter((t) => t.status === 'no_show' && t.created_at?.startsWith(today));
