@@ -18,6 +18,7 @@ import MerchantSignup from "./components/MerchantSignup";
 import About from "./pages/About";
 import Guide from "./pages/Guide";
 import Settings from "./pages/Settings";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/revenue" element={<Revenue />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/billing" element={<Billing />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
 

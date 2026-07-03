@@ -175,10 +175,23 @@ export default function DashboardLayout() {
           <span className="font-semibold">Guest Portal</span>
         </button>
 
+        {/* Pricing & Plans */}
+        <button
+          onClick={() => { navigate("/pricing"); setMenuOpen(false); }}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors mt-4 ${
+            location.pathname === "/pricing"
+              ? "bg-blue-500 text-white font-bold shadow-lg"
+              : "bg-blue-500/90 text-white hover:bg-blue-600"
+          }`}
+        >
+          <CreditCard size={18} />
+          Pricing & Plans
+        </button>
+
         {/* Subscription Link */}
         <button
           onClick={() => { navigate("/billing"); setMenuOpen(false); }}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors mt-4 border-2 ${
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors mt-2 border-2 ${
             location.pathname === "/billing"
               ? "bg-purple-600 text-white border-purple-400 font-bold shadow-lg"
               : "border-purple-400/50 text-purple-300 hover:bg-purple-900/30"
