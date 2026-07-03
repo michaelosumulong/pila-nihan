@@ -173,6 +173,34 @@ const Analytics = () => {
     ? { label: "STABLE", cls: "bg-yellow-100 text-yellow-800" }
     : { label: "NEEDS ATTENTION", cls: "bg-red-100 text-red-800" };
 
+  // Analytics gate: locked for Free (panday) plan
+  const merchantRaw = typeof window !== "undefined" ? localStorage.getItem("pila-merchant") : null;
+  const merchantProfile = merchantRaw ? JSON.parse(merchantRaw) : {};
+  const planKey = String(
+    merchantProfile.current_plan || merchantProfile.servicePlan || "panday"
+  ).toLowerCase();
+  const isFreePlan = planKey === "free" || planKey === "panday";
+  const hasLifetime = !!merchantProfile.foundingLifetime;
+  if (isFreePlan && !hasLifetime) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A2569] to-[#1E3A8A] p-6">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-2xl max-w-md">
+          <div className="text-5xl mb-3">🔒</div>
+          <p className="text-2xl font-bold mb-2 text-[#1E3A8A]">Analytics Locked</p>
+          <p className="text-gray-600 mb-6">
+            Upgrade to Sinag to unlock full analytics, heatmaps, and performance insights.
+          </p>
+          <button
+            onClick={() => navigate("/pricing")}
+            className="px-6 py-3 bg-[#FFB703] text-[#0A2569] font-bold rounded-lg hover:brightness-110 transition"
+          >
+            View Pricing
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A2569] to-[#1E3A8A] pb-6 p-6">
 
