@@ -16,7 +16,7 @@ import { AntiCorruptionBadge, SuriValueBadge } from "@/components/TrustBadges";
 import { useBranding } from "@/contexts/BrandingContext";
 import { getCOPQ, type NoShowRecord } from "@/utils/noShowEngine";
 import { generateDMAICRecommendations } from "@/utils/suriEngine";
-import { loadQueue, saveQueue, fetchQueue, subscribeToQueue, type Ticket } from "@/utils/queueEngine";
+import { loadQueue, type Ticket } from "@/utils/queueEngine";
 import { AlertCircle, TrendingDown, Crown } from "lucide-react";
 // Lucide icons now in DashboardLayout
 interface MerchantData {
@@ -139,7 +139,7 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  // Live queue stats from Supabase
+  // Current merchant queue stats
   const [queueTickets, setQueueTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState({ inQueue: 0, servedToday: 0, noShows: 0, revenue: 0 });
   useEffect(() => {
