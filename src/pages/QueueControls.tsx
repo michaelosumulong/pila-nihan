@@ -532,7 +532,7 @@ const QueueControls = () => {
             ✅ Mark Served
           </button>
           <button
-            onClick={markNoShow}
+            onClick={() => markNoShow(currentServing)}
             className="bg-[#EF4444] text-white font-bold py-3 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
           >
             ❌ No-Show
