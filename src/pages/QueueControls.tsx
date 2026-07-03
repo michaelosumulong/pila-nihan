@@ -119,7 +119,7 @@ const QueueControls = () => {
     status: "",
   });
 
-  const [queueList, setQueueList] = useState<Array<{ id: string; ticketNumber: string; name: string; category: string; waitTime: number }>>([]);
+  const [queueList, setQueueList] = useState<Array<{ id: string; ticketNumber: string; name: string; customerName: string; category: string; servicePace: string; calledAt?: string; waitTime: number }>>([]);
   const [queueData, setQueueData] = useState<Queue>(() => loadQueue());
 
   // Real-time sync via Supabase: initial fetch + realtime subscription
