@@ -11,8 +11,17 @@ import FiveWhysModal from "@/components/FiveWhysModal";
 import PendingAudits from "@/components/PendingAudits";
 import VersionFooter from "@/components/VersionFooter";
 import { getCOPQ, type NoShowRecord } from "@/utils/noShowEngine";
+import { loadQueue, type Ticket } from "@/utils/queueEngine";
 const HOURS = ["8 AM","9 AM","10 AM","11 AM","12 PM","1 PM","2 PM","3 PM","4 PM","5 PM"];
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+interface NoShowDisplayItem {
+  ticketNumber: string;
+  customerName: string;
+  createdAt: string;
+  calledAt?: string;
+  status: string;
+}
 
 const Analytics = () => {
   const navigate = useNavigate();
@@ -30,7 +39,13 @@ const Analytics = () => {
   }, [navigate]);
 
   const [loaded, setLoaded] = useState(false);
-  const [tickets, setTickets] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [noShowData, setNoShowData] = useState<NoShowDisplayItem[]>([]);
+  const [analyticsStats, setAnalyticsStats] = useState({
+    totalServed: 0,
+    totalNoShows: 0,
+    noShowRate: 0,
+  });
   const [showFiveWhys, setShowFiveWhys] = useState(false);
   const [fiveWhysIssue, setFiveWhysIssue] = useState("");
   const { lowBatteryMode, lastRefresh, toggleLowBattery, manualRefresh } = useLowBattery();
@@ -46,45 +61,51 @@ const Analytics = () => {
   };
 
   useEffect(() => {
-    const raw = localStorage.getItem("pila-merchant");
-    if (!raw) {
-      navigate("/login");
+    // Get current merchant
+    const stored = localStorage.getItem('pila-merchant');
+    if (!stored) {
+      navigate('/login');
       return;
     }
 
-    import("@/utils/queueEngine").then(({ fetchQueue, loadQueue }) => {
-      const queue = loadQueue();
-      // CRITICAL: Get merchant ID
-      const storedMerchant = JSON.parse(localStorage.getItem('pila-merchant') || '{}');
-      const merchantUUID = storedMerchant.id;
-      console.log('ANALYTICS: Merchant UUID =', merchantUUID);
-      console.log('ANALYTICS: Total tickets =', queue.tickets.length);
+    const merchant = JSON.parse(stored);
+    const currentMerchantId = merchant.id;
+    if (!currentMerchantId) {
+      navigate('/login');
+      return;
+    }
 
-      if (!merchantUUID) {
-        navigate('/login');
-        return;
+    // Load queue
+    const queue = loadQueue();
+
+    // STEP 1: Filter to current merchant ONLY
+    const myTickets: Ticket[] = [];
+    for (let i = 0; i < queue.tickets.length; i++) {
+      if (queue.tickets[i].merchantId === currentMerchantId) {
+        myTickets.push(queue.tickets[i]);
       }
+    }
 
-      // CRITICAL: Filter to this merchant only (manual loop)
-      const applyFilter = (all: any[]) => {
-        const merchantTickets: any[] = [];
-        for (let i = 0; i < all.length; i++) {
-          if (all[i].merchantId === merchantUUID) {
-            merchantTickets.push(all[i]);
-          }
-        }
-        console.log('ANALYTICS: Filtered tickets =', merchantTickets.length);
-        const completed = merchantTickets.filter(t => t.status === 'completed');
-        const noshow = merchantTickets.filter(t => t.status === 'no_show');
-        const cancelled = merchantTickets.filter(t => t.status === 'cancelled');
-        console.log('ANALYTICS: completed =', completed.length, 'noshow =', noshow.length, 'cancelled =', cancelled.length);
-        setTickets(merchantTickets);
-      };
+    // STEP 2: Calculate analytics from myTickets ONLY
+    const completed = myTickets.filter(t => t.status === 'completed');
+    const noShows = myTickets.filter(t => t.status === 'no_show');
+    const handledTotal = completed.length + noShows.length;
 
-      applyFilter(queue.tickets);
-      fetchQueue(merchantUUID)
-        .then((q) => applyFilter(q.tickets))
-        .catch(() => {});
+    // STEP 3: Build no-show data array for display
+    const noShowList = noShows.map(t => ({
+      ticketNumber: t.ticketNumber,
+      customerName: t.customerName,
+      createdAt: t.created_at,
+      calledAt: t.called_at,
+      status: t.status,
+    }));
+
+    setTickets(myTickets);
+    setNoShowData(noShowList);
+    setAnalyticsStats({
+      totalServed: completed.length,
+      totalNoShows: noShows.length,
+      noShowRate: handledTotal > 0 ? Number(((noShows.length / handledTotal) * 100).toFixed(1)) : 0,
     });
 
 
@@ -201,6 +222,52 @@ const Analytics = () => {
           >
             📥 Download PDF Report
           </button>
+        </div>
+
+        {/* No-show analytics display */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg shadow">
+            <p className="text-gray-600">Total Served</p>
+            <p className="text-3xl font-bold text-[#1E3A8A]">{analyticsStats.totalServed}</p>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg shadow">
+            <p className="text-gray-600">No-Shows</p>
+            <p className="text-3xl font-bold text-red-600">{analyticsStats.totalNoShows}</p>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg shadow">
+            <p className="text-gray-600">No-Show Rate</p>
+            <p className="text-3xl font-bold text-[#1E3A8A]">{analyticsStats.noShowRate}%</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 mb-6 overflow-x-auto">
+          <h3 className="text-lg font-bold mb-4 text-[#1E3A8A]">No-Show History</h3>
+          {noShowData.length > 0 ? (
+            <table className="w-full min-w-[640px]">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-2">Ticket</th>
+                  <th className="text-left p-2">Customer</th>
+                  <th className="text-left p-2">Created</th>
+                  <th className="text-left p-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {noShowData.map(item => (
+                  <tr key={`${item.ticketNumber}-${item.createdAt}`} className="border-b hover:bg-gray-50">
+                    <td className="p-2 font-bold">{item.ticketNumber}</td>
+                    <td className="p-2">{item.customerName}</td>
+                    <td className="p-2 text-sm">{new Date(item.createdAt).toLocaleString()}</td>
+                    <td className="p-2"><span className="bg-red-100 text-red-700 px-2 py-1 rounded">No-Show</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-gray-500 text-center py-8">No no-shows recorded</p>
+          )}
         </div>
 
         {/* Key Metrics */}
