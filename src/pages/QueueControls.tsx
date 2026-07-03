@@ -11,7 +11,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import VersionFooter from "@/components/VersionFooter";
 import NoShowTimer from "@/components/NoShowTimer";
 import { recordNoShow, isForcedNoShow, getCOPQ } from "@/utils/noShowEngine";
-import { loadQueue, fetchQueue, updateTicketStatus, subscribeToQueue, type Ticket, type Queue } from "@/utils/queueEngine";
+import { loadQueue, saveQueue, fetchQueue, updateTicketStatus, subscribeToQueue, type Ticket, type Queue } from "@/utils/queueEngine";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
@@ -51,7 +51,10 @@ const mapQueueTicket = (ticket: any) => ({
   id: ticket.id,
   ticketNumber: ticket.ticketNumber,
   name: ticket.customerName,
+  customerName: ticket.customerName,
   category: ticket.category || ticket.servicePace || "regular",
+  servicePace: ticket.servicePace || "regular",
+  calledAt: ticket.called_at,
   waitTime: ticket.estimatedWaitMinutes || 0,
 });
 
@@ -116,7 +119,7 @@ const QueueControls = () => {
     status: "",
   });
 
-  const [queueList, setQueueList] = useState<Array<{ id: string; ticketNumber: string; name: string; category: string; waitTime: number }>>([]);
+  const [queueList, setQueueList] = useState<Array<{ id: string; ticketNumber: string; name: string; customerName: string; category: string; servicePace: string; calledAt?: string; waitTime: number }>>([]);
   const [queueData, setQueueData] = useState<Queue>(() => loadQueue());
 
   // Real-time sync via Supabase: initial fetch + realtime subscription
@@ -351,60 +354,105 @@ const QueueControls = () => {
     }
   };
 
-  const markNoShow = () => {
-    if (!currentServing.ticketNumber) {
-      toast.error("No customer currently being served");
+  const markNoShow = async (ticket: any) => {
+    if (!ticket || !ticket.ticketNumber) {
+      toast.error("No customer selected");
       return;
     }
 
-    const forced = isForcedNoShow(currentServing.calledAt);
+    const forced = isForcedNoShow(ticket.calledAt);
     const message = forced
-      ? `Timer has NOT expired yet. Mark ${currentServing.ticketNumber} as no-show anyway?\n\n(This will be logged as "forced no-show")`
-      : `Confirm: Mark ${currentServing.ticketNumber} - ${currentServing.customerName} as No-Show?`;
+      ? `Timer has NOT expired yet. Mark ${ticket.ticketNumber} as no-show anyway?\n\n(This will be logged as "forced no-show")`
+      : `Confirm: Mark ${ticket.ticketNumber} - ${ticket.customerName} as No-Show?`;
 
     if (!confirm(message)) return;
 
-    const loss = getCOPQ(currentServing.servicePace);
+    console.log('🚫 MARK NO-SHOW CLICKED:', ticket.ticketNumber);
 
-    recordNoShow({
-      ticketId: `${Date.now()}`,
-      ticketNumber: currentServing.ticketNumber,
-      customerName: currentServing.customerName,
-      servicePace: currentServing.servicePace,
-      timeCalled: currentServing.calledAt,
-    });
-
-    updateAnalytics("no_show");
-    logQueueAction({
-      action_type: "no_show",
-      ticket_number: currentServing.ticketNumber,
-      customer_name: currentServing.customerName,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Clear active ticket if it matches
     try {
-      const activeTicket = localStorage.getItem("pila-active-ticket");
-      if (activeTicket) {
-        const td = JSON.parse(activeTicket);
-        if (td.ticketNumber === currentServing.ticketNumber) {
-          localStorage.removeItem("pila-active-ticket");
-        }
+      // Step 1: Update in Supabase
+      console.log('☁️ Updating Supabase...');
+      const ok = await updateTicketStatus(ticket.id, 'no_show', {
+        cancelled_at: new Date().toISOString(),
+      });
+
+      if (!ok) {
+        console.error('❌ Supabase update failed');
+        toast.error('Failed to mark no-show');
+        return;
       }
-    } catch {}
 
-    setNoShowCount((prev) => prev + 1);
+      console.log('✅ Supabase updated');
 
-    if (forced) {
-      toast.error("Marked as FORCED no-show (before 30-min deadline)", {
-        description: `COPQ: ₱${loss} • This affects customer satisfaction`,
+      // Step 2: Update localStorage
+      console.log('💾 Updating localStorage...');
+      const queue = loadQueue();
+      const idx = queue.tickets.findIndex((t: any) => t.id === ticket.id);
+
+      if (idx !== -1) {
+        queue.tickets[idx].status = 'no_show';
+        queue.tickets[idx].cancelledAt = new Date().toISOString();
+        saveQueue(queue);
+        console.log('✅ localStorage updated');
+      }
+
+      // Step 3: Record no-show analytics
+      recordNoShow({
+        ticketId: ticket.id,
+        ticketNumber: ticket.ticketNumber,
+        customerName: ticket.customerName,
+        servicePace: ticket.servicePace,
+        timeCalled: ticket.calledAt,
       });
-    } else {
-      toast.warning(`${currentServing.ticketNumber} marked as No-Show`, {
-        description: `COPQ: ₱${loss} lost revenue recorded`,
+
+      updateAnalytics("no_show");
+      logQueueAction({
+        action_type: "no_show",
+        ticket_number: ticket.ticketNumber,
+        customer_name: ticket.customerName,
+        timestamp: new Date().toISOString(),
       });
+
+      // Clear active ticket if it matches
+      try {
+        const activeTicket = localStorage.getItem("pila-active-ticket");
+        if (activeTicket) {
+          const td = JSON.parse(activeTicket);
+          if (td.ticketNumber === ticket.ticketNumber) {
+            localStorage.removeItem("pila-active-ticket");
+          }
+        }
+      } catch {}
+
+      // Step 4: Update UI state
+      console.log('🎨 Updating UI state...');
+      const updated = loadQueue();
+      const waiting = updated.tickets.filter((t: any) => t.status === "waiting" || !t.status);
+      setQueueList(waiting.map(mapQueueTicket));
+      setQueueData(updated);
+      setNoShowCount((prev) => prev + 1);
+
+      console.log('✅ UI updated');
+
+      const loss = getCOPQ(ticket.servicePace);
+      if (forced) {
+        toast.error("Marked as FORCED no-show (before 30-min deadline)", {
+          description: `COPQ: ₱${loss} • This affects customer satisfaction`,
+        });
+      } else {
+        toast.warning(`${ticket.ticketNumber} marked as No-Show`, {
+          description: `COPQ: ₱${loss} lost revenue recorded`,
+        });
+      }
+
+      // Auto-call next if this was the current serving ticket
+      if (currentServing.ticketNumber === ticket.ticketNumber) {
+        callNext();
+      }
+    } catch (err: any) {
+      console.error('❌ Error marking no-show:', err);
+      toast.error('Error: ' + (err.message || 'Unknown'));
     }
-    callNext();
   };
 
   const undo = () => {
@@ -484,7 +532,7 @@ const QueueControls = () => {
             ✅ Mark Served
           </button>
           <button
-            onClick={markNoShow}
+            onClick={() => markNoShow(currentServing)}
             className="bg-[#EF4444] text-white font-bold py-3 rounded-xl text-lg shadow-lg active:scale-95 transition-transform"
           >
             ❌ No-Show
@@ -520,6 +568,12 @@ const QueueControls = () => {
                         {tc.label}
                       </span>
                       <span className="text-xs text-gray-400">{ticket.waitTime} min</span>
+                      <button
+                        onClick={() => markNoShow(ticket)}
+                        className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                      >
+                        ❌ No-Show
+                      </button>
                     </div>
                   </div>
                 );
