@@ -51,7 +51,10 @@ const mapQueueTicket = (ticket: any) => ({
   id: ticket.id,
   ticketNumber: ticket.ticketNumber,
   name: ticket.customerName,
+  customerName: ticket.customerName,
   category: ticket.category || ticket.servicePace || "regular",
+  servicePace: ticket.servicePace || "regular",
+  calledAt: ticket.called_at,
   waitTime: ticket.estimatedWaitMinutes || 0,
 });
 
