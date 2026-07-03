@@ -11,7 +11,7 @@ import LowBatteryBanner from "@/components/LowBatteryBanner";
 import VersionFooter from "@/components/VersionFooter";
 import NoShowTimer from "@/components/NoShowTimer";
 import { recordNoShow, isForcedNoShow, getCOPQ } from "@/utils/noShowEngine";
-import { loadQueue, fetchQueue, updateTicketStatus, subscribeToQueue, type Ticket, type Queue } from "@/utils/queueEngine";
+import { loadQueue, saveQueue, fetchQueue, updateTicketStatus, subscribeToQueue, type Ticket, type Queue } from "@/utils/queueEngine";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   regular: { bg: "bg-gray-100", text: "text-gray-800", label: "Regular" },
