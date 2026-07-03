@@ -52,51 +52,45 @@ const Analytics = () => {
       return;
     }
 
-    let merchantId: string | undefined;
-    try {
-      const m = JSON.parse(raw);
-      if (!m?.id) {
-        navigate("/login");
+    import("@/utils/queueEngine").then(({ fetchQueue, loadQueue }) => {
+      const queue = loadQueue();
+      // CRITICAL: Get merchant ID
+      const storedMerchant = JSON.parse(localStorage.getItem('pila-merchant') || '{}');
+      const merchantUUID = storedMerchant.id;
+      console.log('ANALYTICS: Merchant UUID =', merchantUUID);
+      console.log('ANALYTICS: Total tickets =', queue.tickets.length);
+
+      if (!merchantUUID) {
+        navigate('/login');
         return;
       }
-      merchantId = m.id;
-    } catch {
-      navigate("/login");
-      return;
-    }
 
-    // Multi-tenant guard: never let other merchants' tickets reach state.
-    const isolate = (arr: any[]) => {
-      console.log('🔍 TOTAL TICKETS IN QUEUE:', arr.length);
-      console.log('📊 Current merchant ID:', merchantId);
-      const myTickets = arr.filter((t) => {
-        const match = t.merchantId === merchantId;
-        if (!match) {
-          console.warn('❌ TICKET BELONGS TO OTHER MERCHANT:', t.ticketNumber, 'merchantId:', t.merchantId);
+      // CRITICAL: Filter to this merchant only (manual loop)
+      const applyFilter = (all: any[]) => {
+        const merchantTickets: any[] = [];
+        for (let i = 0; i < all.length; i++) {
+          if (all[i].merchantId === merchantUUID) {
+            merchantTickets.push(all[i]);
+          }
         }
-        return match;
-      });
-      console.log('✅ FILTERED TICKETS FOR THIS MERCHANT:', myTickets.length);
-      const noShowList = myTickets.filter((t) => t.status === 'no_show');
-      console.log('🚫 NO-SHOWS (from filtered data):', noShowList.length);
-      console.table(noShowList.map((t) => ({
-        ticket: t.ticketNumber,
-        status: t.status,
-        merchantId: t.merchantId,
-      })));
-      return myTickets;
-    };
+        console.log('ANALYTICS: Filtered tickets =', merchantTickets.length);
+        const completed = merchantTickets.filter(t => t.status === 'completed');
+        const noshow = merchantTickets.filter(t => t.status === 'no_show');
+        const cancelled = merchantTickets.filter(t => t.status === 'cancelled');
+        console.log('ANALYTICS: completed =', completed.length, 'noshow =', noshow.length, 'cancelled =', cancelled.length);
+        setTickets(merchantTickets);
+      };
 
-    import("@/utils/queueEngine").then(({ fetchQueue, loadQueue }) => {
-      const cached = loadQueue();
-      console.log('🗃️  Sync cache snapshot — tickets:', cached.tickets.length);
-      isolate(cached.tickets);
-      fetchQueue(merchantId).then((q) => setTickets(isolate(q.tickets))).catch(() => {});
+      applyFilter(queue.tickets);
+      fetchQueue(merchantUUID)
+        .then((q) => applyFilter(q.tickets))
+        .catch(() => {});
     });
 
 
     setTimeout(() => setLoaded(true), 100);
   }, [navigate]);
+
 
   const today = new Date().toISOString().split("T")[0];
   const servedToday = tickets.filter((t) => t.status === "completed" && t.served_at?.startsWith(today));
