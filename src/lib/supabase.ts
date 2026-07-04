@@ -31,6 +31,10 @@ export interface SupabaseMerchantRow {
   service_plan: string | null;
   is_founding_merchant: boolean | null;
   founding_merchant_number: number | null;
+  current_plan: string | null;
+  wallet_balance: number | null;
+  mobile: string | null;
+  prepaid_credits: number | null;
   created_at: string;
 }
 
