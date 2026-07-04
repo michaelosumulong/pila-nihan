@@ -29,6 +29,8 @@ export interface SupabaseMerchantRow {
   shop_code: string;
   business_category: string | null;
   service_plan: string | null;
+  is_founding_merchant: boolean | null;
+  founding_merchant_number: number | null;
   created_at: string;
 }
 
