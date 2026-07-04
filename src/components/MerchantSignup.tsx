@@ -29,7 +29,6 @@ const SERVICE_PLANS = [
       "Analytics dashboard",
       "Peak hour forecasting",
       "1-year history",
-      "Custom branding",
     ],
     color: "#F59E0B",
     recommended: true,
