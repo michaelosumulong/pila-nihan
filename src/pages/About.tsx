@@ -150,10 +150,10 @@ const About = () => {
             onClick={() => navigate("/signup")}
             className="bg-primary text-primary-foreground px-8 py-4 rounded-xl font-bold text-lg hover:brightness-90 transition-all shadow-2xl"
           >
-            Start Free Beta Trial
+            Start Free
           </button>
           <p className="text-white/70 text-sm mt-4">
-            No credit card required • First 10 beta testers get 2 months free
+            No credit card required
           </p>
         </div>
       </section>
