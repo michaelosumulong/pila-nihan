@@ -151,11 +151,26 @@ const GuestTicket = () => {
       const total = waitingTickets?.length || 0;
       const position = (waitingTickets?.findIndex((t) => t.created_at === createdAt) ?? -1) + 1;
 
-      setTicketData((prev) => ({
-        ...prev,
-        position: position > 0 ? position : 0,
-        totalInQueue: total,
-      }));
+      setTicketData((prev) => {
+        const wasPos = prev.position;
+        const newPos = position > 0 ? position : 0;
+        // Proximity haptic: fire when transitioning into top-3 (but not on initial load)
+        if (
+          !alertsMuted &&
+          wasPos > 0 &&
+          newPos > 0 &&
+          newPos < wasPos &&
+          newPos <= 3
+        ) {
+          try {
+            if ("vibrate" in navigator) {
+              const pattern = newPos === 1 ? [300, 100, 300] : newPos === 2 ? [200, 100, 200] : [150];
+              navigator.vibrate(pattern);
+            }
+          } catch {}
+        }
+        return { ...prev, position: newPos, totalInQueue: total };
+      });
       console.log("📍 Position in line:", position, "of", total);
     } catch (err) {
       console.error("❌ calculatePosition error:", err);
@@ -254,7 +269,7 @@ const GuestTicket = () => {
                   requireInteraction: true,
                 } as any);
               }
-              if ("vibrate" in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
+              if ("vibrate" in navigator) navigator.vibrate([100, 50, 100, 50, 100, 50, 300]); // SOS-style
               const audio = new Audio("/notification.mp3");
               audio.volume = 0.8;
               audio.play().catch((e) =>
