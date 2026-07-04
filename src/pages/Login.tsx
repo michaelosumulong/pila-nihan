@@ -68,8 +68,13 @@ export default function Login() {
         mobile: data.mobile,
         businessCategory: data.business_category,
         servicePlan: data.service_plan,
+        current_plan: data.current_plan || "FREE",
+        is_founding_merchant: data.is_founding_merchant || false,
+        wallet_balance: data.wallet_balance ?? 0,
+        founding_merchant_number: data.founding_merchant_number ?? null,
         prepaidCredits: data.prepaid_credits || 500,
       };
+      console.log("💳 Loaded plan from DB:", merchantSession.current_plan, "Founding:", merchantSession.is_founding_merchant);
 
       console.log("");
       console.log("════════════════════════════════════════");
