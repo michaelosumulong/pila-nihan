@@ -345,8 +345,7 @@ const GuestTicket = () => {
     }
 
     localStorage.removeItem("pila-active-ticket");
-    toast.info("You have left the queue");
-    navigate("/");
+    toast.info("You have left the queue. You may close this window.");
   };
 
   // Smart auto-refresh based on battery mode
