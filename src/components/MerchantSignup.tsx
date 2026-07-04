@@ -196,9 +196,17 @@ const MerchantSignup = () => {
       return;
     }
 
+    // Map selected servicePlan to canonical current_plan enforced across app
+    const currentPlan =
+      form.servicePlan === "sinag" ? "SINAG_MONTHLY" :
+      form.servicePlan === "suri" ? "SURI_MONTHLY" :
+      "FREE";
+    const walletSeed = currentPlan === "FREE" ? 0 : 0; // no seed on standard signup; Founding 15 adds ₱500 via Pricing flow
+
     try {
       console.log("🔄 Creating merchant with shop code:", shopCode);
       console.log("📱 Sanitized mobile:", sanitizedMobile);
+      console.log("💳 Current plan:", currentPlan);
 
       const payload = {
         business_name: form.businessName.trim(),
@@ -208,6 +216,9 @@ const MerchantSignup = () => {
         shop_code: shopCode,
         business_category: form.businessCategory,
         service_plan: form.servicePlan,
+        current_plan: currentPlan,
+        is_founding_merchant: false,
+        wallet_balance: walletSeed,
       };
       console.log("📤 Insert payload:", payload);
 
@@ -241,6 +252,21 @@ const MerchantSignup = () => {
 
       console.log("✅ Merchant created in Supabase:", inserted);
 
+      // Belt-and-suspenders: explicitly UPDATE plan fields in case defaults overrode insert
+      const { error: updateError } = await supabase
+        .from("merchants")
+        .update({
+          current_plan: currentPlan,
+          is_founding_merchant: false,
+          wallet_balance: walletSeed,
+        })
+        .eq("id", inserted.id);
+      if (updateError) {
+        console.warn("⚠️ Plan enforcement update failed:", updateError.message);
+      } else {
+        console.log("✅ Plan enforced in Supabase:", currentPlan);
+      }
+
       const data = {
         id: inserted.id, // UUID from Supabase
         businessName: form.businessName,
@@ -251,6 +277,9 @@ const MerchantSignup = () => {
         location: location || { lat: 14.5995, lng: 120.9842 },
         shopCode,
         servicePlan: form.servicePlan,
+        current_plan: currentPlan,
+        is_founding_merchant: false,
+        wallet_balance: walletSeed,
         businessCategory: form.businessCategory,
         category: defaultServicePace,
         targetHandlingTime: defaultTargetTime,
@@ -259,7 +288,7 @@ const MerchantSignup = () => {
         customLogo: null,
         prepaidCredits: 500,
         foundingMerchantNumber: null,
-        wallet: { balance: 0, credits: 500 },
+        wallet: { balance: walletSeed, credits: 500 },
         settings: {
           targetHandlingTime: defaultTargetTime,
           isPriorityEnabled: form.businessCategory !== "lingkod",
@@ -270,7 +299,7 @@ const MerchantSignup = () => {
 
       localStorage.setItem("pila-merchant", JSON.stringify(data));
       window.dispatchEvent(new CustomEvent("merchant-updated"));
-      console.log("✅ Merchant session saved, redirecting to dashboard");
+      console.log("✅ Merchant session saved with plan:", currentPlan);
 
       toast.success("Account created!", {
         description: `Welcome to Pila-nihan, ${form.businessName}! Shop code: ${shopCode}`,
