@@ -122,7 +122,7 @@ const PricingTable = () => {
       </div>
 
       <p className="text-center text-xs text-gray-400 mt-6">
-        All prices exclusive of 12% VAT • Beta merchants get 2 months free on any plan
+        All prices exclusive of 12% VAT
       </p>
     </div>
   );
