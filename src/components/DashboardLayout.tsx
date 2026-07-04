@@ -102,7 +102,7 @@ export default function DashboardLayout() {
           )}
           <div className="flex-1 min-w-0">
             <h2 className="text-white font-bold text-sm leading-tight truncate">
-              {businessName || "Pila-nihan"}
+              {businessName || "Pilanihan"}
             </h2>
             <p className="text-white/60 text-xs font-mono">
               {merchant?.shopCode || "DEMO"}

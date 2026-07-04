@@ -29,11 +29,11 @@ const FoundingMerchantBadge = () => {
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-gray-900">Founding Merchant</span>
           <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-            #{number} of 50
+            #{number} of 15
           </span>
         </div>
         <p className="text-xs text-gray-600 mt-0.5">
-          2 months free + lifetime 20% discount
+          Lifetime access • ₱500 wallet bonus
         </p>
       </div>
       <span className="text-2xl">🇵🇭</span>

@@ -13,7 +13,7 @@ const plans = [
       "Real-time notifications",
       "Customer feedback",
     ],
-    missing: ["Analytics dashboard", "Suri quality audits", "Priority support", "Custom branding"],
+    missing: ["Analytics dashboard", "Suri quality audits", "Priority support"],
     cta: "Start Free",
     popular: false,
     bg: "bg-white",
@@ -34,7 +34,7 @@ const plans = [
       "Express queue upgrades",
       "Email support",
     ],
-    missing: ["Suri quality audits", "Custom branding"],
+    missing: ["Suri quality audits"],
     cta: "Start Trial",
     popular: true,
     bg: "bg-gradient-to-br from-blue-50 to-white",
@@ -42,16 +42,15 @@ const plans = [
   },
   {
     name: "SURI",
-    tagline: "Six Sigma AI",
+    tagline: "Expert AI",
     price: "₱3,499",
     period: "/mo",
     features: [
       "Everything in SINAG",
       "Suri quality audits (AI)",
       "5 Whys root cause analysis",
-      "Muda waste detection",
-      "Sigma level tracking",
-      "Custom branding",
+      "Waste detection",
+      "Performance tracking",
       "Priority support",
       "API access",
     ],
@@ -123,7 +122,7 @@ const PricingTable = () => {
       </div>
 
       <p className="text-center text-xs text-gray-400 mt-6">
-        All prices exclusive of 12% VAT • Beta merchants get 2 months free on any plan
+        All prices exclusive of 12% VAT
       </p>
     </div>
   );

@@ -73,7 +73,7 @@ const About = () => {
       <section className="bg-gradient-to-br from-[hsl(220,100%,13%)] to-secondary py-20">
         <div className="container mx-auto px-6 text-center">
           <PilaLogo className="w-48 h-48 mx-auto mb-6" />
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">Pila-nihan™</h1>
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">Pilanihan™</h1>
           <p className="text-3xl text-primary italic font-light mb-6">Ginhawa sa Bawat Pila</p>
           <p className="text-xl text-white/90 max-w-3xl mx-auto">
             A professional queue management system designed to optimize business
@@ -150,10 +150,10 @@ const About = () => {
             onClick={() => navigate("/signup")}
             className="bg-primary text-primary-foreground px-8 py-4 rounded-xl font-bold text-lg hover:brightness-90 transition-all shadow-2xl"
           >
-            Start Free Beta Trial
+            Start Free
           </button>
           <p className="text-white/70 text-sm mt-4">
-            No credit card required • First 10 beta testers get 2 months free
+            No credit card required
           </p>
         </div>
       </section>
@@ -161,7 +161,7 @@ const About = () => {
       {/* Footer */}
       <footer className="bg-[hsl(220,100%,13%)] text-white py-6">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-sm text-white/70 mb-2">© 2026 Pila-nihan™ • Ginhawa sa Bawat Pila</p>
+          <p className="text-sm text-white/70 mb-2">© 2026 Pilanihan™ • Ginhawa sa Bawat Pila</p>
           <p className="text-xs text-white/50">Version 1.0 Beta • Hand-crafted in the Philippines 🇵🇭</p>
           <div className="flex flex-wrap justify-center gap-4 text-xs text-white/50 mt-3">
             <button onClick={() => navigate("/terms")} className="hover:text-white underline">Terms &amp; Conditions</button>

@@ -29,7 +29,6 @@ const SERVICE_PLANS = [
       "Analytics dashboard",
       "Peak hour forecasting",
       "1-year history",
-      "Custom branding",
     ],
     color: "#F59E0B",
     recommended: true,
@@ -302,7 +301,7 @@ const MerchantSignup = () => {
       console.log("✅ Merchant session saved with plan:", currentPlan);
 
       toast.success("Account created!", {
-        description: `Welcome to Pila-nihan, ${form.businessName}! Shop code: ${shopCode}`,
+        description: `Welcome to Pilanihan, ${form.businessName}! Shop code: ${shopCode}`,
       });
 
       setTimeout(() => navigate("/dashboard"), 500);
@@ -329,7 +328,7 @@ const MerchantSignup = () => {
         {/* Logo */}
         <div className="flex flex-col items-center pt-8 pb-4">
           <PilaLogo className="w-24 h-24 mb-3" />
-          <h1 className="text-3xl font-bold text-primary tracking-wide">PILA-NIHAN™</h1>
+          <h1 className="text-3xl font-bold text-primary tracking-wide">PILANIHAN™</h1>
           <p className="text-[#FFD700] italic text-lg mt-1">Merchant Signup</p>
         </div>
 

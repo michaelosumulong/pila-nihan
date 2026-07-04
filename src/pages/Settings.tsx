@@ -8,7 +8,7 @@ import VersionFooter from "@/components/VersionFooter";
 const BRAND_PRESETS = [
   {
     id: "classic",
-    name: "Pila-nihan Classic",
+    name: "Pilanihan Classic",
     primary: "#0A2569",
     secondary: "#FFB703",
     accent: "#FCD116",
@@ -217,7 +217,7 @@ const Settings = () => {
           ⚙️ Settings
         </h1>
         <p className="text-[#FDFBD4] text-lg">
-          Customize your Pila-nihan experience
+          Customize your Pilanihan experience
         </p>
       </div>
       {/* Sticky Apply/Discard Bar */}

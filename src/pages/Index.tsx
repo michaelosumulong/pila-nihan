@@ -114,7 +114,7 @@ const Index = () => {
           <PilaLogo className="w-40 h-40 mx-auto mb-6" />
         )}
         <h1 className="text-4xl sm:text-6xl font-bold mb-3 tracking-tight brand-transition" style={{ color: branding.textOnPrimary }}>
-          PILA-NIHAN™
+          PILANIHAN™
         </h1>
         <p className="text-xl sm:text-3xl italic font-light brand-transition" style={{ color: branding.secondary }}>
           Ginhawa sa Bawat Pila
@@ -265,7 +265,7 @@ const Index = () => {
             </p>
           </div>
         </div>
-        <p className="text-xs text-white/70 text-center mt-4">Powered by Pila-nihan™</p>
+        <p className="text-xs text-white/70 text-center mt-4">Powered by Pilanihan™</p>
       </div>
     </div>
   );

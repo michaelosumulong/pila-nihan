@@ -208,8 +208,7 @@ export default function Analytics() {
           </div>
           <p className="text-gray-700 text-sm mb-4">
             Our upcoming enterprise tier, Suri (Expert AI), is actively under engineering
-            development. We are running model calibration pipelines alongside certified Six Sigma
-            Black Belt systems experts to package automated lean operational waste tracking straight
+            development. We are packaging automated operational waste tracking straight
             to your terminal screen.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

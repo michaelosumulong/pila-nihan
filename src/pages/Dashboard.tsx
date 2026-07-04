@@ -273,7 +273,7 @@ const Dashboard = () => {
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(qrUrl)}`;
     const link = document.createElement("a");
     link.href = qrApiUrl;
-    link.download = `pila-nihan-${shopCode}.png`;
+    link.download = `pilanihan-${shopCode}.png`;
     link.click();
     toast.success("QR Code downloading!", {
       description: "Print and display at your entrance",
@@ -599,20 +599,20 @@ const Dashboard = () => {
               </div>
               <div
                 onClick={() => {
-                  navigator.clipboard.writeText(generateDailyBypassCode(merchant.id || "pila-nihan"));
+                  navigator.clipboard.writeText(generateDailyBypassCode(merchant.id || "pilanihan"));
                   toast.success("Bypass code copied!");
                 }}
                 className="text-5xl font-bold font-mono tracking-widest mb-3 text-[#FFD700] text-center cursor-pointer hover:scale-105 transition-transform"
                 title="Click to copy"
               >
-                {generateDailyBypassCode(merchant.id || "pila-nihan")}
+                {generateDailyBypassCode(merchant.id || "pilanihan")}
               </div>
               <p className="text-xs text-white/90 mb-3 text-center">
                 Tap code to copy • Valid for today only
               </p>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(generateDailyBypassCode(merchant.id || "pila-nihan"));
+                  navigator.clipboard.writeText(generateDailyBypassCode(merchant.id || "pilanihan"));
                   toast.success("Bypass code copied!");
                 }}
                 className="w-full bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1 mb-3"
@@ -679,7 +679,7 @@ const Dashboard = () => {
         <div className="bg-[#FFF9E6] border-l-4 border-[#FFB703] p-4 rounded-lg mb-6 flex justify-between items-start">
           <div>
             <p className="text-sm font-semibold text-gray-800">🔔 Announcement</p>
-            <p className="text-sm text-gray-600 mt-1">Welcome to Pila-nihan! Your queue is ready.</p>
+            <p className="text-sm text-gray-600 mt-1">Welcome to Pilanihan! Your queue is ready.</p>
           </div>
           <button className="text-[#3B82F6] text-sm font-medium shrink-0">Edit</button>
         </div>

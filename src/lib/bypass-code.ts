@@ -2,7 +2,7 @@
  * Generates a deterministic daily 6-character bypass code
  * based on the current date and a merchant seed.
  */
-export const generateDailyBypassCode = (seed: string = "pila-nihan"): string => {
+export const generateDailyBypassCode = (seed: string = "pilanihan"): string => {
   const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
   const raw = `${seed}-${today}`;
 

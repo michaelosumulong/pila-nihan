@@ -45,7 +45,7 @@ export const printTicket = (ticket: PrintableTicket) => {
     <body>
       <div class="ticket">
         <div class="logo">🎫</div>
-        <div class="title">PILA-NIHAN™</div>
+        <div class="title">PILANIHAN™</div>
         <div class="ticket-number">${ticket.ticketNumber}</div>
         <div class="name">${ticket.customerName}</div>
         <div class="category">${categoryLabel}</div>
@@ -54,7 +54,7 @@ export const printTicket = (ticket: PrintableTicket) => {
         <div class="info">Est. Wait: ${ticket.estimatedWaitMinutes} min</div>
         <hr />
         <div class="footer">
-          ${merchantData.businessName || "Pila-nihan Queue"}<br />
+          ${merchantData.businessName || "Pilanihan Queue"}<br />
           Ginhawa sa Bawat Pila<br />
           ${new Date().toLocaleString("en-PH", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
         </div>
