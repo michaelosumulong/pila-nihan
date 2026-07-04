@@ -262,7 +262,7 @@ export default function Billing() {
             <h3 className="font-bold text-gray-900 mb-3 text-sm">What are Prepaid Credits?</h3>
             <p className="text-sm text-gray-700 mb-3">
               Prepaid credits are used to fund the merchant's share (40%) of Express Pass revenue.
-              When customers purchase Express Pass priority, 60% goes to Pila-nihan platform and 40%
+              When customers purchase Express Pass priority, 60% goes to Pilanihan platform and 40%
               goes to your merchant account from your prepaid balance.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">

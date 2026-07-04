@@ -15,15 +15,15 @@ const DEFAULT_BRANDING = BRAND_PRESETS[0];
 const loadBrandingFromStorage = () => {
   try {
     const raw = localStorage.getItem("pila-merchant");
-    if (!raw) return { branding: DEFAULT_BRANDING, customLogo: null, businessName: "Pila-nihan" };
+    if (!raw) return { branding: DEFAULT_BRANDING, customLogo: null, businessName: "Pilanihan" };
     const parsed = JSON.parse(raw);
     return {
       branding: parsed.branding || DEFAULT_BRANDING,
       customLogo: parsed.customLogo || null,
-      businessName: parsed.businessName || "Pila-nihan",
+      businessName: parsed.businessName || "Pilanihan",
     };
   } catch {
-    return { branding: DEFAULT_BRANDING, customLogo: null, businessName: "Pila-nihan" };
+    return { branding: DEFAULT_BRANDING, customLogo: null, businessName: "Pilanihan" };
   }
 };
 

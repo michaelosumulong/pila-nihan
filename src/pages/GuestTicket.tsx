@@ -55,7 +55,7 @@ const GuestTicket = () => {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === "accepted") {
-        toast.success("Pila-nihan installed!", { description: "Access tickets from your home screen" });
+        toast.success("Pilanihan installed!", { description: "Access tickets from your home screen" });
       }
       setDeferredPrompt(null);
       setShowInstallPrompt(false);
@@ -64,7 +64,7 @@ const GuestTicket = () => {
 
   const shareTicket = async () => {
     const shareData = {
-      title: `Pila-nihan Ticket ${ticketNumber}`,
+      title: `Pilanihan Ticket ${ticketNumber}`,
       text: `I'm #${ticketData.position} in line. Estimated wait: ${ticketData.estimatedWaitMinutes} min.`,
       url: window.location.href,
     };
@@ -458,7 +458,7 @@ const GuestTicket = () => {
             <PilaLogo className="w-20 h-20" />
           )}
         </div>
-        <h1 className="text-2xl font-bold brand-transition" style={{ color: branding.secondary }}>PILA-NIHAN™</h1>
+        <h1 className="text-2xl font-bold brand-transition" style={{ color: branding.secondary }}>PILANIHAN™</h1>
         <p className="italic text-lg brand-transition" style={{ color: branding.accent || branding.secondary }}>Ginhawa sa Bawat Pila</p>
       </div>
 
@@ -571,7 +571,7 @@ const GuestTicket = () => {
         <ul className="text-xs text-yellow-700 space-y-1">
           <li>📸 Take a screenshot of this page</li>
           <li>🔖 Bookmark this page in your browser</li>
-          <li>📱 Add Pila-nihan to your home screen (works like an app!)</li>
+          <li>📱 Add Pilanihan to your home screen (works like an app!)</li>
         </ul>
       </div>
 
@@ -591,7 +591,7 @@ const GuestTicket = () => {
           <div className="flex items-start gap-3">
             <span className="text-3xl">📱</span>
             <div className="flex-1">
-              <p className="font-bold text-blue-900 mb-1">Install Pila-nihan</p>
+              <p className="font-bold text-blue-900 mb-1">Install Pilanihan</p>
               <p className="text-sm text-blue-800 mb-3">Add to your home screen for quick access!</p>
               <div className="flex gap-2">
                 <button onClick={handleInstallClick} className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold text-sm">

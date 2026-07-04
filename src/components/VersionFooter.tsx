@@ -15,7 +15,7 @@ const VersionFooter = () => {
           </button>
         </div>
         <p className="text-sm text-white/70 mb-2">
-          © 2026 Pila-nihan™ • Ginhawa sa Bawat Pila
+          © 2026 Pilanihan™ • Ginhawa sa Bawat Pila
         </p>
         <p className="text-xs text-white/50">
           Version 1.0 Beta • Hand-crafted with ❤️ in the Philippines 🇵🇭

@@ -168,7 +168,7 @@ const GuestEntry = () => {
     validateShopCode();
   }, [merchantId, navigate]);
 
-  const merchantName = merchantData?.businessName || "Pila-nihan Queue System";
+  const merchantName = merchantData?.businessName || "Pilanihan Queue System";
   const merchantLocation = merchantData?.location || { lat: 14.5995, lng: 120.9842 };
   const merchantCategory = migrateLegacyCategory(merchantData?.category || "Standard");
   const businessCategory = merchantData?.businessCategory || "sulong";
@@ -197,7 +197,7 @@ const GuestEntry = () => {
   const [bypassVerified, setBypassVerified] = useState(false);
 
   const handleBypassSubmit = () => {
-    const seed = merchantData?.id || "pila-nihan";
+    const seed = merchantData?.id || "pilanihan";
     if (validateBypassCode(bypassCode, seed)) {
       setBypassVerified(true);
       setIsWithinRange(true);
@@ -470,7 +470,7 @@ const GuestEntry = () => {
 
           {/* Legal notice */}
           <p className="text-center text-xs opacity-60 mt-4" style={{ color: branding.textOnPrimary }}>
-            By joining, you agree to the Pila-nihan Terms of Service. 🇵🇭
+            By joining, you agree to the Pilanihan Terms of Service. 🇵🇭
           </p>
         </div>
       )}
@@ -712,7 +712,7 @@ const GuestEntry = () => {
       {/* Footer */}
       <div className="flex items-center justify-center gap-2 mt-6">
         <span className="w-2 h-2 bg-green-400 rounded-full" />
-        <span className="text-xs" style={{ color: `${branding.textOnPrimary}80` }}>Powered by Pila-nihan™</span>
+        <span className="text-xs" style={{ color: `${branding.textOnPrimary}80` }}>Powered by Pilanihan™</span>
       </div>
     </div>
   );

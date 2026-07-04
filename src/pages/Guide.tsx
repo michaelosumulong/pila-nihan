@@ -118,7 +118,7 @@ const CustomerGuide = () => (
     <div className="bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">📱 How to Install (Add to Home Screen)</h2>
       <p className="text-gray-700 mb-6">
-        For the best experience, "install" Pila-nihan to your phone. It works like a native app - faster, offline-capable, and you'll never lose the link!
+        For the best experience, "install" Pilanihan to your phone. It works like a native app - faster, offline-capable, and you'll never lose the link!
       </p>
       <div className="grid md:grid-cols-2 gap-6">
         <div className="border-2 border-blue-200 rounded-xl p-6">
@@ -127,7 +127,7 @@ const CustomerGuide = () => (
             <h3 className="text-xl font-bold text-gray-900">iPhone (iOS)</h3>
           </div>
           <ol className="space-y-3 text-sm text-gray-700">
-            {["Open Pila-nihan in **Safari** browser", "Tap the **Share** button (box with arrow up)", 'Scroll and tap **"Add to Home Screen"**', 'Tap **"Add"** in the top right', "Find the Pila-nihan icon on your home screen!"].map((s, i) => (
+            {["Open Pilanihan in **Safari** browser", "Tap the **Share** button (box with arrow up)", 'Scroll and tap **"Add to Home Screen"**', 'Tap **"Add"** in the top right', "Find the Pilanihan icon on your home screen!"].map((s, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="font-bold text-blue-600">{i + 1}.</span>
                 <span dangerouslySetInnerHTML={{ __html: s.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }} />
@@ -141,7 +141,7 @@ const CustomerGuide = () => (
             <h3 className="text-xl font-bold text-gray-900">Android</h3>
           </div>
           <ol className="space-y-3 text-sm text-gray-700">
-            {["Open Pila-nihan in **Chrome** browser", "Tap the **three dots (⋮)** menu in top right", 'Tap **"Add to Home screen"** or **"Install app"**', 'Tap **"Add"** or **"Install"**', "Find the Pila-nihan icon on your home screen!"].map((s, i) => (
+            {["Open Pilanihan in **Chrome** browser", "Tap the **three dots (⋮)** menu in top right", 'Tap **"Add to Home screen"** or **"Install app"**', 'Tap **"Add"** or **"Install"**', "Find the Pilanihan icon on your home screen!"].map((s, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="font-bold text-green-600">{i + 1}.</span>
                 <span dangerouslySetInnerHTML={{ __html: s.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }} />
@@ -441,7 +441,7 @@ const Guide = () => {
           </button>
           <PilaLogo className="w-16 h-16 mx-auto mb-4" />
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">How It Works</h1>
-          <p className="text-xl text-white/90">Your complete guide to using Pila-nihan</p>
+          <p className="text-xl text-white/90">Your complete guide to using Pilanihan</p>
         </div>
       </div>
 

@@ -52,7 +52,7 @@ const ROICalculator = () => {
       </div>
 
       <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
-        <p className="text-sm text-red-700 font-semibold mb-1">Without Pila-nihan:</p>
+        <p className="text-sm text-red-700 font-semibold mb-1">Without Pilanihan:</p>
         <p className="text-xs text-red-600">
           ~{walkawayRate.toFixed(0)}% walk-away rate → {lostCustomers} lost customers/day
         </p>
@@ -62,7 +62,7 @@ const ROICalculator = () => {
       </div>
 
       <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-        <p className="text-sm text-green-700 font-semibold mb-1">With Pila-nihan:</p>
+        <p className="text-sm text-green-700 font-semibold mb-1">With Pilanihan:</p>
         <p className="text-xs text-green-600">
           70% fewer walk-aways with queue management
         </p>

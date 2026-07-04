@@ -10,7 +10,7 @@ interface PilaLogoProps {
 const PilaLogo = ({ className = "w-14 h-14", variant = "icon", style }: PilaLogoProps) => (
   <img
     src={pilaLogo}
-    alt="Pila-nihan logo"
+    alt="Pilanihan logo"
     className={className}
     style={{ ...style, filter: "none" }}
   />
