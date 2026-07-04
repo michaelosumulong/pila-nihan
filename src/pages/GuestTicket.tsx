@@ -345,8 +345,7 @@ const GuestTicket = () => {
     }
 
     localStorage.removeItem("pila-active-ticket");
-    toast.info("You have left the queue");
-    navigate("/");
+    toast.info("You have left the queue. You may close this window.");
   };
 
   // Smart auto-refresh based on battery mode
@@ -684,12 +683,10 @@ const GuestTicket = () => {
           ⚠️ Report an Issue
         </button>
         {ticketData.status === "completed" ? (
-          <button
-            onClick={() => navigate("/")}
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition-all shadow-lg active:scale-95"
-          >
-            ✓ Done — Return Home
-          </button>
+          <div className="text-center p-4 mt-2 bg-white/5 rounded-xl border border-white/10">
+            <p className="text-sm text-white/90 font-semibold">Thank you for visiting Pilanihan!</p>
+            <p className="text-xs text-white/60 mt-2">You can close this window or create a new ticket via the merchant's QR code.</p>
+          </div>
         ) : (
           <button
             onClick={handleLeaveQueue}

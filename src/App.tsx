@@ -2,10 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { BrandingProvider } from "@/contexts/BrandingContext";
 import DashboardLayout from "@/components/DashboardLayout";
-import Index from "./pages/Index";
 import Revenue from "./pages/Revenue";
 import Billing from "./pages/Billing";
 import Dashboard from "./pages/Dashboard";
@@ -19,7 +18,7 @@ import About from "./pages/About";
 import Guide from "./pages/Guide";
 import Settings from "./pages/Settings";
 import Pricing from "./pages/Pricing";
-import NotFound from "./pages/NotFound";
+
 
 const queryClient = new QueryClient();
 
@@ -31,10 +30,14 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/ticket/:ticketNumber" element={<GuestTicket />} />
+            {/* Root = merchant login (no public guest selector) */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+
+            {/* Public guest routes (no auth) */}
             <Route path="/join/:merchantId" element={<GuestEntry />} />
+            <Route path="/ticket/:ticketNumber" element={<GuestTicket />} />
+
+            {/* Merchant auth + marketing */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<MerchantSignup />} />
             <Route path="/about" element={<About />} />
@@ -51,7 +54,8 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
             </Route>
 
-            <Route path="*" element={<NotFound />} />
+            {/* Catch-all → login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>
       </BrandingProvider>
