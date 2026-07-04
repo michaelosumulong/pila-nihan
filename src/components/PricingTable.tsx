@@ -102,7 +102,7 @@ const PricingTable = () => {
               ))}
               {plan.missing.map((f) => (
                 <li key={f} className="flex items-center gap-2 text-sm text-gray-400">
-                  <span className="flex-shrink-0">—</span> {f}
+                  <span className="flex-shrink-0">✓</span> {f}
                 </li>
               ))}
             </ul>
