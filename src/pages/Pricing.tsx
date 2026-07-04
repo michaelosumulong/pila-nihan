@@ -50,7 +50,7 @@ export default function Pricing() {
 
   const foundingRemaining = Math.max(0, FOUNDING_TOTAL - foundingSold);
 
-  const claimFounding15 = () => {
+  const claimFounding15 = async () => {
     if (foundingRemaining === 0) return;
     const raw = localStorage.getItem("pila-merchant");
     if (!raw) {
@@ -76,6 +76,22 @@ export default function Pricing() {
         lifetimePassPurchasedAt: new Date().toISOString(),
         prepaidCredits: (merchant.prepaidCredits || 0) + seedBonus,
       };
+
+      // Persist founding status to Supabase if merchant has a real ID
+      if (merchant.id) {
+        const { error } = await supabase
+          .from('merchants')
+          .update({
+            is_founding_merchant: true,
+            founding_merchant_number: nextNumber,
+            service_plan: 'sinag',
+          })
+          .eq('id', merchant.id);
+        if (error) {
+          console.error('Supabase founding update error:', error);
+        }
+      }
+
       localStorage.setItem("pila-merchant", JSON.stringify(updated));
       setFoundingSold(nextNumber);
       toast.success(
