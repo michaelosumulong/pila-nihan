@@ -13,7 +13,7 @@ const plans = [
       "Real-time notifications",
       "Customer feedback",
     ],
-    missing: ["Analytics dashboard", "Suri quality audits", "Priority support", "Custom branding"],
+    missing: ["Analytics dashboard", "Suri quality audits", "Priority support"],
     cta: "Start Free",
     popular: false,
     bg: "bg-white",
