@@ -34,7 +34,7 @@ const plans = [
       "Express queue upgrades",
       "Email support",
     ],
-    missing: ["Suri quality audits", "Custom branding"],
+    missing: ["Suri quality audits"],
     cta: "Start Trial",
     popular: true,
     bg: "bg-gradient-to-br from-blue-50 to-white",
