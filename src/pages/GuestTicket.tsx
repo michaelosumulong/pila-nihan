@@ -254,7 +254,7 @@ const GuestTicket = () => {
                   requireInteraction: true,
                 } as any);
               }
-              if ("vibrate" in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
+              if ("vibrate" in navigator) navigator.vibrate([100, 50, 100, 50, 100, 50, 300]); // SOS-style
               const audio = new Audio("/notification.mp3");
               audio.volume = 0.8;
               audio.play().catch((e) =>
