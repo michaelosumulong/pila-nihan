@@ -30,10 +30,14 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/ticket/:ticketNumber" element={<GuestTicket />} />
+            {/* Root = merchant login (no public guest selector) */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+
+            {/* Public guest routes (no auth) */}
             <Route path="/join/:merchantId" element={<GuestEntry />} />
+            <Route path="/ticket/:ticketNumber" element={<GuestTicket />} />
+
+            {/* Merchant auth + marketing */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<MerchantSignup />} />
             <Route path="/about" element={<About />} />
@@ -50,7 +54,8 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
             </Route>
 
-            <Route path="*" element={<NotFound />} />
+            {/* Catch-all → login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>
       </BrandingProvider>
