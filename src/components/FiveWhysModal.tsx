@@ -70,7 +70,7 @@ const FiveWhysModal = ({ open, onClose, initialIssue = "" }: FiveWhysModalProps)
             🧐 5 Whys Root Cause Analysis
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-600">
-            Lean Six Sigma technique to find the true root cause of queue issues.
+            A structured technique to find the true root cause of queue issues.
           </DialogDescription>
         </DialogHeader>
 
