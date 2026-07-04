@@ -18,7 +18,7 @@ import About from "./pages/About";
 import Guide from "./pages/Guide";
 import Settings from "./pages/Settings";
 import Pricing from "./pages/Pricing";
-import NotFound from "./pages/NotFound";
+
 
 const queryClient = new QueryClient();
 
