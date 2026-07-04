@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, Lock } from "lucide-react";
+import { Check, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 interface Plan {
   name: string;
@@ -19,18 +20,37 @@ const FOUNDING_TOTAL = 15;
 
 export default function Pricing() {
   const navigate = useNavigate();
-  const [foundingSold, setFoundingSold] = useState<number>(() => {
-    const raw = localStorage.getItem("pila-founding15-sold");
-    return raw ? Math.min(FOUNDING_TOTAL, parseInt(raw, 10) || 0) : 6;
-  });
+  const [foundingSold, setFoundingSold] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFoundingCount = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('merchants')
+          .select('id')
+          .eq('is_founding_merchant', true);
+
+        if (!error && data) {
+          const sold = Math.min(FOUNDING_TOTAL, data.length);
+          setFoundingSold(sold);
+          const remaining = Math.max(0, FOUNDING_TOTAL - sold);
+          console.log('📊 Founding merchants:', sold, '/ Remaining slots:', remaining);
+        } else {
+          console.error('Error fetching founding count:', error);
+        }
+      } catch (err) {
+        console.error('Error fetching founding count:', err);
+      }
+      setLoading(false);
+    };
+
+    fetchFoundingCount();
+  }, []);
 
   const foundingRemaining = Math.max(0, FOUNDING_TOTAL - foundingSold);
 
-  useEffect(() => {
-    localStorage.setItem("pila-founding15-sold", String(foundingSold));
-  }, [foundingSold]);
-
-  const claimFounding15 = () => {
+  const claimFounding15 = async () => {
     if (foundingRemaining === 0) return;
     const raw = localStorage.getItem("pila-merchant");
     if (!raw) {
@@ -56,6 +76,22 @@ export default function Pricing() {
         lifetimePassPurchasedAt: new Date().toISOString(),
         prepaidCredits: (merchant.prepaidCredits || 0) + seedBonus,
       };
+
+      // Persist founding status to Supabase if merchant has a real ID
+      if (merchant.id) {
+        const { error } = await supabase
+          .from('merchants')
+          .update({
+            is_founding_merchant: true,
+            founding_merchant_number: nextNumber,
+            service_plan: 'sinag',
+          })
+          .eq('id', merchant.id);
+        if (error) {
+          console.error('Supabase founding update error:', error);
+        }
+      }
+
       localStorage.setItem("pila-merchant", JSON.stringify(updated));
       setFoundingSold(nextNumber);
       toast.success(
@@ -169,6 +205,17 @@ export default function Pricing() {
       toast.info("You're on the Free plan.");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <p className="text-gray-600 font-medium">Loading pricing...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
