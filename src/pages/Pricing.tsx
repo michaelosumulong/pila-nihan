@@ -20,16 +20,35 @@ const FOUNDING_TOTAL = 15;
 
 export default function Pricing() {
   const navigate = useNavigate();
-  const [foundingSold, setFoundingSold] = useState<number>(() => {
-    const raw = localStorage.getItem("pila-founding15-sold");
-    return raw ? Math.min(FOUNDING_TOTAL, parseInt(raw, 10) || 0) : 6;
-  });
-
-  const foundingRemaining = Math.max(0, FOUNDING_TOTAL - foundingSold);
+  const [foundingSold, setFoundingSold] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem("pila-founding15-sold", String(foundingSold));
-  }, [foundingSold]);
+    const fetchFoundingCount = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('merchants')
+          .select('id')
+          .eq('is_founding_merchant', true);
+
+        if (!error && data) {
+          const sold = Math.min(FOUNDING_TOTAL, data.length);
+          setFoundingSold(sold);
+          const remaining = Math.max(0, FOUNDING_TOTAL - sold);
+          console.log('📊 Founding merchants:', sold, '/ Remaining slots:', remaining);
+        } else {
+          console.error('Error fetching founding count:', error);
+        }
+      } catch (err) {
+        console.error('Error fetching founding count:', err);
+      }
+      setLoading(false);
+    };
+
+    fetchFoundingCount();
+  }, []);
+
+  const foundingRemaining = Math.max(0, FOUNDING_TOTAL - foundingSold);
 
   const claimFounding15 = () => {
     if (foundingRemaining === 0) return;
