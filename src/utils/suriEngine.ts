@@ -1,5 +1,5 @@
 /**
- * SURI AI Engine: Lean Six Sigma Business Intelligence
+ * SURI AI Engine: Business Intelligence
  * Takt/Cycle/Lead Time, Muda Detection, DMAIC Recommendations
  */
 
