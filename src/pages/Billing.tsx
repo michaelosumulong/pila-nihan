@@ -34,7 +34,6 @@ const PLANS = [
     features: [
       "Everything in PANDAY",
       "Peak hour forecasting",
-      "Custom branding & logo",
       "1-year history",
       "Advanced analytics dashboard",
       "Customer heatmaps",
