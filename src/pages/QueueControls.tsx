@@ -455,8 +455,89 @@ const QueueControls = () => {
     }
   };
 
-  const undo = () => {
-    toast.info("Previous customer returned to queue");
+  const undo = async () => {
+    console.log('↩️ UNDO triggered');
+
+    // Resolve current merchant UUID for isolation
+    let currentMerchantId: string | undefined;
+    try {
+      const raw = localStorage.getItem('pila-merchant');
+      if (raw) {
+        const m = JSON.parse(raw);
+        if (m?.id && /^[0-9a-f-]{36}$/i.test(m.id)) currentMerchantId = m.id;
+      }
+    } catch {}
+
+    const queue = loadQueue();
+    const lastModified = queue.tickets
+      .filter((t: any) => {
+        if (t.status !== 'completed' && t.status !== 'no_show') return false;
+        if (currentMerchantId && t.merchantId && t.merchantId !== currentMerchantId) return false;
+        return true;
+      })
+      .sort((a: any, b: any) => {
+        const aTime = new Date(a.served_at || a.cancelledAt || a.cancelled_at || 0).getTime();
+        const bTime = new Date(b.served_at || b.cancelledAt || b.cancelled_at || 0).getTime();
+        return bTime - aTime;
+      })[0];
+
+    if (!lastModified) {
+      toast.info('No actions to undo');
+      return;
+    }
+
+    console.log('↩️ Undoing ticket:', lastModified.ticketNumber, lastModified.id);
+
+    const ok = await updateTicketStatus(lastModified.id, 'waiting', {
+      served_at: null,
+      cancelled_at: null,
+    });
+
+    if (!ok) {
+      console.error('❌ updateTicketStatus failed for undo');
+      toast.error('Failed to undo');
+      return;
+    }
+    console.log('✅ Supabase reverted to waiting');
+
+    // Update localStorage
+    const updated = loadQueue();
+    const idx = updated.tickets.findIndex((t: any) => t.id === lastModified.id);
+    if (idx !== -1) {
+      updated.tickets[idx].status = 'waiting';
+      (updated.tickets[idx] as any).served_at = null;
+      (updated.tickets[idx] as any).cancelledAt = null;
+      (updated.tickets[idx] as any).cancelled_at = null;
+      saveQueue(updated);
+      console.log('✅ localStorage reverted');
+    }
+
+    // Refresh UI
+    const fresh = loadQueue();
+    setQueueData(fresh);
+    setQueueList(
+      fresh.tickets
+        .filter((t: Ticket) => t.status === 'waiting' || !t.status)
+        .map(mapQueueTicket)
+    );
+    const stillServing = fresh.tickets.find(
+      (t: Ticket) => t.status === 'called' || t.status === 'serving'
+    );
+    if (!stillServing) {
+      setCurrentServing({
+        id: '',
+        ticketNumber: '',
+        customerName: '',
+        category: 'regular',
+        waitTime: 0,
+        calledAt: new Date().toISOString(),
+        servicePace: 'regular',
+        status: '',
+      });
+    }
+
+    toast.success(`Undo: ${lastModified.ticketNumber} back to waiting`);
+    console.log('✅ Undo complete');
   };
 
   const handleWalkInCreated = (ticket: any) => {
